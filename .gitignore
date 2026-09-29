@@ -1,0 +1,33 @@
+# Dependencias
+node_modules/
+
+# Variables privadas
+.env
+.env.*
+!.env.example
+
+# Compilaciones
+dist/
+build/
+coverage/
+
+# Registros
+*.log
+logs/
+
+# Visual Studio Code
+.vscode/
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# PostgreSQL y Docker
+database/data/
+docker/data/
+docker/backups/*
+!docker/backups/.gitkeep
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

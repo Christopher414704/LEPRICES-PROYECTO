@@ -1,0 +1,15 @@
+{
+  "name": "mapa-gasolineras-jalapa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema web para visualizar gasolineras y precios de combustible en un mapa de Guatemala.",
+  "scripts": {
+    "dev:api": "pnpm --filter @jalapa/api dev",
+    "dev:web": "pnpm --filter @jalapa/web dev",
+    "test": "pnpm -r test"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.24.0"
+}

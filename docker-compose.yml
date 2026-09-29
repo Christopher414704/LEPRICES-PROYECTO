@@ -1,0 +1,36 @@
+services:
+  database:
+    image: postgis/postgis:18-3.6
+    container_name: jalapa-postgis
+    restart: unless-stopped
+
+    env_file:
+      - ./docker/postgres/.env
+
+    ports:
+      - "127.0.0.1:5433:5432"
+
+    volumes:
+      - jalapa_postgres_data:/var/lib/postgresql
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    networks:
+      - jalapa_network
+
+volumes:
+  jalapa_postgres_data:
+    name: jalapa_postgres_data
+
+networks:
+  jalapa_network:
+    name: jalapa_network

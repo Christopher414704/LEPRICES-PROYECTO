@@ -1,0 +1,30 @@
+{
+  "name": "@jalapa/api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API REST del mapa de gasolineras de Jalapa.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test",
+    "db:migrate": "node-pg-migrate up --migrations-dir ../../database/migrations --envPath .env --pretty",
+    "db:rollback": "node-pg-migrate down --migrations-dir ../../database/migrations --envPath .env --pretty",
+    "db:seed:catalogo": "node scripts/sembrar-catalogo-jalapa.js"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "node-pg-migrate": "^9.0.0",
+    "nodemon": "^3.1.14"
+  }
+}
