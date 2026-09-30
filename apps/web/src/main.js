@@ -14,6 +14,8 @@ const esPublico = true;
 const estado = document.querySelector("#estadoMapa");
 const panel = document.querySelector("#tableroPrecios");
 const fichas = new Map();
+const preciosConsultados = new Map();
+const solicitudesPrecios = new Map();
 const imagenUbicacion = `${import.meta.env.BASE_URL}images/ubicacion.png`;
 const visor = new Viewer("cesiumContainer", {
   baseLayer: false, baseLayerPicker: false, animation: false, timeline: false,
@@ -93,6 +95,35 @@ function posicionDeEntidad(entidad) {
   return { x: punto.x + limites.left, y: punto.y + limites.top };
 }
 
+async function consultarPrecios(entidad) {
+  const ficha = fichas.get(entidad.id);
+  if (!ficha) return null;
+
+  const consultaAnterior = preciosConsultados.get(entidad.id);
+  if (consultaAnterior && Date.now() - consultaAnterior.instante < 30_000) {
+    return consultaAnterior.ficha;
+  }
+  if (solicitudesPrecios.has(entidad.id)) return solicitudesPrecios.get(entidad.id);
+
+  const solicitud = (async () => {
+    const respuesta = await fetch(
+      `${urlApi}/publico/gasolineras/${encodeURIComponent(ficha.codigo)}/precios`,
+      { credentials: "omit" },
+    );
+    if (!respuesta.ok) throw new Error(`La API respondió con estado ${respuesta.status}.`);
+    const resultado = await respuesta.json();
+    if (!resultado.data || !Array.isArray(resultado.data.combustibles)) {
+      throw new Error("La API no devolvió los precios de la gasolinera.");
+    }
+    preciosConsultados.set(entidad.id, { ficha: resultado.data, instante: Date.now() });
+    fichas.set(entidad.id, resultado.data);
+    return resultado.data;
+  })().finally(() => solicitudesPrecios.delete(entidad.id));
+
+  solicitudesPrecios.set(entidad.id, solicitud);
+  return solicitud;
+}
+
 function mostrarTablero(entidad, fijar = false) {
   clearTimeout(cierrePendiente);
   const punto = posicionDeEntidad(entidad);
@@ -106,6 +137,17 @@ function mostrarTablero(entidad, fijar = false) {
   fijada = fijar;
   tablero.mostrar(fichas.get(entidad.id), punto);
   visor.scene.canvas.style.cursor = "pointer";
+  consultarPrecios(entidad).then((fichaActualizada) => {
+    if (seleccionada !== entidad || !fichaActualizada) return;
+    const posicionActual = posicionDeEntidad(entidad);
+    if (posicionActual) tablero.mostrar(fichaActualizada, posicionActual);
+  }).catch((error) => {
+    console.error("No fue posible consultar los precios vigentes:", error);
+    if (seleccionada === entidad) {
+      estado.textContent = "No fue posible actualizar los precios de esta gasolinera.";
+      estado.classList.add("estado--error");
+    }
+  });
 }
 
 function programarCierre() {

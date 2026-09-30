@@ -65,6 +65,17 @@ export function crearPublicoRouter(listar = listarGasolinerasConPrecios, db = da
     res.json({ data: gasolineras.slice(0, 300).map(prepararGasolineraPublica),
       total: Math.min(gasolineras.length, 300), hayMas: gasolineras.length > 300 });
   });
+  router.get("/gasolineras/:codigo/precios", async (req, res) => {
+    const { codigo } = leerFiltrosPublicos({ codigo: req.params.codigo });
+    const [gasolinera] = await listar({ soloVisibles: true, codigo, limite: 1 });
+
+    if (!gasolinera) {
+      throw errorHttp(404, "La gasolinera no existe o no está disponible.");
+    }
+
+    res.set("Cache-Control", "public, max-age=30");
+    res.json({ data: prepararGasolineraPublica(gasolinera) });
+  });
   router.get("/regiones", async (_req, res) => {
     const { rows } = await db.query(`
       SELECT departamento, municipio, COUNT(*)::INTEGER AS cantidad,

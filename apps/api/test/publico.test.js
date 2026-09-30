@@ -25,10 +25,10 @@ test("la respuesta pública solo contiene datos de consulta y fecha del último 
 });
 
 test("GET público funciona sin cookie y no ofrece mutaciones", async (t) => {
-  let consulta;
+  const consultas = [];
   const app = express();
   app.use("/api/publico", crearPublicoRouter(async (opciones) => {
-    consulta = opciones;
+    consultas.push(opciones);
     return [ejemplo];
   }));
   const server = app.listen(0, "127.0.0.1");
@@ -38,9 +38,26 @@ test("GET público funciona sin cookie y no ofrece mutaciones", async (t) => {
   const respuesta = await fetch(url);
   assert.equal(respuesta.status, 200);
   assert.equal(respuesta.headers.get("cache-control"), "public, max-age=30");
-  assert.deepEqual(consulta, { soloVisibles: true, bbox: null, departamento: null, municipio: null, codigo: null, buscar: null, limite: 301 });
+  assert.deepEqual(consultas[0], { soloVisibles: true, bbox: null, departamento: null, municipio: null, codigo: null, buscar: null, limite: 301 });
   assert.equal((await respuesta.json()).data[0].codigo, ejemplo.codigo);
+  const precios = await fetch(`${url}/${ejemplo.codigo}/precios`);
+  assert.equal(precios.status, 200);
+  assert.equal((await precios.json()).data.combustibles[0].precios.autoservicio.precio, 31.5);
+  assert.deepEqual(consultas[1], { soloVisibles: true, codigo: ejemplo.codigo, limite: 1 });
   assert.equal((await fetch(url, { method: "POST" })).status, 404);
+});
+
+test("GET de precios indica cuando la gasolinera no existe", async (t) => {
+  const app = express();
+  app.use("/api/publico", crearPublicoRouter(async () => []));
+  app.use((error, _req, res, _next) => res.status(error.statusCode ?? 500).json({ message: error.message }));
+  const server = app.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => new Promise((resolver) => server.close(resolver)));
+
+  const respuesta = await fetch(`http://127.0.0.1:${server.address().port}/api/publico/gasolineras/inexistente/precios`);
+  assert.equal(respuesta.status, 404);
+  assert.match((await respuesta.json()).message, /no existe/i);
 });
 
 test("filtros de región y área rechazan coordenadas inválidas", () => {

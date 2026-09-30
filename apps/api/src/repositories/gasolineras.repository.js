@@ -69,7 +69,11 @@ export async function obtenerGasolinerasConPrecios({ soloVisibles = false, bbox 
 
     LEFT JOIN precios_combustible pc
       ON pc.id_combustible_gasolinera = cg.id
-      AND pc.fecha_vigencia_fin IS NULL
+      AND pc.fecha_vigencia_inicio <= CURRENT_TIMESTAMP
+      AND (
+        pc.fecha_vigencia_fin IS NULL
+        OR pc.fecha_vigencia_fin > CURRENT_TIMESTAMP
+      )
 
     LEFT JOIN modalidades_servicio ms
       ON ms.id = pc.id_modalidad_servicio
