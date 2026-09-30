@@ -28,6 +28,8 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         inicio: path.resolve(directorioActual, "index.html"),
+        login: path.resolve(directorioActual, "login.html"),
+        mapa: path.resolve(directorioActual, "mapa.html"),
         publico: path.resolve(directorioActual, "publico.html"),
       },
     },

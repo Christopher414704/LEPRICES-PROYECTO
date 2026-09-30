@@ -6,11 +6,11 @@ import {
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./style.css";
+import { apiAutenticada, urlApi } from "./auth.js";
 import { crearTableroPrecios } from "./tablero-precios.js";
 import { coincideNombreGasolinera, normalizarNombreGasolinera } from "./busqueda-gasolineras.js";
 
-const urlApi = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "");
-const esPublico = true;
+const esPublico = document.body.dataset.modo === "publico";
 const estado = document.querySelector("#estadoMapa");
 const panel = document.querySelector("#tableroPrecios");
 const fichas = new Map();
@@ -433,9 +433,12 @@ async function cargarPrecios() {
     if (esPublico && consulta === consultaActual) return;
     solicitudMapa?.abort();
     solicitudMapa = new AbortController();
-    const respuesta = await fetch(`${urlApi}/publico/gasolineras?${consulta}`, {
-      credentials: "omit", signal: solicitudMapa.signal,
-    });
+    const respuesta = esPublico
+      ? await fetch(`${urlApi}/publico/gasolineras?${consulta}`, {
+        credentials: "omit",
+        signal: solicitudMapa.signal,
+      })
+      : await apiAutenticada("/gasolineras", { signal: solicitudMapa.signal });
     if (!respuesta.ok) throw new Error(`La API respondió con estado ${respuesta.status}.`);
     const resultado = await respuesta.json();
     if (!Array.isArray(resultado.data)) throw new Error("La API no devolvió una lista de gasolineras.");

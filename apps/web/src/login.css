@@ -1,0 +1,81 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #202733;
+  background: #edf0f4;
+  font-synthesis: none;
+  --rojo: #d71920;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; min-width: 320px; min-height: 100dvh; display: flex; flex-direction: column; }
+button, input { font: inherit; }
+.barra-marca {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 8px clamp(20px, 5vw, 72px); min-height: 88px;
+  border-top: 4px solid var(--rojo); border-bottom: 1px solid #d4d8df;
+  background: linear-gradient(120deg, #fff, #f3f4f6);
+}
+.marca { display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 850; letter-spacing: -.04em; }
+.marca img { display: block; width: 86px; height: 62px; object-fit: contain; }
+.marca small { display: block; margin-top: 3px; color: #697380; font-size: 10px; font-weight: 500; letter-spacing: .03em; }
+.ubicacion { color: #6c7582; font-size: 12px; }
+.login {
+  display: grid; grid-template-columns: 1fr 1fr; width: min(1080px, calc(100% - 64px));
+  margin: auto; border: 1px solid #d3d8e0; border-radius: 24px; overflow: hidden;
+  background: #fff; box-shadow: 0 20px 60px #20273312, 0 2px 6px #20273308;
+}
+.panel-visual {
+  position: relative; display: flex; flex-direction: column; justify-content: space-between;
+  min-width: 0; padding: 38px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 42%, #46515f, transparent 68%), linear-gradient(145deg, #293340, #171e27);
+  color: #fff;
+}
+.logotipo-principal { display: block; width: 100%; height: auto; max-height: 320px; object-fit: contain; margin: 18px 0; filter: drop-shadow(0 18px 15px #0005); }
+.linea-roja { display: block; width: 38px; height: 4px; margin-bottom: 16px; border-radius: 4px; background: #fa3541; }
+.presentacion h2 { margin: 0; font-size: clamp(23px, 2.3vw, 29px); line-height: 1.25; letter-spacing: -.035em; }
+.panel-formulario { min-width: 0; display: flex; align-items: center; padding: 46px 50px; }
+.contenido, .formulario { width: 100%; }
+.bienvenida { margin: 0 0 12px; color: #bc1722; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+h1 { margin: 0; font-size: clamp(27px, 2.8vw, 36px); line-height: 1.15; font-weight: 800; letter-spacing: -.045em; }
+.descripcion { margin: 14px 0 28px; color: #6c7582; font-size: 13px; line-height: 1.7; }
+.campo { position: relative; margin-bottom: 20px; }
+.campo label { display: block; margin-bottom: 8px; color: #414b59; font-size: 12px; font-weight: 650; }
+.campo input {
+  width: 100%; min-height: 52px; padding: 14px 15px; border: 1px solid #d3d8e0; border-radius: 10px;
+  color: #202733; background: #f8f9fb; outline: none; transition: border-color 150ms, box-shadow 150ms;
+  font-size: 16px;
+}
+.campo input::placeholder { color: #8a929e; font-size: 13px; }
+.campo input:focus { border-color: var(--rojo); background: #fff; box-shadow: 0 0 0 3px #d7192012; }
+.campo:focus-within label { color: #ba1721; }
+.campo-password input { padding-right: 84px; }
+.mostrar-password {
+  position: absolute; right: 8px; bottom: 5px; min-height: 42px; padding: 8px;
+  border: 0; border-radius: 7px; color: #68717e; background: transparent; font-size: 11px; font-weight: 650; cursor: pointer;
+}
+.mostrar-password:hover { color: #b41923; background: #fff0f1; }
+button:focus-visible { outline: 3px solid var(--rojo); outline-offset: 3px; }
+.boton-ingresar {
+  width: 100%; min-height: 52px; margin-top: 4px; border: 1px solid #b91620; border-radius: 10px;
+  color: #fff; background: linear-gradient(110deg, #e82530, #c8111c); box-shadow: 0 5px 13px #d7192020;
+  cursor: pointer; font-size: 14px; font-weight: 750; transition: filter 150ms, transform 150ms;
+}
+.boton-ingresar:hover:not(:disabled) { filter: brightness(.94); transform: translateY(-1px); }
+.boton-ingresar:disabled { opacity: .65; cursor: wait; }
+.enlace-publico { display: block; margin-top: 18px; color: #af1822; font-size: 12px; font-weight: 750; text-align: center; text-decoration: none; }
+.enlace-publico:hover { text-decoration: underline; }
+.boton-secundario { display: block; margin: 14px auto 0; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 8px; color: #ac1620; background: transparent; cursor: pointer; text-decoration: underline; font-size: 13px; }
+.mensaje { margin: 18px 0 0; padding: 12px 14px; border: 1px solid #f1c6ca; border-radius: 10px; color: #9d1520; background: #fff0f1; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+@media (min-width: 761px) { .login { margin-block: 36px; align-self: center; } body { justify-content: space-between; } }
+@media (max-width: 1000px) { .panel-formulario { padding: 34px; } .panel-visual { padding: 28px; } }
+@media (max-width: 760px) {
+  .barra-marca { padding: 8px 20px; gap: 12px; }
+  .marca { gap: 10px; font-size: 20px; }
+  .marca img { width: 72px; height: 54px; }
+  .ubicacion { display: none; }
+  .login { grid-template-columns: 1fr; width: min(460px, calc(100% - 32px)); margin: 28px auto; border-radius: 20px; }
+  .panel-visual { display: none; }
+  .panel-formulario { padding: 32px 26px; border-top: 4px solid var(--rojo); }
+}
+@media (max-width: 360px) { .panel-formulario { padding: 28px 20px; } }
+@media (prefers-reduced-motion: reduce) { .campo input, .boton-ingresar { transition: none; } }

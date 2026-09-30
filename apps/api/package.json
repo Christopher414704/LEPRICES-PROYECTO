@@ -11,12 +11,15 @@
     "test": "node --test",
     "db:migrate": "node-pg-migrate up --migrations-dir ../../database/migrations --envPath .env --pretty",
     "db:rollback": "node-pg-migrate down --migrations-dir ../../database/migrations --envPath .env --pretty",
-    "db:seed:catalogo": "node scripts/sembrar-catalogo-jalapa.js"
+    "db:seed": "node scripts/sembrar-datos-iniciales.js",
+    "db:seed:catalogo": "node scripts/sembrar-catalogo-jalapa.js",
+    "db:seed:gestores": "node scripts/crear-gestores-jalapa.js"
   },
   "engines": {
     "node": ">=24"
   },
   "dependencies": {
+    "argon2": "^0.45.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

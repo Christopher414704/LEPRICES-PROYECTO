@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#d71920" />
+    <title>Iniciar sesión | LEPRICES</title>
+    <link rel="stylesheet" href="/src/login.css" />
+  </head>
+  <body>
+    <header class="barra-marca">
+      <div class="marca">
+        <img src="/images/leprices-logo.png" alt="" width="86" height="62" />
+        <span>LEPRICES<small>Precios de combustible</small></span>
+      </div>
+      <span class="ubicacion">Jalapa, Guatemala</span>
+    </header>
+
+    <main class="login">
+      <aside class="panel-visual" aria-label="LEPRICES, precios de combustible">
+        <img
+          class="logotipo-principal"
+          src="/images/leprices-logo.png"
+          alt="Logotipo de LEPRICES"
+          width="1450"
+          height="1086"
+        />
+        <div class="presentacion">
+          <span class="linea-roja" aria-hidden="true"></span>
+          <h2>Encuentra tu estación.<br />Consulta sus precios.</h2>
+        </div>
+      </aside>
+
+      <section class="panel-formulario" aria-label="Acceso a LEPRICES">
+        <div class="contenido">
+          <form id="formularioLogin" class="formulario">
+            <p class="bienvenida">BIENVENIDO A LEPRICES</p>
+            <h1>Iniciar sesión</h1>
+            <p class="descripcion">
+              Ingresa a tu cuenta para acceder a las funciones administrativas de tu rol.
+            </p>
+
+            <div class="campo">
+              <label for="usuario">Usuario</label>
+              <input
+                id="usuario"
+                name="usuario"
+                type="text"
+                placeholder="Escribe tu usuario"
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                maxlength="100"
+                required
+              />
+            </div>
+
+            <div class="campo campo-password">
+              <label for="password">Contraseña</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Escribe tu contraseña"
+                autocomplete="current-password"
+                maxlength="256"
+                required
+              />
+              <button
+                id="mostrarPassword"
+                class="mostrar-password"
+                type="button"
+                aria-controls="password"
+                aria-pressed="false"
+                aria-label="Mostrar contraseña"
+              >Mostrar</button>
+            </div>
+
+            <button id="botonIngresar" class="boton-ingresar" type="submit">
+              Iniciar sesión
+            </button>
+            <a class="enlace-publico" href="/publico.html">
+              Consultar precios sin iniciar sesión →
+            </a>
+            <p id="mensajeLogin" class="mensaje" role="alert" hidden></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/login.js"></script>
+  </body>
+</html>

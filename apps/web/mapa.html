@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Mapa interno de gasolineras de LEPRICES." />
+    <title>Mapa interno | LEPRICES</title>
+  </head>
+  <body>
+    <section id="verificacionSesion" class="verificacion-sesion">
+      <p id="mensajeSesion" role="status">Comprobando tu sesión...</p>
+      <button id="reintentarSesion" type="button" hidden>Volver a intentar</button>
+      <a id="enlaceLogin" href="/login.html">Ir al inicio de sesión</a>
+    </section>
+
+    <div id="app" hidden>
+      <main id="cesiumContainer" aria-label="Mapa de gasolineras"></main>
+      <header class="encabezado">
+        <div class="espacio-logotipo">
+          <img src="/images/leprices-logo.png" alt="LEPRICES" width="148" height="72" />
+        </div>
+        <div class="titulo-mapa">
+          <p class="subtitulo">Jalapa, Guatemala</p>
+          <h1>Explora las gasolineras</h1>
+        </div>
+        <nav class="menu-superior" aria-label="Apartados principales">
+          <button id="verMapa" class="opcion-menu opcion-menu--activa" type="button" aria-current="page">
+            <img src="/images/gasolinera.png" alt="" width="44" height="44" />
+            <span>Mapa</span>
+          </button>
+        </nav>
+      </header>
+
+      <div id="estadoMapa" class="estado" role="status"></div>
+      <section id="listaGasolineras" class="lista-gasolineras" aria-labelledby="tituloGasolineras">
+        <div class="cabecera-lista">
+          <div>
+            <p class="etiqueta-seccion">ENCUENTRA TU ESTACIÓN</p>
+            <h2 id="tituloGasolineras">Gasolineras</h2>
+          </div>
+          <button
+            id="plegarGasolineras"
+            class="plegar-lista"
+            type="button"
+            aria-expanded="true"
+            aria-controls="contenidoGasolineras"
+            aria-label="Contraer lista de gasolineras"
+          >−</button>
+        </div>
+        <div id="contenidoGasolineras" class="contenido-lista">
+          <p class="ayuda-lista">Selecciona una estación para ver sus precios en el mapa.</p>
+          <label class="buscador-gasolineras" for="buscarGasolinera">
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10.5" cy="10.5" r="6.5" />
+              <path d="m16 16 5 5" />
+            </svg>
+            <input
+              id="buscarGasolinera"
+              type="search"
+              placeholder="Buscar gasolinera…"
+              aria-label="Buscar gasolinera por nombre"
+              autocomplete="off"
+            />
+          </label>
+          <p id="cantidadGasolineras" class="cantidad-gasolineras" role="status" aria-live="polite"></p>
+          <ul id="resultadosGasolineras" class="resultados-gasolineras"></ul>
+          <p id="sinGasolineras" class="sin-resultados" hidden>
+            No encontramos gasolineras con ese nombre. Prueba otra búsqueda.
+          </p>
+        </div>
+      </section>
+
+      <aside
+        id="tableroPrecios"
+        class="tablero-precios"
+        aria-labelledby="nombreGasolinera"
+        aria-live="polite"
+        hidden
+      ></aside>
+    </div>
+
+    <script type="module" src="/src/inicio.js"></script>
+  </body>
+</html>
