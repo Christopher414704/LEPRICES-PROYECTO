@@ -81,6 +81,11 @@ export function crearAuth(auth, env) {
   router.get("/sesion", exigirSesion, (req, res) => {
     res.json({ autenticado: true, usuario: req.usuario });
   });
+  router.post("/logout", validarOrigen, exigirSesion, async (req, res) => {
+    await auth.cerrarSesion(leerToken(req));
+    res.clearCookie(NOMBRE_COOKIE, cookie);
+    res.status(204).end();
+  });
 
   return { router, exigirSesion, validarOrigen };
 }

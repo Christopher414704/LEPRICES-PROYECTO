@@ -45,7 +45,7 @@ export async function enviarFormulario(ruta, datos) {
     const resultado = await respuesta.json().catch(() => ({}));
     throw new Error(resultado.message ?? "No fue posible completar la solicitud.");
   }
-  return respuesta.json();
+  return respuesta.status === 204 ? null : respuesta.json();
 }
 
 export function mensajeError(error) {

@@ -113,5 +113,13 @@ export function crearServicioAuth(database) {
     return fila ? usuarioPublico(fila) : null;
   }
 
-  return { iniciarSesion, obtenerSesion };
+  async function cerrarSesion(token) {
+    if (!tokenValido(token)) return;
+    await database.query(
+      "DELETE FROM sesiones_usuario WHERE token_hash = $1",
+      [resumenToken(token)],
+    );
+  }
+
+  return { iniciarSesion, obtenerSesion, cerrarSesion };
 }

@@ -17,10 +17,12 @@ async function ejecutarServidor(t, aplicacion, ejecutar) {
 }
 
 function crearAplicacion({ production = false } = {}) {
+  let vigente = true;
   const usuario = { id: "1", rol: "administrador" };
   const auth = {
     iniciarSesion: async () => ({ token, usuario }),
-    obtenerSesion: async (valor) => valor === token ? usuario : null,
+    obtenerSesion: async (valor) => valor === token && vigente ? usuario : null,
+    cerrarSesion: async () => { vigente = false; },
   };
   const api = express();
   api.use(cors({ origin, credentials: true }), express.json());
@@ -59,22 +61,42 @@ test("login establece una cookie HttpOnly, SameSite, duración y Secure en produ
   });
 });
 
-test("login rechaza un origen ajeno o ausente", async (t) => {
+test("las mutaciones de autenticación rechazan un origen ajeno o ausente", async (t) => {
   await ejecutarServidor(t, crearAplicacion(), async (url) => {
-    for (const headers of [{}, { origin: "https://otro.example" }]) {
-      const res = await fetch(url + "/api/auth/login", { method: "POST", headers });
-      assert.equal(res.status, 403);
+    for (const ruta of ["login", "logout"]) {
+      for (const headers of [{}, { origin: "https://otro.example" }]) {
+        const res = await fetch(`${url}/api/auth/${ruta}`, { method: "POST", headers });
+        assert.equal(res.status, 403);
+      }
     }
   });
 });
 
-test("una sesión válida permite entrar y una cookie manipulada no autoriza acceso", async (t) => {
+test("una sesión válida permite entrar y logout invalida la cookie anterior", async (t) => {
   await ejecutarServidor(t, crearAplicacion(), async (url) => {
-    const valido = await fetch(url + "/api/privado", {
-      headers: { cookie: `jalapa_sesion=${token}` },
-    });
-    assert.equal(valido.status, 200);
+    const headers = { origin, cookie: `jalapa_sesion=${token}` };
+    assert.equal((await fetch(url + "/api/auth/sesion", { headers })).status, 200);
+    assert.equal((await fetch(url + "/api/privado", { headers })).status, 200);
 
+    const salida = await fetch(url + "/api/auth/logout", { method: "POST", headers });
+    assert.equal(salida.status, 204);
+    assert.match(salida.headers.get("set-cookie"), /Expires=Thu, 01 Jan 1970/);
+    assert.equal((await fetch(url + "/api/privado", { headers })).status, 401);
+  });
+});
+
+test("logout exige una sesión autenticada", async (t) => {
+  await ejecutarServidor(t, crearAplicacion(), async (url) => {
+    const salida = await fetch(url + "/api/auth/logout", {
+      method: "POST",
+      headers: { origin },
+    });
+    assert.equal(salida.status, 401);
+  });
+});
+
+test("una cookie manipulada no autoriza acceso", async (t) => {
+  await ejecutarServidor(t, crearAplicacion(), async (url) => {
     const manipulado = await fetch(url + "/api/privado", {
       headers: { cookie: "jalapa_sesion=%GG; usuario=administrador" },
     });

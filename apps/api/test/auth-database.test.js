@@ -93,6 +93,13 @@ test("autenticación con PostgreSQL y Argon2 reales", {
     assert.ok((await auth.iniciarSesion(usuario.nombre, clave)).token);
   });
 
+  await t.test("cerrar sesión elimina el token persistido", async () => {
+    const usuario = await crearUsuario();
+    const sesion = await auth.iniciarSesion(usuario.nombre, clave);
+    await auth.cerrarSesion(sesion.token);
+    assert.equal(await auth.obtenerSesion(sesion.token), null);
+  });
+
   await t.test("la expiración o desactivación invalida la sesión", async () => {
     const usuario = await crearUsuario();
     const sesion = await auth.iniciarSesion(usuario.nombre, clave);
