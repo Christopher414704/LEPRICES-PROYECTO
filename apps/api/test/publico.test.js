@@ -50,4 +50,6 @@ test("filtros de región y área rechazan coordenadas inválidas", () => {
   assert.throws(() => leerFiltrosPublicos({ bbox: "NaN,14,-89,15" }), { statusCode: 400 });
   assert.throws(() => leerFiltrosPublicos({ codigo: "<script>" }), { statusCode: 400 });
   assert.equal(leerFiltrosPublicos({ buscar: "Montaña" }).buscar, "montana");
+  assert.equal(leerFiltrosPublicos({ buscar: "m" }).buscar, "m");
+  assert.equal(leerFiltrosPublicos({ buscar: "Shell Centro" }).buscar, "shell centro");
 });

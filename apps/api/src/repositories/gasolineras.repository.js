@@ -46,7 +46,11 @@ export async function obtenerGasolinerasConPrecios({ soloVisibles = false, bbox 
         AND ($6::TEXT IS NULL OR g.departamento = $6)
         AND ($7::TEXT IS NULL OR g.municipio = $7)
         AND ($9::TEXT IS NULL OR g.codigo = $9)
-        AND ($10::TEXT IS NULL OR translate(lower(g.nombre), 'áéíóúüñ', 'aeiouun') LIKE '%' || $10 || '%')
+        AND ($10::TEXT IS NULL OR NOT EXISTS (
+          SELECT 1
+          FROM unnest(regexp_split_to_array($10, '\\s+')) AS palabra
+          WHERE translate(lower(g.nombre), 'áéíóúüñ', 'aeiouun') NOT LIKE '%' || palabra || '%'
+        ))
       ORDER BY g.nombre, g.id
       LIMIT $8::INTEGER
     ) g

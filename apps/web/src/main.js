@@ -7,6 +7,7 @@ import {
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./style.css";
 import { crearTableroPrecios } from "./tablero-precios.js";
+import { coincideNombreGasolinera, normalizarNombreGasolinera } from "./busqueda-gasolineras.js";
 
 const urlApi = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "");
 const esPublico = true;
@@ -172,13 +173,11 @@ const contenidoLista = document.querySelector("#contenidoGasolineras");
 const botonPlegar = document.querySelector("#plegarGasolineras");
 const vistaMovil = window.matchMedia("(max-width: 700px)");
 const elementosLista = [];
-const normalizar = (texto) => texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es").trim();
 
 function filtrarGasolineras() {
-  const palabras = normalizar(buscador.value).split(/\s+/).filter(Boolean);
   let cantidad = 0;
   for (const { nodo, nombre } of elementosLista) {
-    nodo.hidden = !palabras.every((palabra) => nombre.includes(palabra));
+    nodo.hidden = !coincideNombreGasolinera(nombre, buscador.value);
     if (!nodo.hidden) cantidad++;
   }
   contador.textContent = `${cantidad} de ${elementosLista.length} gasolineras`;
@@ -272,7 +271,7 @@ function agregarEstaciones(publicadas) {
     const nodo = document.createElement("li");
     nodo.append(boton);
     lista.append(nodo);
-    elementosLista.push({ nodo, boton, indicacion, estacion, nombre: normalizar(estacion.nombre) });
+    elementosLista.push({ nodo, boton, indicacion, estacion, nombre: estacion.nombre });
   }
   for (const entidad of [...estaciones.entities.values]) {
     if (!vigentes.has(entidad.id)) {
@@ -382,8 +381,8 @@ async function cargarPrecios() {
     const parametros = new URLSearchParams();
     if (esPublico) {
       const bbox = areaVisible();
-      const busqueda = normalizar(buscador.value);
-      if (busqueda.length >= 2 && busqueda.length <= 100) parametros.set("buscar", busqueda);
+      const busqueda = normalizarNombreGasolinera(buscador.value);
+      if (busqueda.length >= 1 && busqueda.length <= 100) parametros.set("buscar", busqueda);
       else if (regionRequiereArea() && bbox && bbox[0] < bbox[2]) parametros.set("bbox", bbox.join(","));
       if (seleccionDepartamento.value) parametros.set("departamento", seleccionDepartamento.value);
       if (seleccionMunicipio.value) parametros.set("municipio", seleccionMunicipio.value);

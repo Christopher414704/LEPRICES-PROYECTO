@@ -9,7 +9,7 @@ export function leerFiltrosPublicos(query) {
   const departamento = texto(query.departamento);
   const municipio = texto(query.municipio);
   const codigo = texto(query.codigo);
-  const buscar = typeof query.buscar === "string" && /^[\p{L}\p{N}\s-]{2,100}$/u.test(query.buscar.trim())
+  const buscar = typeof query.buscar === "string" && /^[\p{L}\p{N}\s-]{1,100}$/u.test(query.buscar.trim())
     ? query.buscar.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es") : null;
   if ((query.departamento != null && !departamento) || (query.municipio != null && !municipio) ||
       (query.codigo != null && (!codigo || !/^[\w-]{1,100}$/.test(codigo))) ||
