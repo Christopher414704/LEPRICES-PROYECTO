@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#d71920" />
+    <title>Cambiar precios | LEPRICES</title>
+    <link rel="stylesheet" href="/src/precios-page.css" />
+  </head>
+  <body>
+    <header class="barra">
+      <a class="marca" href="/mapa.html" aria-label="LEPRICES: volver al mapa"><img src="/images/leprices-logo.png" alt="" width="100" height="65" /><span>LEPRICES<small>Precios de combustible</small></span></a>
+      <nav aria-label="Apartados principales">
+        <a class="opcion activa" href="/precios.html" aria-current="page"><img src="/images/precios.png" alt="" width="40" height="40" />Cambiar precios</a>
+        <a class="opcion" href="/mapa.html"><img src="/images/gasolinera.png" alt="" width="40" height="40" />Mapa</a>
+        <button id="salir" class="opcion" type="button"><img src="/images/exit.png" alt="" width="40" height="40" />Salir</button>
+      </nav>
+    </header>
+    <main id="app" hidden>
+      <div class="intro"><p class="sobretitulo">GESTIÓN DE COMBUSTIBLE</p><h1>Cambiar precios</h1><p>Actualiza los precios de tu gasolinera. Cada cambio queda registrado en el historial.</p></div>
+      <p id="mensaje" class="mensaje" role="status" aria-live="polite" hidden></p>
+      <section id="administracion" class="tarjeta" hidden aria-labelledby="tituloPermisos">
+        <p class="sobretitulo">ADMINISTRACIÓN</p><h2 id="tituloPermisos">Asignación y horario</h2>
+        <p class="ayuda">Asigna cada gestor a una gasolinera y define cuándo puede editar sus precios.</p>
+        <form id="formPermisos" class="rejilla-form">
+          <label>Gestor<select id="gestor" required></select></label>
+          <label>Gasolinera<select id="gasolineraGestor" required></select></label>
+          <label>Inicio en Guatemala<input id="horaInicio" type="time" value="08:00" required /></label>
+          <label>Duración<select id="duracion"><option value="15">15 minutos</option><option value="30" selected>30 minutos</option><option value="60">60 minutos</option></select></label>
+          <div class="acciones"><button class="boton-primario" type="submit">Guardar asignación y horario</button><button id="revocar" class="boton-secundario" type="button">Desactivar horario</button></div>
+        </form>
+      </section>
+      <section class="tarjeta" aria-labelledby="tituloEditor">
+        <p class="sobretitulo">PRECIOS VIGENTES</p><h2 id="tituloEditor">Tu gasolinera</h2>
+        <p id="estadoHorario" class="estado-horario" role="status"></p>
+        <label id="selectorEstacion" class="selector" hidden>Gasolinera<select id="gasolineraEditor"></select></label>
+        <div id="contenidoEditor" hidden>
+          <form id="formAgregar" class="agregar">
+            <label>Combustible para agregar<select id="tipoNuevo"></select></label>
+            <button class="boton-secundario" type="submit">Agregar combustible</button>
+          </form>
+          <form id="formPrecios">
+            <div id="filasPrecios" class="filas-precios"></div>
+            <button id="guardarPrecios" class="boton-primario" type="submit">Guardar cambios</button>
+          </form>
+        </div>
+      </section>
+    </main>
+    <section id="espera" class="espera" role="status">Comprobando tu sesión…</section>
+    <script type="module" src="/src/precios-page.js"></script>
+  </body>
+</html>
