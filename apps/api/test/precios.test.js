@@ -68,3 +68,36 @@ test("un gestor no puede editar otra gasolinera aunque esté dentro del horario"
   }), { statusCode: 403 });
   assert.equal(db.consultas.at(-1), "ROLLBACK");
 });
+
+test("una actualización válida se confirma después de insertar y confirmar la transacción", async () => {
+  const consultas = [];
+  const cliente = {
+    async query(sql, parametros) {
+      consultas.push({ sql, parametros });
+      if (["BEGIN", "COMMIT", "ROLLBACK"].includes(sql)) return { rows: [] };
+      if (sql.includes("SELECT u.id_gasolinera, r.codigo AS rol")) return { rows: [{
+        id_gasolinera: "2", rol: "gestor_gasolinera", activo: true, horario_vigente: true,
+      }] };
+      if (sql.includes("id = ANY")) return { rows: [{ id: "3" }] };
+      if (sql.includes("SELECT id FROM modalidades_servicio")) return { rows: [{ id: "4" }] };
+      if (sql.includes("SELECT precio FROM precios_combustible")) return { rows: [{ precio: "34.50" }] };
+      if (sql.includes("INSERT INTO precios_combustible")) return { rows: [], rowCount: 1 };
+      throw new Error(`Consulta inesperada: ${sql.slice(0, 80)}`);
+    },
+    release() {},
+  };
+  const servicio = crearServicioPrecios({ connect: async () => cliente });
+
+  const resultado = await servicio.registrar({ id: "1" }, { idGasolinera: "2", cambios: [
+    { idCombustible: "3", idModalidad: "4", precio: "35.25" },
+  ] });
+
+  assert.deepEqual(resultado, {
+    guardado: true,
+    actualizados: 1,
+    message: "Precio actualizado correctamente.",
+  });
+  assert.equal(consultas.at(-1).sql, "COMMIT");
+  const insercion = consultas.find(({ sql }) => sql.includes("INSERT INTO precios_combustible"));
+  assert.deepEqual(insercion.parametros, ["3", "4", "1", "35.25"]);
+});

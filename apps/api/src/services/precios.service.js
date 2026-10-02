@@ -181,6 +181,7 @@ export function crearServicioPrecios(database) {
       const { rows: modalidades } = await cliente.query("SELECT id FROM modalidades_servicio WHERE activo=TRUE");
       const validas = new Set(modalidades.map((m) => String(m.id)));
       if (cambios.some((c) => !validas.has(String(c.idModalidad)))) throw errorHttp(400, "Una modalidad no está disponible.");
+      let actualizados = 0;
       for (const cambio of cambios) {
         const { rows: [vigente] } = await cliente.query(`
           SELECT precio FROM precios_combustible
@@ -192,8 +193,17 @@ export function crearServicioPrecios(database) {
             (id_combustible_gasolinera, id_modalidad_servicio, id_usuario_registro, precio)
           VALUES ($1,$2,$3,$4)
         `, [cambio.idCombustible, cambio.idModalidad, usuario.id, cambio.precio]);
+        actualizados += 1;
       }
-      return { guardado: true };
+      return {
+        guardado: true,
+        actualizados,
+        message: actualizados === 1
+          ? "Precio actualizado correctamente."
+          : actualizados > 1
+            ? `${actualizados} precios actualizados correctamente.`
+            : "Los precios ya estaban actualizados.",
+      };
     });
   }
 
