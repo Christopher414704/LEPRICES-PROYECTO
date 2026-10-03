@@ -69,14 +69,34 @@ test("un gestor no puede editar otra gasolinera aunque esté dentro del horario"
   assert.equal(db.consultas.at(-1), "ROLLBACK");
 });
 
-test("una actualización válida se confirma después de insertar y confirmar la transacción", async () => {
+test("el estado identifica la gasolinera asignada al usuario autenticado", async () => {
+  const db = {
+    async query(sql) {
+      if (sql.includes("FROM usuarios u JOIN roles")) return { rows: [{
+        id_gasolinera: 7, rol: "gestor_gasolinera", precio_horario_activo: true,
+        hora_inicio: "08:00", precio_duracion_minutos: 30,
+        horario_vigente: true, hora_guatemala: "08:10",
+      }] };
+      if (sql.includes("FROM tipos_combustible")) return { rows: [] };
+      throw new Error(`Consulta inesperada: ${sql.slice(0, 80)}`);
+    },
+  };
+
+  const estado = await crearServicioPrecios(db).estado({ id: "15" });
+
+  assert.equal(estado.rol, "gestor_gasolinera");
+  assert.equal(estado.idGasolinera, "7");
+  assert.equal(estado.horarioVigente, true);
+});
+
+test("el administrador puede actualizar cualquier gasolinera y la transacción se confirma", async () => {
   const consultas = [];
   const cliente = {
     async query(sql, parametros) {
       consultas.push({ sql, parametros });
       if (["BEGIN", "COMMIT", "ROLLBACK"].includes(sql)) return { rows: [] };
       if (sql.includes("SELECT u.id_gasolinera, r.codigo AS rol")) return { rows: [{
-        id_gasolinera: "2", rol: "gestor_gasolinera", activo: true, horario_vigente: true,
+        id_gasolinera: null, rol: "administrador", activo: true, horario_vigente: false,
       }] };
       if (sql.includes("id = ANY")) return { rows: [{ id: "3" }] };
       if (sql.includes("SELECT id FROM modalidades_servicio")) return { rows: [{ id: "4" }] };

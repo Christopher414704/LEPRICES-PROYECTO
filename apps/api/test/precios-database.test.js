@@ -46,14 +46,29 @@ test("migración y permisos de precios en PostgreSQL real", { skip: process.env.
       VALUES (1,1,'Regular','regular'),(2,1,'Regular','regular');
   `);
   const migracion = await import("../../../database/migrations/0009_restringir_actualizacion_precios_por_horario.mjs");
+  const migracionAsignacion = await import("../../../database/migrations/0010_limitar_gestores_a_gasolinera.mjs");
   const consultas = [];
   migracion.up({ sql: (sql) => consultas.push(sql) });
+  migracionAsignacion.up({ sql: (sql) => consultas.push(sql) });
   for (const sql of consultas) await db.query(sql);
   await db.query(`CREATE TRIGGER preparar_precio BEFORE INSERT ON precios_combustible
     FOR EACH ROW EXECUTE FUNCTION preparar_nuevo_precio()`);
   const servicio = crearServicioPrecios(db);
   const adminUsuario = { id: "1", rol: "administrador" };
   const gestorUsuario = { id: "2", rol: "gestor_gasolinera" };
+
+  await t.test("la base de datos exige una gasolinera para cada gestor", async () => {
+    await assert.rejects(db.query(`
+      INSERT INTO usuarios (id,id_rol,id_gasolinera,nombre_completo,nombre_usuario)
+      VALUES (3,2,NULL,'Gestor sin estación','gestor_sin_estacion')
+    `), /gasolinera asignada/i);
+    await assert.rejects(db.query("UPDATE usuarios SET id_gasolinera=NULL WHERE id=2"),
+      /gasolinera asignada/i);
+    await db.query(`
+      INSERT INTO usuarios (id,id_rol,id_gasolinera,nombre_completo,nombre_usuario)
+      VALUES (4,1,NULL,'Otro administrador','otro_admin')
+    `);
+  });
 
   await t.test("horario cerrado impide agregar combustibles y precios", async () => {
     await assert.rejects(servicio.agregarCombustible(gestorUsuario, {
@@ -104,6 +119,7 @@ test("migración y permisos de precios en PostgreSQL real", { skip: process.env.
 
   await t.test("la migración puede revertirse sin dejar la función dependiente de las columnas nuevas", async () => {
     const reversas = [];
+    migracionAsignacion.down({ sql: (sql) => reversas.push(sql) });
     migracion.down({ sql: (sql) => reversas.push(sql) });
     for (const sql of reversas) await db.query(sql);
     const { rows: [fila] } = await db.query(`
