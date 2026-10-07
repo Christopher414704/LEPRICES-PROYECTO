@@ -5,6 +5,10 @@ import { crearServicioPrecios } from "../services/precios.service.js";
 export function crearPreciosRouter(servicio = crearServicioPrecios(database)) {
   const router = Router();
   router.get("/estado", async (req, res) => res.json(await servicio.estado(req.usuario)));
+  router.get("/historial", async (req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.json(await servicio.historial(req.usuario, req.query));
+  });
   router.put("/gestores/:id", async (req, res) =>
     res.json(await servicio.asignar(req.usuario, req.params.id, req.body)));
   router.delete("/gestores/:id/horario", async (req, res) =>

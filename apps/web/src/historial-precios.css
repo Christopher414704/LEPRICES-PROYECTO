@@ -1,0 +1,12 @@
+.filtros-historial { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr; gap: 14px; align-items: end; margin-top: 20px; }
+.filtros-historial button { min-height: 46px; }
+.tabla-contenedor { margin-top: 18px; overflow-x: auto; }
+table { width: 100%; min-width: 850px; border-collapse: collapse; font-size: 12px; }
+th, td { padding: 13px 11px; border-bottom: 1px solid #e3e7ec; text-align: left; vertical-align: top; }
+th { color: #606b78; background: #f5f7f9; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+td { color: #303b48; }
+.precio-anterior { color: #747e8a; text-decoration: line-through; font-variant-numeric: tabular-nums; }
+.precio-nuevo { color: #a9141e; font-weight: 800; font-variant-numeric: tabular-nums; }
+.responsable small { display: block; margin-top: 3px; color: #7b8490; }
+@media (max-width: 800px) { .filtros-historial { grid-template-columns: 1fr 1fr; } .filtros-historial label:first-child { grid-column: 1 / -1; } }
+@media (max-width: 520px) { .filtros-historial { grid-template-columns: 1fr; } .filtros-historial label:first-child { grid-column: auto; } }

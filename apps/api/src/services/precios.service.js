@@ -2,6 +2,14 @@ const errorHttp = (statusCode, message) => Object.assign(new Error(message), { s
 const idValido = (valor) => /^(?:[1-9]\d{0,17})$/.test(String(valor ?? ""));
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
 const PRECIO = /^(?:(?:[1-9]\d{0,7})(?:\.\d{1,2})?|0\.(?:0[1-9]|[1-9]\d?))$/;
+const CODIGO_COMBUSTIBLE = /^[a-z0-9_-]{1,50}$/;
+
+function fechaValida(valor) {
+  if (valor == null || valor === "") return null;
+  if (typeof valor !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
+  const fecha = new Date(`${valor}T00:00:00.000Z`);
+  return Number.isFinite(fecha.getTime()) && fecha.toISOString().startsWith(valor) ? valor : false;
+}
 
 async function transaccion(database, operacion) {
   const cliente = await database.connect();
@@ -49,6 +57,65 @@ async function permisoEdicion(cliente, idUsuario, idGasolinera) {
 }
 
 export function crearServicioPrecios(database) {
+  async function historial(usuario, filtros = {}) {
+    if (usuario?.rol !== "administrador") {
+      throw errorHttp(403, "Solo un administrador puede consultar el historial de precios.");
+    }
+    const idGasolinera = String(filtros.idGasolinera ?? "");
+    const combustible = filtros.combustible == null || filtros.combustible === ""
+      ? null : String(filtros.combustible);
+    const desde = fechaValida(filtros.desde);
+    const hasta = fechaValida(filtros.hasta);
+    if (!idValido(idGasolinera) || (combustible && !CODIGO_COMBUSTIBLE.test(combustible)) ||
+        desde === false || hasta === false || (desde && hasta && desde > hasta)) {
+      throw errorHttp(400, "Los filtros del historial no son válidos.");
+    }
+    const { rows: [gasolinera] } = await database.query(
+      "SELECT id, nombre FROM gasolineras WHERE id=$1", [idGasolinera]);
+    if (!gasolinera) throw errorHttp(404, "La gasolinera no existe.");
+    const { rows } = await database.query(`
+      WITH cambios AS (
+        SELECT pc.id, pc.precio AS precio_nuevo,
+          LAG(pc.precio) OVER (
+            PARTITION BY pc.id_combustible_gasolinera, pc.id_modalidad_servicio
+            ORDER BY pc.fecha_vigencia_inicio, pc.id
+          ) AS precio_anterior,
+          TRIM(pc.codigo_moneda) AS moneda, pc.unidad_medida,
+          pc.fecha_vigencia_inicio AS fecha,
+          cg.nombre_comercial AS combustible, tc.codigo AS codigo_combustible,
+          ms.nombre AS modalidad, u.id AS id_usuario,
+          u.nombre_completo AS usuario, u.nombre_usuario
+        FROM precios_combustible pc
+        JOIN combustibles_gasolinera cg ON cg.id=pc.id_combustible_gasolinera
+        JOIN tipos_combustible tc ON tc.id=cg.id_tipo_combustible
+        JOIN modalidades_servicio ms ON ms.id=pc.id_modalidad_servicio
+        LEFT JOIN usuarios u ON u.id=pc.id_usuario_registro
+        WHERE cg.id_gasolinera=$1
+      )
+      SELECT * FROM cambios
+      WHERE ($2::TEXT IS NULL OR codigo_combustible=$2)
+        AND ($3::DATE IS NULL OR (fecha AT TIME ZONE 'America/Guatemala')::DATE >= $3)
+        AND ($4::DATE IS NULL OR (fecha AT TIME ZONE 'America/Guatemala')::DATE <= $4)
+      ORDER BY fecha DESC, id DESC
+    `, [idGasolinera, combustible, desde, hasta]);
+    return {
+      gasolinera: { id: String(gasolinera.id), nombre: gasolinera.nombre },
+      registros: rows.map((fila) => ({
+        id: String(fila.id),
+        combustible: { nombre: fila.combustible, codigo: fila.codigo_combustible },
+        modalidad: fila.modalidad,
+        precioAnterior: fila.precio_anterior == null ? null : Number(fila.precio_anterior),
+        precioNuevo: Number(fila.precio_nuevo),
+        moneda: fila.moneda,
+        unidadMedida: fila.unidad_medida,
+        fecha: fila.fecha,
+        usuario: fila.id_usuario == null ? null : {
+          id: String(fila.id_usuario), nombre: fila.usuario, usuario: fila.nombre_usuario,
+        },
+      })),
+    };
+  }
+
   async function estado(usuario) {
     const { rows: [fila] } = await database.query(`
       SELECT u.id_gasolinera, r.codigo AS rol, u.precio_horario_activo,
@@ -207,5 +274,5 @@ export function crearServicioPrecios(database) {
     });
   }
 
-  return { estado, asignar, revocar, agregarCombustible, registrar };
+  return { estado, historial, asignar, revocar, agregarCombustible, registrar };
 }
