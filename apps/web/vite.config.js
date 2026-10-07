@@ -31,6 +31,7 @@ export default defineConfig({
         login: path.resolve(directorioActual, "login.html"),
         mapa: path.resolve(directorioActual, "mapa.html"),
         precios: path.resolve(directorioActual, "precios.html"),
+        gasolineras: path.resolve(directorioActual, "gasolineras.html"),
         publico: path.resolve(directorioActual, "publico.html"),
       },
     },

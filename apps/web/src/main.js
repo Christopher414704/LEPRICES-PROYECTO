@@ -347,7 +347,7 @@ const seleccionMunicipio = document.querySelector("#seleccionarMunicipio");
 let regiones = [];
 let solicitudMapa;
 let temporizadorMapa;
-let consultaActual = "";
+let consultaActual = null;
 
 function limitesRegionSeleccionada() {
   const filtradas = regiones.filter((r) => (!seleccionDepartamento?.value || r.departamento === seleccionDepartamento.value) &&
@@ -379,18 +379,26 @@ function regionRequiereArea() {
   return cantidad > 300;
 }
 
-async function cargarRegiones() {
+async function cargarRegiones({ inicial = false } = {}) {
   try {
-    const respuesta = await fetch(`${urlApi}/publico/regiones`, { credentials: "omit" });
+    const respuesta = await fetch(`${urlApi}/publico/regiones`, {
+      credentials: "omit", cache: "no-cache", signal: AbortSignal.timeout(15000),
+    });
     if (!respuesta.ok) return;
     regiones = (await respuesta.json()).data.filter((r) => r.limites?.every(Number.isFinite));
+    const departamentoAnterior = seleccionDepartamento.value;
+    const municipioAnterior = seleccionMunicipio.value;
+    seleccionDepartamento.replaceChildren(new Option("Todos", ""));
     for (const departamento of [...new Set(regiones.map((r) => r.departamento))]) {
       const opcion = document.createElement("option");
       opcion.value = opcion.textContent = departamento;
       seleccionDepartamento.append(opcion);
     }
-    if (regiones.some((r) => r.departamento === "Jalapa")) seleccionDepartamento.value = "Jalapa";
+    if (regiones.some((r) => r.departamento === departamentoAnterior)) seleccionDepartamento.value = departamentoAnterior;
+    else if (inicial && regiones.some((r) => r.departamento === "Jalapa")) seleccionDepartamento.value = "Jalapa";
     actualizarMunicipios();
+    if (regiones.some((r) => r.municipio === municipioAnterior &&
+        (!seleccionDepartamento.value || r.departamento === seleccionDepartamento.value))) seleccionMunicipio.value = municipioAnterior;
   } catch (error) { console.error("No fue posible cargar regiones:", error); }
 }
 
@@ -418,7 +426,7 @@ if (esPublico) {
   });
 }
 
-async function cargarPrecios() {
+async function cargarPrecios({ forzar = false } = {}) {
   try {
     const parametros = new URLSearchParams();
     if (esPublico) {
@@ -430,12 +438,13 @@ async function cargarPrecios() {
       if (seleccionMunicipio.value) parametros.set("municipio", seleccionMunicipio.value);
     }
     const consulta = parametros.toString();
-    if (esPublico && consulta === consultaActual) return;
+    if (esPublico && !forzar && consulta === consultaActual) return;
     solicitudMapa?.abort();
     solicitudMapa = new AbortController();
     const respuesta = esPublico
       ? await fetch(`${urlApi}/publico/gasolineras?${consulta}`, {
         credentials: "omit",
+        cache: forzar ? "no-cache" : "default",
         signal: solicitudMapa.signal,
       })
       : await apiAutenticada("/gasolineras", { signal: solicitudMapa.signal });
@@ -458,19 +467,24 @@ async function cargarPrecios() {
 }
 
 await Promise.allSettled([cargarMapaSatelital(), (async () => {
-  if (esPublico) await cargarRegiones();
+  if (esPublico) await cargarRegiones({ inicial: true });
   await cargarPrecios();
 })()]);
-if (esPublico) {
+{
   const codigoEnlace = new URLSearchParams(window.location.search).get("gasolinera");
   if (codigoEnlace && /^[\w-]{1,100}$/.test(codigoEnlace)) {
     try {
-      const respuesta = await fetch(`${urlApi}/publico/gasolineras?codigo=${encodeURIComponent(codigoEnlace)}`, { credentials: "omit" });
-      const ficha = (await respuesta.json()).data?.[0];
+      let ficha = fichas.get(`gasolinera-${codigoEnlace}`);
+      if (!ficha && esPublico) {
+        const respuesta = await fetch(`${urlApi}/publico/gasolineras?codigo=${encodeURIComponent(codigoEnlace)}`, { credentials: "omit" });
+        if (respuesta.ok) ficha = (await respuesta.json()).data?.[0];
+      }
       if (ficha) {
-        seleccionDepartamento.value = ficha.departamento;
-        actualizarMunicipios();
-        seleccionMunicipio.value = "";
+        if (esPublico) {
+          seleccionDepartamento.value = ficha.departamento;
+          actualizarMunicipios();
+          seleccionMunicipio.value = "";
+        }
         let entidad = estaciones.entities.getById(`gasolinera-${ficha.codigo}`);
         if (!entidad) {
           agregarEstaciones([ficha]);
@@ -483,3 +497,18 @@ if (esPublico) {
     } catch (error) { console.error("No fue posible abrir la gasolinera enlazada:", error); }
   }
 }
+
+// Las estaciones nuevas aparecen también en mapas que ya estaban abiertos.
+let actualizandoCatalogo = false;
+async function actualizarCatalogo() {
+  if (document.hidden || actualizandoCatalogo) return;
+  actualizandoCatalogo = true;
+  try {
+    if (esPublico) await cargarRegiones();
+    await cargarPrecios({ forzar: true });
+  } finally {
+    actualizandoCatalogo = false;
+  }
+}
+setInterval(actualizarCatalogo, 30000);
+window.addEventListener("focus", actualizarCatalogo);

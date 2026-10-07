@@ -29,6 +29,7 @@ async function comprobarAcceso() {
       return;
     }
     app.hidden = false;
+    document.querySelector("#registrarGasolinera").hidden = usuario.rol !== "administrador";
     acceso.hidden = true;
     if (!cargada) {
       await import("./main.js");

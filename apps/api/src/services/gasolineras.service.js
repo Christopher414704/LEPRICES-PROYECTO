@@ -1,6 +1,7 @@
 import {
   obtenerGasolinerasConPrecios,
 } from "../repositories/gasolineras.repository.js";
+import { database } from "../config/database.js";
 
 function convertirNumero(valor) {
   if (valor === null || valor === undefined) {
@@ -10,8 +11,8 @@ function convertirNumero(valor) {
   return Number(valor);
 }
 
-export async function listarGasolinerasConPrecios({ soloVisibles = false, bbox = null, departamento = null, municipio = null, codigo = null, buscar = null, limite = null } = {}) {
-  const filas = await obtenerGasolinerasConPrecios({ soloVisibles, bbox, departamento, municipio, codigo, buscar, limite });
+export async function listarGasolinerasConPrecios({ soloVisibles = false, bbox = null, departamento = null, municipio = null, codigo = null, buscar = null, limite = null } = {}, db = database) {
+  const filas = await obtenerGasolinerasConPrecios({ soloVisibles, bbox, departamento, municipio, codigo, buscar, limite }, db);
   const registros = new Map();
 
   for (const fila of filas) {

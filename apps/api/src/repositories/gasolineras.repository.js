@@ -1,6 +1,6 @@
 import { database } from "../config/database.js";
 
-export async function obtenerGasolinerasConPrecios({ soloVisibles = false, bbox = null, departamento = null, municipio = null, codigo = null, buscar = null, limite = null } = {}) {
+export async function obtenerGasolinerasConPrecios({ soloVisibles = false, bbox = null, departamento = null, municipio = null, codigo = null, buscar = null, limite = null } = {}, db = database) {
   const consulta = `
     SELECT
       g.id AS id_gasolinera,
@@ -85,7 +85,7 @@ export async function obtenerGasolinerasConPrecios({ soloVisibles = false, bbox 
       ms.orden_visual;
   `;
 
-  const resultado = await database.query(consulta, [soloVisibles, ...(bbox ?? [null, null, null, null]), departamento, municipio, limite, codigo, buscar]);
+  const resultado = await db.query(consulta, [soloVisibles, ...(bbox ?? [null, null, null, null]), departamento, municipio, limite, codigo, buscar]);
 
   return resultado.rows;
 }
