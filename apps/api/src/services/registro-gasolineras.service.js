@@ -135,5 +135,62 @@ export function crearServicioRegistroGasolineras(database) {
       cliente.release();
     }
   }
-  return { marcas, registrar, editar };
+  async function listarAdministracion(usuario) {
+    exigirAdministrador(usuario);
+    const { rows } = await database.query(`
+      SELECT id, codigo, nombre, direccion, municipio, departamento, pais, latitud, longitud, activo, visible_publico
+      FROM gasolineras ORDER BY nombre, id
+    `);
+    return rows.map((fila) => ({
+      id: String(fila.id), codigo: fila.codigo, nombre: fila.nombre, direccion: fila.direccion,
+      municipio: fila.municipio, departamento: fila.departamento, pais: fila.pais,
+      ubicacion: { latitud: Number(fila.latitud), longitud: Number(fila.longitud) },
+      activo: fila.activo, visiblePublico: fila.visible_publico,
+    }));
+  }
+
+  async function cambiarEstado(usuario, id, datos) {
+    exigirAdministrador(usuario);
+    if (!/^[1-9]\d{0,17}$/.test(String(id ?? ""))) throw errorHttp(400, "Selecciona una estación válida.");
+    if (typeof datos?.activo !== "boolean") throw errorHttp(400, "El estado activo debe ser verdadero o falso.");
+    const cliente = await database.connect();
+    const ficha = (fila) => ({
+      id: String(fila.id), codigo: fila.codigo, nombre: fila.nombre,
+      activo: fila.activo, visiblePublico: fila.visible_publico,
+    });
+    try {
+      await cliente.query("BEGIN");
+      const { rows: [administrador] } = await cliente.query(`
+        SELECT u.id FROM usuarios u JOIN roles r ON r.id=u.id_rol
+        WHERE u.id=$1 AND u.activo=TRUE AND r.activo=TRUE AND r.codigo='administrador'
+        FOR SHARE OF u, r
+      `, [usuario.id]);
+      if (!administrador) throw errorHttp(403, "La cuenta no tiene permisos de administrador activos.");
+      const { rows: [anterior] } = await cliente.query(`
+        SELECT id, codigo, nombre, activo, visible_publico FROM gasolineras WHERE id=$1 FOR UPDATE
+      `, [id]);
+      if (!anterior) throw errorHttp(404, "La gasolinera no existe.");
+      if (anterior.activo === datos.activo) {
+        await cliente.query("COMMIT");
+        return { gasolinera: ficha(anterior), cambiado: false };
+      }
+      const { rows: [actualizada] } = await cliente.query(`
+        UPDATE gasolineras SET activo=$2 WHERE id=$1 RETURNING id, codigo, nombre, activo, visible_publico
+      `, [id, datos.activo]);
+      const gasolinera = ficha(actualizada);
+      await cliente.query(`
+        INSERT INTO auditoria_gasolineras (id_gasolinera, id_usuario, operacion, datos)
+        VALUES ($1,$2,$3,$4::jsonb)
+      `, [id, usuario.id, datos.activo ? "reactivacion" : "desactivacion",
+        JSON.stringify({ antes: ficha(anterior), despues: gasolinera })]);
+      await cliente.query("COMMIT");
+      return { gasolinera, cambiado: true };
+    } catch (error) {
+      await cliente.query("ROLLBACK");
+      throw error;
+    } finally {
+      cliente.release();
+    }
+  }
+  return { marcas, registrar, editar, listarAdministracion, cambiarEstado };
 }

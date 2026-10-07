@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#d71920" />
-    <title>Editar gasolinera | LEPRICES</title>
+    <title>Administrar gasolineras | LEPRICES</title>
     <link rel="stylesheet" href="/src/precios-page.css" />
   </head>
   <body>
@@ -13,11 +13,16 @@
       <nav aria-label="Apartados principales"><a class="opcion" href="/gasolineras.html">Registrar estación</a><a class="opcion" href="/mapa.html"><img src="/images/gasolinera.png" alt="" width="40" height="40" />Volver al mapa</a></nav>
     </header>
     <main id="app" hidden>
-      <div class="intro"><p class="sobretitulo">ADMINISTRACIÓN</p><h1>Editar información de una gasolinera</h1><p>Selecciona una estación y actualiza sus datos y ubicación.</p></div>
+      <div class="intro"><p class="sobretitulo">ADMINISTRACIÓN</p><h1>Administrar gasolineras</h1><p>Actualiza los datos de una estación o cambia su estado de servicio.</p></div>
       <p id="mensajeEdicion" class="mensaje" role="alert" hidden></p>
       <section class="tarjeta" aria-labelledby="tituloEdicion">
         <h2 id="tituloEdicion">Datos de la estación</h2>
-        <label class="selector">Estación a modificar<select id="estacionEdicion"><option value="">Selecciona una estación</option></select></label>
+        <label class="selector">Estación a administrar<select id="estacionEdicion"><option value="">Selecciona una estación</option></select></label>
+        <div id="gestionEstado" hidden>
+          <p id="estadoEstacion" class="vacio" role="status"></p>
+          <p class="ayuda">Las estaciones inactivas no aparecen en el mapa público. Sus precios e historial se conservan. Al reactivarlas mantienen su configuración de publicación.</p>
+          <div class="acciones"><button id="cambiarEstado" class="boton-secundario" type="button">Desactivar gasolinera</button></div>
+        </div>
         <form id="formEdicion" class="rejilla-form" hidden>
           <label>Nombre de la estación<input name="nombre" maxlength="150" autocomplete="organization" required /></label>
           <label>Dirección<input name="direccion" maxlength="500" autocomplete="street-address" required /></label>

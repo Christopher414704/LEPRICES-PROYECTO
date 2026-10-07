@@ -57,11 +57,12 @@ export function prepararGasolineraPublica(gasolinera) {
 
 export function crearPublicoRouter(listar = listarGasolinerasConPrecios, db = database) {
   const router = Router();
+  // Revalida también respuestas 404 para reflejar desactivaciones y reactivaciones.
+  router.use((_req, res, next) => { res.set("Cache-Control", "no-cache"); next(); });
   router.get("/gasolineras", async (req, res) => {
     const filtros = leerFiltrosPublicos(req.query);
     const limite = 301;
     const gasolineras = await listar({ soloVisibles: true, ...filtros, limite });
-    res.set("Cache-Control", "public, max-age=30");
     res.json({ data: gasolineras.slice(0, 300).map(prepararGasolineraPublica),
       total: Math.min(gasolineras.length, 300), hayMas: gasolineras.length > 300 });
   });
@@ -73,7 +74,6 @@ export function crearPublicoRouter(listar = listarGasolinerasConPrecios, db = da
       throw errorHttp(404, "La gasolinera no existe o no está disponible.");
     }
 
-    res.set("Cache-Control", "public, max-age=30");
     res.json({ data: prepararGasolineraPublica(gasolinera) });
   });
   router.get("/regiones", async (_req, res) => {
@@ -84,7 +84,6 @@ export function crearPublicoRouter(listar = listarGasolinerasConPrecios, db = da
       FROM gasolineras WHERE activo = TRUE AND visible_publico = TRUE
       GROUP BY departamento, municipio ORDER BY departamento, municipio
     `);
-    res.set("Cache-Control", "public, max-age=300");
     res.json({ data: rows.map((r) => ({ departamento: r.departamento, municipio: r.municipio,
       cantidad: Number(r.cantidad), limites: [Number(r.oeste), Number(r.sur), Number(r.este), Number(r.norte)] })) });
   });

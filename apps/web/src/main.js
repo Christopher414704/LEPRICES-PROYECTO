@@ -230,6 +230,9 @@ function filtrarGasolineras() {
   }
   contador.textContent = `${cantidad} de ${elementosLista.length} gasolineras`;
   sinResultados.hidden = cantidad > 0;
+  sinResultados.textContent = buscador.value.trim()
+    ? "No encontramos gasolineras con ese nombre. Prueba otra búsqueda."
+    : (esPublico ? "No hay gasolineras activas disponibles en esta región." : "No hay gasolineras activas disponibles.");
 }
 
 function plegarLista(plegada) {

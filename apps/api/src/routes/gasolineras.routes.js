@@ -16,6 +16,10 @@ export function crearGasolinerasRouter(servicio = crearServicioRegistroGasoliner
     next();
   });
   router.get("/marcas", async (req, res) => res.json({ data: await servicio.marcas(req.usuario) }));
+  router.get("/administracion", async (req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.json({ data: await servicio.listarAdministracion(req.usuario) });
+  });
   router.post("/", async (req, res) => {
     const gasolinera = await servicio.registrar(req.usuario, req.body);
     res.status(201).json({ status: "ok", message: "Gasolinera registrada correctamente.", data: gasolinera });
@@ -23,6 +27,13 @@ export function crearGasolinerasRouter(servicio = crearServicioRegistroGasoliner
   router.put("/:id", async (req, res) => {
     const gasolinera = await servicio.editar(req.usuario, req.params.id, req.body);
     res.json({ status: "ok", message: "Gasolinera modificada correctamente.", data: gasolinera });
+  });
+  router.patch("/:id/estado", async (req, res) => {
+    const { gasolinera, cambiado } = await servicio.cambiarEstado(req.usuario, req.params.id, req.body);
+    const message = cambiado
+      ? (gasolinera.activo ? "Gasolinera reactivada correctamente." : "Gasolinera desactivada correctamente.")
+      : (gasolinera.activo ? "La gasolinera ya está activa." : "La gasolinera ya está inactiva.");
+    res.json({ status: "ok", message, data: gasolinera, cambiado });
   });
   return router;
 }

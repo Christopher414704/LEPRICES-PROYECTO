@@ -9,7 +9,7 @@ import { crearServicioRegistroGasolineras } from "../src/services/registro-gasol
 import { listarGasolinerasConPrecios } from "../src/services/gasolineras.service.js";
 import { crearPublicoRouter } from "../src/routes/publico.routes.js";
 
-test("HU-11/HU-12: registro, edición, duplicados, auditoría y API pública en PostgreSQL real", {
+test("HU-11/HU-12/HU-13: registro, edición, estado, historial y API pública en PostgreSQL real", {
   skip: process.env.RUN_DB_TESTS !== "1",
 }, async (t) => {
   const schema = `gasolineras_test_${randomUUID().replaceAll("-", "")}`;
@@ -28,6 +28,7 @@ test("HU-11/HU-12: registro, edición, duplicados, auditoría y API pública en 
     "0007_publicar_gasolineras", "0008_crear_sesiones_usuario", "0009_restringir_actualizacion_precios_por_horario",
     "0010_limitar_gestores_a_gasolinera", "0011_registrar_gasolineras_y_auditoria",
     "0012_auditar_edicion_gasolineras",
+    "0013_auditar_estado_gasolineras",
   ]) {
     const migracion = await import(`../../../database/migrations/${archivo}.mjs`);
     const consultas = [];
@@ -161,5 +162,101 @@ test("HU-11/HU-12: registro, edición, duplicados, auditoría y API pública en 
     await db.query("ALTER TABLE auditoria_gasolineras ADD CONSTRAINT simular_fallo_auditoria CHECK (datos->>'nombre' <> 'Fallo auditoría')");
     await assert.rejects(servicio.registrar(administrador, { ...datos, nombre: "Fallo auditoría", latitud: 16, longitud: -91 }));
     assert.equal((await db.query("SELECT count(*)::int AS n FROM gasolineras WHERE nombre='Fallo auditoría'")).rows[0].n, 0);
+  });
+
+  let preciosHistoricos;
+  let combustiblesHistoricos;
+  await t.test("desactivar preserva estación, precios históricos y relaciones; la API pública la excluye", async (st) => {
+    // Genera un precio anterior cerrado y uno vigente para comprobar ambos.
+    await db.query(`
+      INSERT INTO precios_combustible (id_combustible_gasolinera,id_modalidad_servicio,id_usuario_registro,precio)
+      SELECT pc.id_combustible_gasolinera,pc.id_modalidad_servicio,$2,32.50
+      FROM precios_combustible pc JOIN combustibles_gasolinera cg ON cg.id=pc.id_combustible_gasolinera
+      WHERE cg.id_gasolinera=$1 AND pc.fecha_vigencia_fin IS NULL
+    `, [creada.id, usuario.id]);
+    preciosHistoricos = (await db.query(`
+      SELECT pc.* FROM precios_combustible pc JOIN combustibles_gasolinera cg ON cg.id=pc.id_combustible_gasolinera
+      WHERE cg.id_gasolinera=$1 ORDER BY pc.id
+    `, [creada.id])).rows;
+    combustiblesHistoricos = (await db.query('SELECT * FROM combustibles_gasolinera WHERE id_gasolinera=$1 ORDER BY id', [creada.id])).rows;
+    assert.equal(preciosHistoricos.length, 2);
+    assert.ok(preciosHistoricos[0].fecha_vigencia_fin);
+    const antes = (await db.query('SELECT * FROM gasolineras WHERE id=$1', [creada.id])).rows[0];
+    await servicio.cambiarEstado(administrador, creada.id, { activo: false });
+    const despues = (await db.query('SELECT * FROM gasolineras WHERE id=$1', [creada.id])).rows[0];
+    assert.equal(despues.activo, false);
+    const { activo: _a, fecha_actualizacion: _f, ...original } = antes;
+    const { activo: _b, fecha_actualizacion: _g, ...restante } = despues;
+    assert.deepEqual(restante, original);
+    assert.deepEqual((await db.query(`
+      SELECT pc.* FROM precios_combustible pc JOIN combustibles_gasolinera cg ON cg.id=pc.id_combustible_gasolinera
+      WHERE cg.id_gasolinera=$1 ORDER BY pc.id
+    `, [creada.id])).rows, preciosHistoricos);
+    assert.deepEqual((await db.query('SELECT * FROM combustibles_gasolinera WHERE id_gasolinera=$1 ORDER BY id', [creada.id])).rows, combustiblesHistoricos);
+    const auditoria = (await db.query("SELECT * FROM auditoria_gasolineras WHERE id_gasolinera=$1 AND operacion='desactivacion'", [creada.id])).rows[0];
+    assert.equal(auditoria.id_usuario, usuario.id);
+    assert.equal(auditoria.datos.antes.activo, true);
+    assert.equal(auditoria.datos.despues.activo, false);
+    assert.equal((await servicio.listarAdministracion(administrador)).find((g) => g.codigo === creada.codigo).activo, false);
+    assert.deepEqual(await listarGasolinerasConPrecios({ codigo: creada.codigo }, db), []);
+    const app = express();
+    app.use('/api/publico', crearPublicoRouter((opciones) => listarGasolinerasConPrecios(opciones, db), db));
+    app.use((error, _req, res, _next) => res.status(error.statusCode ?? 500).json({ message: error.message }));
+    const server = app.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    st.after(() => new Promise((resolve) => server.close(resolve)));
+    const url = `http://127.0.0.1:${server.address().port}/api/publico`;
+    const respuesta = await fetch(`${url}/gasolineras?codigo=${creada.codigo}`);
+    assert.equal(respuesta.headers.get('cache-control'), 'no-cache');
+    assert.deepEqual((await respuesta.json()).data, []);
+    assert.equal((await fetch(`${url}/gasolineras/${creada.codigo}/precios`)).status, 404);
+    assert.equal((await (await fetch(`${url}/regiones`)).json()).data.some((r) => r.municipio === 'Monjas'), false);
+  });
+
+  await t.test("reactivar recupera la misma estación y sus precios sin perder historial", async () => {
+    const resultado = await servicio.cambiarEstado(administrador, creada.id, { activo: true });
+    assert.equal(resultado.gasolinera.codigo, creada.codigo);
+    const [publica] = await listarGasolinerasConPrecios({ soloVisibles: true, codigo: creada.codigo }, db);
+    assert.equal(publica.combustibles[0].precios.autoservicio.precio, 32.5);
+    assert.deepEqual((await db.query(`
+      SELECT pc.* FROM precios_combustible pc JOIN combustibles_gasolinera cg ON cg.id=pc.id_combustible_gasolinera
+      WHERE cg.id_gasolinera=$1 ORDER BY pc.id
+    `, [creada.id])).rows, preciosHistoricos);
+    assert.deepEqual((await db.query('SELECT * FROM combustibles_gasolinera WHERE id_gasolinera=$1 ORDER BY id', [creada.id])).rows, combustiblesHistoricos);
+    const auditoria = (await db.query("SELECT datos FROM auditoria_gasolineras WHERE id_gasolinera=$1 AND operacion='reactivacion'", [creada.id])).rows[0];
+    assert.equal(auditoria.datos.antes.activo, false);
+    assert.equal(auditoria.datos.despues.activo, true);
+  });
+
+  await t.test("desactivaciones concurrentes y repetidas producen un solo cambio auditado", async () => {
+    const antes = (await db.query('SELECT count(*)::int AS n FROM auditoria_gasolineras')).rows[0].n;
+    const resultados = await Promise.all([
+      servicio.cambiarEstado(administrador, creada.id, { activo: false }),
+      servicio.cambiarEstado(administrador, creada.id, { activo: false }),
+    ]);
+    assert.equal(resultados.filter((r) => r.cambiado).length, 1);
+    assert.equal((await db.query('SELECT count(*)::int AS n FROM auditoria_gasolineras')).rows[0].n, antes + 1);
+    await servicio.cambiarEstado(administrador, creada.id, { activo: true });
+  });
+
+  await t.test("si falla la auditoría PostgreSQL conserva el estado y todo el historial", async () => {
+    await db.query("ALTER TABLE auditoria_gasolineras ADD CONSTRAINT simular_fallo_estado CHECK (operacion NOT IN ('desactivacion','reactivacion')) NOT VALID");
+    for (const activo of [true, false]) {
+      await db.query('UPDATE gasolineras SET activo=$2 WHERE id=$1', [creada.id, activo]);
+      await assert.rejects(servicio.cambiarEstado(administrador, creada.id, { activo: !activo }));
+      assert.equal((await db.query('SELECT activo FROM gasolineras WHERE id=$1', [creada.id])).rows[0].activo, activo);
+      assert.deepEqual((await db.query(`
+        SELECT pc.* FROM precios_combustible pc JOIN combustibles_gasolinera cg ON cg.id=pc.id_combustible_gasolinera
+        WHERE cg.id_gasolinera=$1 ORDER BY pc.id
+      `, [creada.id])).rows, preciosHistoricos);
+    }
+    await db.query('ALTER TABLE auditoria_gasolineras DROP CONSTRAINT simular_fallo_estado');
+  });
+
+  await t.test("reactivar una estación privada no la publica automáticamente", async () => {
+    await db.query('UPDATE gasolineras SET visible_publico=FALSE WHERE id=$1', [creada.id]);
+    await servicio.cambiarEstado(administrador, creada.id, { activo: true });
+    assert.deepEqual(await listarGasolinerasConPrecios({ soloVisibles: true, codigo: creada.codigo }, db), []);
+    assert.equal((await listarGasolinerasConPrecios({ codigo: creada.codigo }, db))[0].codigo, creada.codigo);
   });
 });

@@ -37,11 +37,12 @@ test("GET público funciona sin cookie y no ofrece mutaciones", async (t) => {
   const url = `http://127.0.0.1:${server.address().port}/api/publico/gasolineras`;
   const respuesta = await fetch(url);
   assert.equal(respuesta.status, 200);
-  assert.equal(respuesta.headers.get("cache-control"), "public, max-age=30");
+  assert.equal(respuesta.headers.get("cache-control"), "no-cache");
   assert.deepEqual(consultas[0], { soloVisibles: true, bbox: null, departamento: null, municipio: null, codigo: null, buscar: null, limite: 301 });
   assert.equal((await respuesta.json()).data[0].codigo, ejemplo.codigo);
   const precios = await fetch(`${url}/${ejemplo.codigo}/precios`);
   assert.equal(precios.status, 200);
+  assert.equal(precios.headers.get("cache-control"), "no-cache");
   assert.equal((await precios.json()).data.combustibles[0].precios.autoservicio.precio, 31.5);
   assert.deepEqual(consultas[1], { soloVisibles: true, codigo: ejemplo.codigo, limite: 1 });
   assert.equal((await fetch(url, { method: "POST" })).status, 404);
@@ -57,6 +58,7 @@ test("GET de precios indica cuando la gasolinera no existe", async (t) => {
 
   const respuesta = await fetch(`http://127.0.0.1:${server.address().port}/api/publico/gasolineras/inexistente/precios`);
   assert.equal(respuesta.status, 404);
+  assert.equal(respuesta.headers.get("cache-control"), "no-cache");
   assert.match((await respuesta.json()).message, /no existe/i);
 });
 
