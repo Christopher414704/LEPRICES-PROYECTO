@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#d71920" />
+    <title>Editar gasolinera | LEPRICES</title>
+    <link rel="stylesheet" href="/src/precios-page.css" />
+  </head>
+  <body>
+    <header class="barra">
+      <a class="marca" href="/mapa.html" aria-label="LEPRICES: volver al mapa"><img src="/images/leprices-logo.png" alt="" width="100" height="65" /><span>LEPRICES<small>Precios de combustible</small></span></a>
+      <nav aria-label="Apartados principales"><a class="opcion" href="/gasolineras.html">Registrar estación</a><a class="opcion" href="/mapa.html"><img src="/images/gasolinera.png" alt="" width="40" height="40" />Volver al mapa</a></nav>
+    </header>
+    <main id="app" hidden>
+      <div class="intro"><p class="sobretitulo">ADMINISTRACIÓN</p><h1>Editar información de una gasolinera</h1><p>Selecciona una estación y actualiza sus datos y ubicación.</p></div>
+      <p id="mensajeEdicion" class="mensaje" role="alert" hidden></p>
+      <section class="tarjeta" aria-labelledby="tituloEdicion">
+        <h2 id="tituloEdicion">Datos de la estación</h2>
+        <label class="selector">Estación a modificar<select id="estacionEdicion"><option value="">Selecciona una estación</option></select></label>
+        <form id="formEdicion" class="rejilla-form" hidden>
+          <label>Nombre de la estación<input name="nombre" maxlength="150" autocomplete="organization" required /></label>
+          <label>Dirección<input name="direccion" maxlength="500" autocomplete="street-address" required /></label>
+          <label>Municipio<input name="municipio" maxlength="100" required /></label>
+          <label>Departamento<input name="departamento" maxlength="100" required /></label>
+          <label>Latitud (−90 a 90)<input name="latitud" type="number" min="-90" max="90" step="0.000001" required /></label>
+          <label>Longitud (−180 a 180)<input name="longitud" type="number" min="-180" max="180" step="0.000001" required /></label>
+          <p class="ayuda">Todos los campos son obligatorios. No se permiten nombres repetidos en el mismo municipio y departamento ni estaciones en las mismas coordenadas.</p>
+          <div class="acciones"><button id="guardarEdicion" class="boton-primario" type="submit">Guardar cambios</button><a id="verEstacionEditada" class="boton-secundario" href="/mapa.html">Ver estación en el mapa</a></div>
+        </form>
+      </section>
+    </main>
+    <section id="esperaEdicion" class="espera" role="status">Comprobando permisos…</section>
+    <script type="module" src="/src/editar-gasolinera-page.js"></script>
+  </body>
+</html>

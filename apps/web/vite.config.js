@@ -32,6 +32,7 @@ export default defineConfig({
         mapa: path.resolve(directorioActual, "mapa.html"),
         precios: path.resolve(directorioActual, "precios.html"),
         gasolineras: path.resolve(directorioActual, "gasolineras.html"),
+        editarGasolinera: path.resolve(directorioActual, "editar-gasolinera.html"),
         publico: path.resolve(directorioActual, "publico.html"),
       },
     },

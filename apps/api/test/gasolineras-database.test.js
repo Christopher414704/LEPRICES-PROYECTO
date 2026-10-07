@@ -9,7 +9,7 @@ import { crearServicioRegistroGasolineras } from "../src/services/registro-gasol
 import { listarGasolinerasConPrecios } from "../src/services/gasolineras.service.js";
 import { crearPublicoRouter } from "../src/routes/publico.routes.js";
 
-test("HU-11: registro, duplicados, auditoría y API pública en PostgreSQL real", {
+test("HU-11/HU-12: registro, edición, duplicados, auditoría y API pública en PostgreSQL real", {
   skip: process.env.RUN_DB_TESTS !== "1",
 }, async (t) => {
   const schema = `gasolineras_test_${randomUUID().replaceAll("-", "")}`;
@@ -27,6 +27,7 @@ test("HU-11: registro, duplicados, auditoría y API pública en PostgreSQL real"
     "0001_crear_marcas_y_gasolineras", "0002_crear_roles_y_usuarios", "0003_crear_combustibles_y_precios",
     "0007_publicar_gasolineras", "0008_crear_sesiones_usuario", "0009_restringir_actualizacion_precios_por_horario",
     "0010_limitar_gestores_a_gasolinera", "0011_registrar_gasolineras_y_auditoria",
+    "0012_auditar_edicion_gasolineras",
   ]) {
     const migracion = await import(`../../../database/migrations/${archivo}.mjs`);
     const consultas = [];
@@ -86,6 +87,74 @@ test("HU-11: registro, duplicados, auditoría y API pública en PostgreSQL real"
     const { rows: [conteo] } = await db.query("SELECT (SELECT count(*)::int FROM gasolineras) AS estaciones,(SELECT count(*)::int FROM auditoria_gasolineras) AS auditorias");
     assert.equal(conteo.estaciones, 2);
     assert.equal(conteo.auditorias, 2);
+  });
+
+  await t.test("edita ubicación PostGIS y API conservando identificador, marca y precios", async () => {
+    const { rows: [combustible] } = await db.query(`
+      INSERT INTO combustibles_gasolinera (id_gasolinera,id_tipo_combustible,nombre_comercial,codigo)
+      SELECT $1,id,'Regular de prueba','regular-prueba' FROM tipos_combustible WHERE codigo='regular' RETURNING id
+    `, [creada.id]);
+    const { rows: [precio] } = await db.query(`
+      INSERT INTO precios_combustible (id_combustible_gasolinera,id_modalidad_servicio,id_usuario_registro,precio)
+      SELECT $1,id,$2,30.50 FROM modalidades_servicio WHERE codigo='autoservicio' RETURNING id
+    `, [combustible.id, usuario.id]);
+    const editada = await servicio.editar(administrador, creada.id, {
+      ...datos, nombre: 'Estación renovada', direccion: 'Avenida nueva', municipio: 'Monjas', latitud: 14.5, longitud: -89.9,
+    });
+    assert.equal(editada.codigo, creada.codigo);
+    assert.equal(editada.idMarca, marca.id);
+    const { rows: [fila] } = await db.query(`
+      SELECT g.visible_publico, g.activo, ST_X(g.ubicacion::geometry) AS longitud,
+        ST_Y(g.ubicacion::geometry) AS latitud, a.id_usuario, a.datos
+      FROM gasolineras g JOIN auditoria_gasolineras a ON a.id_gasolinera=g.id
+      WHERE g.id=$1 AND a.operacion='edicion'
+    `, [creada.id]);
+    assert.equal(fila.longitud, -89.9);
+    assert.equal(fila.latitud, 14.5);
+    assert.equal(fila.activo, true);
+    assert.equal(fila.visible_publico, true);
+    assert.equal(fila.id_usuario, usuario.id);
+    assert.equal(fila.datos.antes.nombre, datos.nombre);
+    assert.deepEqual(fila.datos.despues, editada);
+    const listado = await listarGasolinerasConPrecios({ soloVisibles: true, codigo: creada.codigo }, db);
+    assert.equal(listado[0].nombre, 'Estación renovada');
+    assert.equal(listado[0].municipio, 'Monjas');
+    assert.deepEqual(listado[0].ubicacion, editada.ubicacion);
+    assert.equal(listado[0].combustibles[0].id, Number(combustible.id));
+    assert.equal(listado[0].combustibles[0].precios.autoservicio.precio, 30.5);
+    assert.equal((await db.query('SELECT count(*)::int AS n FROM precios_combustible WHERE id=$1', [precio.id])).rows[0].n, 1);
+  });
+
+  await t.test("editar la misma estación no es duplicado; un conflicto mantiene datos y auditoría", async () => {
+    const { rows: [antes] } = await db.query('SELECT * FROM gasolineras WHERE id=$1', [creada.id]);
+    const cambios = { nombre: antes.nombre, direccion: antes.direccion, municipio: antes.municipio,
+      departamento: antes.departamento, latitud: antes.latitud, longitud: antes.longitud };
+    await servicio.editar(administrador, creada.id, cambios);
+    const n = (await db.query('SELECT count(*)::int AS n FROM auditoria_gasolineras')).rows[0].n;
+    await assert.rejects(servicio.editar(administrador, creada.id, { ...cambios, latitud: 15, longitud: -90 }), { statusCode: 409 });
+    const { rows: [despues] } = await db.query('SELECT * FROM gasolineras WHERE id=$1', [creada.id]);
+    for (const campo of ['nombre', 'direccion', 'municipio', 'departamento', 'latitud', 'longitud']) {
+      assert.equal(despues[campo], antes[campo]);
+    }
+    assert.equal((await db.query('SELECT count(*)::int AS n FROM auditoria_gasolineras')).rows[0].n, n);
+  });
+
+  await t.test("ediciones simultáneas dejan una secuencia de auditoría coherente", async () => {
+    const cambios = { ...datos, municipio: 'Monjas', latitud: 14.5, longitud: -89.9 };
+    await Promise.all([
+      servicio.editar(administrador, creada.id, { ...cambios, nombre: 'Edición A' }),
+      servicio.editar(administrador, creada.id, { ...cambios, nombre: 'Edición B' }),
+    ]);
+    const { rows } = await db.query("SELECT datos FROM auditoria_gasolineras WHERE id_gasolinera=$1 AND operacion='edicion' ORDER BY id DESC LIMIT 2", [creada.id]);
+    assert.equal(rows[0].datos.antes.nombre, rows[1].datos.despues.nombre);
+    assert.equal((await db.query('SELECT nombre FROM gasolineras WHERE id=$1', [creada.id])).rows[0].nombre, rows[0].datos.despues.nombre);
+  });
+
+  await t.test("una auditoría de edición fallida revierte los cambios", async () => {
+    const { rows: [antes] } = await db.query('SELECT nombre,latitud,longitud FROM gasolineras WHERE id=$1', [creada.id]);
+    await db.query("ALTER TABLE auditoria_gasolineras ADD CONSTRAINT simular_fallo_edicion CHECK (operacion <> 'edicion' OR datos->'despues'->>'nombre' <> 'Edición fallida')");
+    await assert.rejects(servicio.editar(administrador, creada.id, { ...datos, nombre: 'Edición fallida', latitud: 17, longitud: -92 }));
+    assert.deepEqual((await db.query('SELECT nombre,latitud,longitud FROM gasolineras WHERE id=$1', [creada.id])).rows[0], antes);
   });
 
   await t.test("si la auditoría falla PostgreSQL revierte también la estación", async () => {

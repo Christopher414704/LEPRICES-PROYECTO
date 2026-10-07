@@ -101,23 +101,29 @@ async function consultarPrecios(entidad) {
 
   const consultaAnterior = preciosConsultados.get(entidad.id);
   if (consultaAnterior && Date.now() - consultaAnterior.instante < 30_000) {
-    return consultaAnterior.ficha;
+    return { ...ficha, ...consultaAnterior.precios };
   }
   if (solicitudesPrecios.has(entidad.id)) return solicitudesPrecios.get(entidad.id);
 
   const solicitud = (async () => {
     const respuesta = await fetch(
       `${urlApi}/publico/gasolineras/${encodeURIComponent(ficha.codigo)}/precios`,
-      { credentials: "omit" },
+      { credentials: "omit", cache: "no-store" },
     );
     if (!respuesta.ok) throw new Error(`La API respondió con estado ${respuesta.status}.`);
     const resultado = await respuesta.json();
     if (!resultado.data || !Array.isArray(resultado.data.combustibles)) {
       throw new Error("La API no devolvió los precios de la gasolinera.");
     }
-    preciosConsultados.set(entidad.id, { ficha: resultado.data, instante: Date.now() });
-    fichas.set(entidad.id, resultado.data);
-    return resultado.data;
+    const vigente = fichas.get(entidad.id);
+    if (!vigente) return null;
+    // La consulta de precios puede terminar después de una edición del catálogo.
+    // Conserva el nombre y la ubicación del último catálogo recibido.
+    const precios = { combustibles: resultado.data.combustibles, ultimaActualizacion: resultado.data.ultimaActualizacion };
+    const actualizada = { ...vigente, ...precios };
+    preciosConsultados.set(entidad.id, { precios, instante: Date.now() });
+    fichas.set(entidad.id, actualizada);
+    return actualizada;
   })().finally(() => solicitudesPrecios.delete(entidad.id));
 
   solicitudesPrecios.set(entidad.id, solicitud);
@@ -262,7 +268,11 @@ function agregarEstaciones(publicadas) {
     const id = `gasolinera-${estacion.codigo}`;
     vigentes.add(id);
     let entidad = estaciones.entities.getById(id);
-    if (!entidad) entidad = estaciones.entities.add({
+    if (entidad) {
+      entidad.name = estacion.nombre;
+      entidad.position = Cartesian3.fromDegrees(estacion.ubicacion.longitud, estacion.ubicacion.latitud);
+      entidad.label.text = estacion.nombre.replace(/^Gasolinera /, "");
+    } else entidad = estaciones.entities.add({
       id, name: estacion.nombre,
       position: Cartesian3.fromDegrees(estacion.ubicacion.longitud, estacion.ubicacion.latitud),
       billboard: {
@@ -320,6 +330,7 @@ function agregarEstaciones(publicadas) {
       if (seleccionada === entidad) ocultarTablero();
       estaciones.entities.remove(entidad);
       fichas.delete(entidad.id);
+      preciosConsultados.delete(entidad.id);
     }
   }
   filtrarGasolineras();
@@ -498,7 +509,7 @@ await Promise.allSettled([cargarMapaSatelital(), (async () => {
   }
 }
 
-// Las estaciones nuevas aparecen también en mapas que ya estaban abiertos.
+// Las altas y ediciones aparecen también en mapas que ya estaban abiertos.
 let actualizandoCatalogo = false;
 async function actualizarCatalogo() {
   if (document.hidden || actualizandoCatalogo) return;

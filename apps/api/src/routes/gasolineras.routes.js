@@ -11,7 +11,7 @@ export function crearGasolinerasRouter(servicio = crearServicioRegistroGasoliner
   router.get("/", listarGasolineras);
   router.use((req, res, next) => {
     if (req.usuario?.rol !== "administrador") {
-      return res.status(403).json({ message: "Solo un administrador puede registrar gasolineras." });
+      return res.status(403).json({ message: "Solo un administrador puede administrar gasolineras." });
     }
     next();
   });
@@ -19,6 +19,10 @@ export function crearGasolinerasRouter(servicio = crearServicioRegistroGasoliner
   router.post("/", async (req, res) => {
     const gasolinera = await servicio.registrar(req.usuario, req.body);
     res.status(201).json({ status: "ok", message: "Gasolinera registrada correctamente.", data: gasolinera });
+  });
+  router.put("/:id", async (req, res) => {
+    const gasolinera = await servicio.editar(req.usuario, req.params.id, req.body);
+    res.json({ status: "ok", message: "Gasolinera modificada correctamente.", data: gasolinera });
   });
   return router;
 }
