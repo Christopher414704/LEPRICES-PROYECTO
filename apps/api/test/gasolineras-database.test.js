@@ -29,6 +29,7 @@ test("HU-11/HU-12/HU-13: registro, edición, estado, historial y API pública en
     "0010_limitar_gestores_a_gasolinera", "0011_registrar_gasolineras_y_auditoria",
     "0012_auditar_edicion_gasolineras",
     "0013_auditar_estado_gasolineras",
+    "0014_administrar_usuarios",
   ]) {
     const migracion = await import(`../../../database/migrations/${archivo}.mjs`);
     const consultas = [];

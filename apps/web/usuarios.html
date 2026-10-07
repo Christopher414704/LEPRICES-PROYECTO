@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#d71920" />
+    <title>Administrar usuarios | LEPRICES</title>
+    <link rel="stylesheet" href="/src/precios-page.css" />
+    <link rel="stylesheet" href="/src/usuarios.css" />
+  </head>
+  <body>
+    <header class="barra">
+      <a class="marca" href="/mapa.html" aria-label="LEPRICES: volver al mapa"><img src="/images/leprices-logo.png" alt="" width="100" height="65" /><span>LEPRICES<small>Precios de combustible</small></span></a>
+      <nav aria-label="Apartados principales"><a class="opcion" href="/precios.html">Precios</a><a class="opcion" href="/mapa.html"><img src="/images/gasolinera.png" alt="" width="40" height="40" />Mapa</a><button id="salir" class="opcion" type="button">Salir</button></nav>
+    </header>
+    <main id="app" hidden>
+      <div class="intro"><p class="sobretitulo">ADMINISTRACIÓN</p><h1>Usuarios</h1><p>Controla las cuentas que pueden acceder al sistema.</p></div>
+      <p id="mensaje" class="mensaje" role="status" aria-live="polite" hidden></p>
+      <section class="tarjeta" aria-labelledby="tituloCrear">
+        <h2 id="tituloCrear">Crear cuenta</h2>
+        <p class="ayuda">La contraseña se protege con Argon2 y el usuario deberá cambiarla según las reglas del sistema.</p>
+        <form id="formUsuario" class="rejilla-form">
+          <label>Nombre completo<input name="nombre" maxlength="150" autocomplete="name" required /></label>
+          <label>Nombre de usuario<input name="usuario" minlength="4" maxlength="100" pattern="[A-Za-z0-9._-]+" autocomplete="off" required /></label>
+          <label>Correo electrónico<input name="correo" type="email" maxlength="254" autocomplete="email" required /></label>
+          <label>Contraseña temporal<input name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required /></label>
+          <label>Rol<select id="rol" name="idRol" required></select></label>
+          <label id="campoGasolinera" hidden>Gasolinera asignada<select id="gasolinera" name="idGasolinera"></select></label>
+          <div class="acciones"><button id="crearUsuario" class="boton-primario" type="submit">Crear usuario</button></div>
+        </form>
+      </section>
+      <section class="tarjeta" aria-labelledby="tituloUsuarios">
+        <p class="sobretitulo">CUENTAS REGISTRADAS</p><h2 id="tituloUsuarios">Usuarios del sistema</h2>
+        <div class="tabla-contenedor"><table><thead><tr><th>Usuario</th><th>Rol</th><th>Gasolinera</th><th>Estado</th><th>Último acceso</th><th>Acción</th></tr></thead><tbody id="listaUsuarios"></tbody></table></div>
+        <p id="sinUsuarios" class="vacio" hidden>No hay usuarios registrados.</p>
+      </section>
+    </main>
+    <section id="espera" class="espera" role="status">Comprobando permisos…</section>
+    <script type="module" src="/src/usuarios-page.js"></script>
+  </body>
+</html>
