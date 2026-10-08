@@ -6,6 +6,10 @@ const nodos = {
   rol: document.querySelector("#rol"), campoGasolinera: document.querySelector("#campoGasolinera"),
   gasolinera: document.querySelector("#gasolinera"), lista: document.querySelector("#listaUsuarios"),
   sinUsuarios: document.querySelector("#sinUsuarios"), boton: document.querySelector("#crearUsuario"),
+  formularioAsignacion: document.querySelector("#formAsignacion"),
+  gestorAsignacion: document.querySelector("#gestorAsignacion"),
+  gasolineraAsignacion: document.querySelector("#gasolineraAsignacion"),
+  botonAsignacion: document.querySelector("#asignarGestor"),
 };
 let datos;
 let administradorActual;
@@ -73,6 +77,19 @@ function render() {
   nodos.sinUsuarios.hidden = Boolean(datos.usuarios.length);
 }
 
+function ajustarGasolinerasAsignacion() {
+  const gestor = datos.usuarios.find((usuario) => usuario.id === nodos.gestorAsignacion.value);
+  const ocupadas = new Set(datos.usuarios
+    .filter((usuario) => usuario.activo && usuario.rol.codigo === "gestor_gasolinera" && usuario.id !== gestor?.id)
+    .map((usuario) => usuario.gasolinera?.id).filter(Boolean));
+  nodos.gasolineraAsignacion.replaceChildren(new Option("Selecciona una gasolinera", ""));
+  for (const estacion of datos.gasolineras.filter((g) => g.activo &&
+    (!ocupadas.has(g.id) || g.id === gestor?.gasolinera?.id))) {
+    nodos.gasolineraAsignacion.append(new Option(estacion.nombre, estacion.id));
+  }
+  nodos.gasolineraAsignacion.value = gestor?.gasolinera?.id ?? "";
+}
+
 async function cambiarEstado(usuario, boton) {
   boton.disabled = true;
   nodos.mensaje.hidden = true;
@@ -98,7 +115,14 @@ async function recargar() {
   for (const estacion of datos.gasolineras.filter((g) => g.activo)) {
     nodos.gasolinera.append(new Option(estacion.nombre, estacion.id));
   }
+  nodos.gestorAsignacion.replaceChildren(new Option("Selecciona un gestor", ""));
+  if (datos.roles.some((rol) => rol.codigo === "gestor_gasolinera")) {
+    for (const usuario of datos.usuarios.filter((u) => u.activo && u.rol.codigo === "gestor_gasolinera")) {
+      nodos.gestorAsignacion.append(new Option(`${usuario.nombre} · ${usuario.gasolinera?.nombre ?? "Sin asignación"}`, usuario.id));
+    }
+  }
   ajustarRol();
+  ajustarGasolinerasAsignacion();
   render();
 }
 
@@ -114,6 +138,26 @@ async function iniciar() {
   nodos.app.hidden = false;
   nodos.espera.hidden = true;
   nodos.rol.addEventListener("change", ajustarRol);
+  nodos.gestorAsignacion.addEventListener("change", ajustarGasolinerasAsignacion);
+  nodos.formularioAsignacion.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    nodos.botonAsignacion.disabled = true;
+    nodos.mensaje.hidden = true;
+    try {
+      const resultado = await solicitar(`/usuarios/${encodeURIComponent(nodos.gestorAsignacion.value)}/gasolinera`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idGasolinera: nodos.gasolineraAsignacion.value }),
+      });
+      await recargar();
+      nodos.gestorAsignacion.value = resultado.data.id;
+      ajustarGasolinerasAsignacion();
+      informar(resultado.message);
+    } catch (error) {
+      informar(mensajeError(error), true);
+    } finally {
+      nodos.botonAsignacion.disabled = false;
+    }
+  });
   nodos.formulario.addEventListener("submit", async (evento) => {
     evento.preventDefault();
     nodos.boton.disabled = true;

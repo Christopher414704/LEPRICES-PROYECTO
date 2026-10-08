@@ -25,5 +25,13 @@ export function crearUsuariosRouter(servicio = crearServicioUsuarios(database)) 
       : (resultado.usuario.activo ? "El usuario ya está activo." : "El usuario ya está inactivo.");
     res.json({ message, data: resultado.usuario, cambiado: resultado.cambiado });
   });
+  router.patch("/:id/gasolinera", async (req, res) => {
+    const resultado = await servicio.asignarGasolinera(req.usuario, req.params.id, req.body);
+    res.json({
+      message: resultado.cambiado ? "Gasolinera asignada correctamente." : "El gestor ya tiene esa gasolinera asignada.",
+      data: resultado.usuario,
+      cambiado: resultado.cambiado,
+    });
+  });
   return router;
 }

@@ -29,6 +29,15 @@
           <div class="acciones"><button id="crearUsuario" class="boton-primario" type="submit">Crear usuario</button></div>
         </form>
       </section>
+      <section class="tarjeta" aria-labelledby="tituloAsignar">
+        <h2 id="tituloAsignar">Asignar gestor a una gasolinera</h2>
+        <p class="ayuda">Cada gestor activo puede administrar una sola estación. Una nueva asignación reemplaza la anterior.</p>
+        <form id="formAsignacion" class="rejilla-form">
+          <label>Gestor<select id="gestorAsignacion" required></select></label>
+          <label>Gasolinera disponible<select id="gasolineraAsignacion" required></select></label>
+          <div class="acciones"><button id="asignarGestor" class="boton-primario" type="submit">Guardar asignación</button></div>
+        </form>
+      </section>
       <section class="tarjeta" aria-labelledby="tituloUsuarios">
         <p class="sobretitulo">CUENTAS REGISTRADAS</p><h2 id="tituloUsuarios">Usuarios del sistema</h2>
         <div class="tabla-contenedor"><table><thead><tr><th>Usuario</th><th>Rol</th><th>Gasolinera</th><th>Estado</th><th>Último acceso</th><th>Acción</th></tr></thead><tbody id="listaUsuarios"></tbody></table></div>

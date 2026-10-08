@@ -179,5 +179,70 @@ export function crearServicioUsuarios(database) {
     }
   }
 
-  return { listar, registrar, cambiarEstado };
+  async function asignarGasolinera(usuarioAutenticado, idGestor, datos) {
+    if (usuarioAutenticado?.rol !== "administrador") {
+      throw errorHttp(403, "Solo un administrador puede asignar gestores.");
+    }
+    const idGasolinera = String(datos?.idGasolinera ?? "");
+    if (!ID.test(String(idGestor ?? "")) || !ID.test(idGasolinera)) {
+      throw errorHttp(400, "Selecciona un gestor y una gasolinera válidos.");
+    }
+
+    const cliente = await database.connect();
+    try {
+      await cliente.query("BEGIN");
+      await administradorActivo(cliente, usuarioAutenticado);
+      const { rows: [gestor] } = await cliente.query(`
+        SELECT u.id,u.nombre_completo,u.nombre_usuario,u.correo_electronico,u.activo,
+          u.id_rol,r.codigo AS codigo_rol,r.nombre AS nombre_rol,u.id_gasolinera,
+          g.nombre AS nombre_gasolinera,u.ultimo_acceso
+        FROM usuarios u JOIN roles r ON r.id=u.id_rol
+        LEFT JOIN gasolineras g ON g.id=u.id_gasolinera
+        WHERE u.id=$1 AND u.activo=TRUE AND r.activo=TRUE AND r.codigo='gestor_gasolinera'
+        FOR UPDATE OF u
+      `, [idGestor]);
+      if (!gestor) throw errorHttp(404, "El gestor no existe o está inactivo.");
+
+      const { rows: [gasolinera] } = await cliente.query(
+        "SELECT id,nombre FROM gasolineras WHERE id=$1 AND activo=TRUE FOR UPDATE", [idGasolinera]);
+      if (!gasolinera) throw errorHttp(404, "La gasolinera no existe o está inactiva.");
+
+      if (String(gestor.id_gasolinera) === idGasolinera) {
+        await cliente.query("COMMIT");
+        return { usuario: publico(gestor), cambiado: false };
+      }
+
+      const { rows: [ocupacion] } = await cliente.query(`
+        SELECT id FROM usuarios WHERE id_gasolinera=$1 AND activo=TRUE AND id<>$2
+        LIMIT 1 FOR UPDATE
+      `, [idGasolinera, idGestor]);
+      if (ocupacion) throw errorHttp(409, "La gasolinera ya tiene un gestor asignado.");
+
+      const { rows: [actualizado] } = await cliente.query(
+        "UPDATE usuarios SET id_gasolinera=$2 WHERE id=$1 RETURNING *", [idGestor, idGasolinera]);
+      const resultado = publico({ ...actualizado, codigo_rol: gestor.codigo_rol,
+        nombre_rol: gestor.nombre_rol, nombre_gasolinera: gasolinera.nombre });
+      await cliente.query(`
+        INSERT INTO auditoria_asignaciones_gestores
+          (id_usuario_gestor,id_administrador,id_gasolinera_anterior,id_gasolinera_nueva,datos)
+        VALUES ($1,$2,$3,$4,$5::jsonb)
+      `, [idGestor, usuarioAutenticado.id, gestor.id_gasolinera, idGasolinera,
+        JSON.stringify({
+          antes: gestor.id_gasolinera == null ? null : {
+            idGasolinera: String(gestor.id_gasolinera), nombreGasolinera: gestor.nombre_gasolinera,
+          },
+          despues: { idGasolinera, nombreGasolinera: gasolinera.nombre },
+        })]);
+      await cliente.query("COMMIT");
+      return { usuario: resultado, cambiado: true };
+    } catch (error) {
+      await cliente.query("ROLLBACK");
+      if (error.code === "23505") throw errorHttp(409, "La gasolinera ya tiene un gestor asignado.");
+      throw error;
+    } finally {
+      cliente.release();
+    }
+  }
+
+  return { listar, registrar, cambiarEstado, asignarGasolinera };
 }
