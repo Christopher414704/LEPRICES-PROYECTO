@@ -8,7 +8,7 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./style.css";
 import { apiAutenticada, urlApi } from "./auth.js";
 import { crearTableroPrecios } from "./tablero-precios.js";
-import { coincideNombreGasolinera, normalizarNombreGasolinera } from "./busqueda-gasolineras.js";
+import { coincideFiltrosGasolinera, normalizarNombreGasolinera } from "./busqueda-gasolineras.js";
 import { consultarCatalogoGasolineras } from "./catalogo-gasolineras.js";
 
 const esPublico = document.body.dataset.modo === "publico";
@@ -225,15 +225,27 @@ const elementosLista = [];
 
 function filtrarGasolineras() {
   let cantidad = 0;
-  for (const { nodo, nombre } of elementosLista) {
-    nodo.hidden = !coincideNombreGasolinera(nombre, buscador.value);
-    if (!nodo.hidden) cantidad++;
+  const filtros = {
+    busqueda: buscador.value,
+    departamento: seleccionDepartamento.value,
+    municipio: seleccionMunicipio.value,
+  };
+  for (const { nodo, entidad, estacion } of elementosLista) {
+    const coincide = coincideFiltrosGasolinera(estacion, filtros);
+    nodo.hidden = !coincide;
+    entidad.show = coincide;
+    if (coincide) cantidad++;
   }
+  if (seleccionada && !seleccionada.show) ocultarTablero();
   contador.textContent = `${cantidad} de ${elementosLista.length} gasolineras`;
   sinResultados.hidden = cantidad > 0;
-  sinResultados.textContent = buscador.value.trim()
-    ? "No encontramos gasolineras con ese nombre. Prueba otra búsqueda."
-    : (esPublico ? "No hay gasolineras activas disponibles en esta región." : "No hay gasolineras activas disponibles.");
+  const hayRegion = filtros.departamento || filtros.municipio;
+  sinResultados.textContent = filtros.busqueda.trim()
+    ? (hayRegion
+      ? "No encontramos gasolineras con ese nombre en la región seleccionada. Prueba otra búsqueda o filtro."
+      : "No encontramos gasolineras con ese nombre. Prueba otra búsqueda.")
+    : (hayRegion ? "No hay gasolineras disponibles para los filtros seleccionados."
+      : "No hay gasolineras activas disponibles.");
 }
 
 function plegarLista(plegada) {
@@ -327,7 +339,7 @@ function agregarEstaciones(publicadas) {
     const nodo = document.createElement("li");
     nodo.append(boton);
     lista.append(nodo);
-    elementosLista.push({ nodo, boton, indicacion, estacion, nombre: estacion.nombre });
+    elementosLista.push({ nodo, boton, indicacion, entidad, estacion });
   }
   for (const entidad of [...estaciones.entities.values]) {
     if (!vigentes.has(entidad.id)) {
@@ -337,6 +349,7 @@ function agregarEstaciones(publicadas) {
       preciosConsultados.delete(entidad.id);
     }
   }
+  if (!esPublico) actualizarRegionesDesdeCatalogo(publicadas);
   filtrarGasolineras();
   estaciones.entities.resumeEvents();
   visor.scene.requestRender();
@@ -364,6 +377,41 @@ let solicitudMapa;
 let temporizadorMapa;
 let consultaActual = null;
 let gasolineraCercana = null;
+
+function actualizarRegionesDesdeCatalogo(gasolineras) {
+  const departamentoAnterior = seleccionDepartamento.value;
+  const municipioAnterior = seleccionMunicipio.value;
+  const agrupadas = new Map();
+  for (const gasolinera of gasolineras) {
+    const { departamento, municipio, ubicacion } = gasolinera;
+    const latitud = Number(ubicacion?.latitud);
+    const longitud = Number(ubicacion?.longitud);
+    if (!departamento || !municipio || !Number.isFinite(latitud) || !Number.isFinite(longitud)) continue;
+    const clave = `${departamento}\u0000${municipio}`;
+    const region = agrupadas.get(clave);
+    if (region) {
+      region.cantidad++;
+      region.limites[0] = Math.min(region.limites[0], longitud);
+      region.limites[1] = Math.min(region.limites[1], latitud);
+      region.limites[2] = Math.max(region.limites[2], longitud);
+      region.limites[3] = Math.max(region.limites[3], latitud);
+    } else agrupadas.set(clave, { departamento, municipio, cantidad: 1,
+      limites: [longitud, latitud, longitud, latitud] });
+  }
+  regiones = [...agrupadas.values()];
+  seleccionDepartamento.replaceChildren(new Option("Todos", ""));
+  for (const departamento of [...new Set(regiones.map((r) => r.departamento))].sort((a, b) => a.localeCompare(b, "es"))) {
+    seleccionDepartamento.append(new Option(departamento, departamento));
+  }
+  if (regiones.some((r) => r.departamento === departamentoAnterior)) {
+    seleccionDepartamento.value = departamentoAnterior;
+  }
+  actualizarMunicipios();
+  if (regiones.some((r) => r.municipio === municipioAnterior &&
+      (!seleccionDepartamento.value || r.departamento === seleccionDepartamento.value))) {
+    seleccionMunicipio.value = municipioAnterior;
+  }
+}
 
 function limitesRegionSeleccionada() {
   const filtradas = regiones.filter((r) => (!seleccionDepartamento?.value || r.departamento === seleccionDepartamento.value) &&
@@ -426,16 +474,18 @@ function actualizarMunicipios() {
   }
 }
 
+seleccionDepartamento.addEventListener("change", () => {
+  actualizarMunicipios();
+  filtrarGasolineras();
+  visor.camera.flyTo({ destination: limitesRegionSeleccionada(), duration: .5 });
+  if (esPublico) cargarPrecios();
+});
+seleccionMunicipio.addEventListener("change", () => {
+  filtrarGasolineras();
+  visor.camera.flyTo({ destination: limitesRegionSeleccionada(), duration: .5 });
+  if (esPublico) cargarPrecios();
+});
 if (esPublico) {
-  seleccionDepartamento.addEventListener("change", () => {
-    actualizarMunicipios();
-    visor.camera.flyTo({ destination: limitesRegionSeleccionada(), duration: .5 });
-    cargarPrecios();
-  });
-  seleccionMunicipio.addEventListener("change", () => {
-    visor.camera.flyTo({ destination: limitesRegionSeleccionada(), duration: .5 });
-    cargarPrecios();
-  });
   visor.camera.moveEnd.addEventListener(() => {
     clearTimeout(temporizadorMapa);
     temporizadorMapa = setTimeout(cargarPrecios, 250);
@@ -466,7 +516,11 @@ async function cargarPrecios({ forzar = false } = {}) {
       urlApi,
     });
     consultaActual = consulta;
-    if (gasolineraCercana && !resultado.data.some((g) => g.codigo === gasolineraCercana.codigo)) {
+    if (gasolineraCercana && coincideFiltrosGasolinera(gasolineraCercana, {
+      busqueda: buscador.value,
+      departamento: seleccionDepartamento.value,
+      municipio: seleccionMunicipio.value,
+    }) && !resultado.data.some((g) => g.codigo === gasolineraCercana.codigo)) {
       resultado.data.push(gasolineraCercana);
     }
     agregarEstaciones(resultado.data);
