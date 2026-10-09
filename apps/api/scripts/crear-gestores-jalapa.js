@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import * as argon2 from "argon2";
 
 import { database } from "../src/config/database.js";
-import { GASOLINERAS_JALAPA } from "../../web/src/gasolineras-jalapa.datos.js";
+import { GASOLINERAS_JALAPA } from "./catalogo-jalapa.datos.js";
 
 function usuarioPara(estacion) {
   return `gestor_${estacion.id.replaceAll("-", "_")}`;

@@ -1,4 +1,5 @@
-// Códigos únicos compartidos con el catálogo de la API. Nunca inferir IDs numéricos.
+// Datos de carga inicial. El frontend nunca importa este archivo: PostgreSQL es
+// la fuente del catálogo que la aplicación consulta mediante la API.
 export const GASOLINERAS_JALAPA = [
   {
     id: "texaco-centro",

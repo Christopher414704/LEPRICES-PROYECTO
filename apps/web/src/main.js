@@ -9,6 +9,7 @@ import "./style.css";
 import { apiAutenticada, urlApi } from "./auth.js";
 import { crearTableroPrecios } from "./tablero-precios.js";
 import { coincideNombreGasolinera, normalizarNombreGasolinera } from "./busqueda-gasolineras.js";
+import { consultarCatalogoGasolineras } from "./catalogo-gasolineras.js";
 
 const esPublico = document.body.dataset.modo === "publico";
 const estado = document.querySelector("#estadoMapa");
@@ -455,16 +456,14 @@ async function cargarPrecios({ forzar = false } = {}) {
     if (esPublico && !forzar && consulta === consultaActual) return;
     solicitudMapa?.abort();
     solicitudMapa = new AbortController();
-    const respuesta = esPublico
-      ? await fetch(`${urlApi}/publico/gasolineras?${consulta}`, {
-        credentials: "omit",
-        cache: forzar ? "no-cache" : "default",
-        signal: solicitudMapa.signal,
-      })
-      : await apiAutenticada("/gasolineras", { signal: solicitudMapa.signal });
-    if (!respuesta.ok) throw new Error(`La API respondió con estado ${respuesta.status}.`);
-    const resultado = await respuesta.json();
-    if (!Array.isArray(resultado.data)) throw new Error("La API no devolvió una lista de gasolineras.");
+    const resultado = await consultarCatalogoGasolineras({
+      publico: esPublico,
+      parametros,
+      forzar,
+      signal: solicitudMapa.signal,
+      api: apiAutenticada,
+      urlApi,
+    });
     consultaActual = consulta;
     agregarEstaciones(resultado.data);
     if (resultado.hayMas) {

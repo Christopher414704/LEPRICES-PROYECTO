@@ -1,5 +1,5 @@
 import { database } from "../src/config/database.js";
-import { GASOLINERAS_JALAPA } from "../../web/src/gasolineras-jalapa.datos.js";
+import { GASOLINERAS_JALAPA } from "./catalogo-jalapa.datos.js";
 
 const codigoMarca = (nombre) => nombre.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
   .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
