@@ -10,7 +10,7 @@ const ejemplo = {
   ubicacion: { latitud: 14.63705, longitud: -89.99001 },
   marca: { id: 1, nombre: "Texaco", colorPrincipal: "#D71920", urlLogo: null },
   combustibles: [{ id: 8, nombreComercial: "Regular", tipo: { id: 2, nombre: "Regular", codigo: "regular" },
-    precios: { autoservicio: { precio: 31.5, moneda: "GTQ", unidadMedida: "galon",
+    precios: { autoservicio: { modalidad: "Autoservicio", precio: 31.5, moneda: "GTQ", unidadMedida: "galon",
       vigenteDesde: "2026-09-22T14:00:00.000Z" } } }],
 };
 
@@ -20,6 +20,7 @@ test("la respuesta pública solo contiene datos de consulta y fecha del último 
   assert.equal(publica.marca.id, undefined);
   assert.equal(publica.combustibles[0].id, undefined);
   assert.equal(publica.combustibles[0].precios.autoservicio.precio, 31.5);
+  assert.equal(publica.combustibles[0].precios.autoservicio.modalidad, "Autoservicio");
   assert.equal(publica.ultimaActualizacion, "2026-09-22T14:00:00.000Z");
   assert.equal(prepararGasolineraPublica({ ...ejemplo, combustibles: [] }).ultimaActualizacion, null);
 });

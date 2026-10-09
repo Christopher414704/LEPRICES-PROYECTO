@@ -35,7 +35,7 @@ export function prepararGasolineraPublica(gasolinera) {
     codigo: combustible.tipo.codigo,
     precios: Object.fromEntries(Object.entries(combustible.precios).map(([modalidad, precio]) => [
       modalidad,
-      { precio: precio.precio, moneda: precio.moneda,
+      { modalidad: precio.modalidad, precio: precio.precio, moneda: precio.moneda,
         unidadMedida: precio.unidadMedida, vigenteDesde: precio.vigenteDesde },
     ])),
   }));

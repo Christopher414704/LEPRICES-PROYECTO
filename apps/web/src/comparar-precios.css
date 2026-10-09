@@ -1,0 +1,23 @@
+.filtros-comparacion { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.filtros-comparacion .busqueda { grid-column: span 2; }
+.resumen-comparacion { margin: 20px 0 10px; color: #596575; font-size: 13px; }
+.tabla-contenedor { overflow-x: auto; border: 1px solid #dce1e8; border-radius: 12px; }
+.tabla-comparacion { width: 100%; border-collapse: collapse; min-width: 760px; font-size: 13px; }
+.tabla-comparacion th { padding: 12px 14px; color: #5d6876; background: #f3f5f8; font-size: 11px; text-align: left; text-transform: uppercase; letter-spacing: .05em; }
+.tabla-comparacion td { padding: 15px 14px; border-top: 1px solid #e5e8ed; vertical-align: middle; }
+.tabla-comparacion strong { display: block; color: #26313e; }
+.resultado-mejor { background: #edf8f1; }
+.insignia-mejor { display: inline-block; margin-top: 6px; padding: 3px 7px; border-radius: 999px; color: #17653e; background: #d9f0e2; font-size: 10px; font-weight: 800; }
+.valor-precio { color: #b5141e; font-size: 18px; font-weight: 850; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.valor-precio small { display: block; margin-top: 2px; color: #6f7885; font-size: 10px; font-weight: 500; }
+.enlace-mapa { display: inline-block; padding: 8px 10px; border: 1px solid #e1b8bb; border-radius: 8px; color: #a9141e; background: #fff; font-size: 11px; font-weight: 750; text-decoration: none; white-space: nowrap; }
+.enlace-mapa:hover { background: #fff0f1; }
+.acciones-carga { display: flex; align-items: center; gap: 10px; }
+@media (max-width: 800px) {
+  .filtros-comparacion { grid-template-columns: 1fr 1fr; }
+  .filtros-comparacion .busqueda { grid-column: 1 / -1; }
+}
+@media (max-width: 520px) {
+  .filtros-comparacion { grid-template-columns: 1fr; }
+  .filtros-comparacion .busqueda { grid-column: auto; }
+}
