@@ -363,6 +363,7 @@ let regiones = [];
 let solicitudMapa;
 let temporizadorMapa;
 let consultaActual = null;
+let gasolineraCercana = null;
 
 function limitesRegionSeleccionada() {
   const filtradas = regiones.filter((r) => (!seleccionDepartamento?.value || r.departamento === seleccionDepartamento.value) &&
@@ -465,6 +466,9 @@ async function cargarPrecios({ forzar = false } = {}) {
       urlApi,
     });
     consultaActual = consulta;
+    if (gasolineraCercana && !resultado.data.some((g) => g.codigo === gasolineraCercana.codigo)) {
+      resultado.data.push(gasolineraCercana);
+    }
     agregarEstaciones(resultado.data);
     if (resultado.hayMas) {
       estado.textContent = "Hay más estaciones en esta región. Acerca el mapa o elige un municipio para verlas todas.";
@@ -478,6 +482,67 @@ async function cargarPrecios({ forzar = false } = {}) {
     estado.classList.add("estado--error");
   }
 }
+
+
+// La ubicación se solicita exclusivamente después de pulsar el botón.
+const botonUbicacion = document.querySelector("#miUbicacion");
+let puntoUsuario = null;
+botonUbicacion?.addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    estado.textContent = "Tu navegador no permite consultar la ubicación. Puedes seguir buscando por nombre.";
+    return;
+  }
+  botonUbicacion.disabled = true;
+  estado.textContent = "Esperando autorización para consultar tu ubicación…";
+  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+    try {
+      estado.textContent = "Buscando la gasolinera más cercana…";
+      const parametros = new URLSearchParams({ latitud: coords.latitude, longitud: coords.longitude });
+      const respuesta = await fetch(`${urlApi}/publico/gasolineras/cercana?${parametros}`, {
+        credentials: "omit", cache: "no-store", signal: AbortSignal.timeout(15000),
+      });
+      if (!respuesta.ok) throw new Error("No fue posible consultar la estación más cercana.");
+      const resultado = await respuesta.json();
+      gasolineraCercana = resultado.data;
+      if (!gasolineraCercana) {
+        estado.textContent = resultado.message;
+        return;
+      }
+      buscador.value = "";
+      if (seleccionDepartamento) seleccionDepartamento.value = "";
+      actualizarMunicipios();
+      if (seleccionMunicipio) seleccionMunicipio.value = "";
+      agregarEstaciones([...fichas.values()].filter((g) => g.codigo !== gasolineraCercana.codigo).concat(gasolineraCercana));
+      const entidad = estaciones.entities.getById(`gasolinera-${gasolineraCercana.codigo}`);
+      if (puntoUsuario) visor.entities.remove(puntoUsuario);
+      puntoUsuario = visor.entities.add({
+        name: "Mi ubicación", position: Cartesian3.fromDegrees(coords.longitude, coords.latitude),
+        point: { pixelSize: 15, color: Color.fromCssColorString("#1684e8"),
+          outlineColor: Color.WHITE, outlineWidth: 4, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+      });
+      const distancia = gasolineraCercana.distanciaKm;
+      const textoDistancia = distancia < 1 ? Math.round(distancia * 1000) + " m" : distancia.toFixed(1) + " km";
+      estado.classList.remove("estado--error");
+      estado.classList.add("estado--informacion");
+      estado.textContent = gasolineraCercana.nombre + " es la gasolinera más cercana: " + textoDistancia + " en línea recta.";
+      const elemento = elementosLista.find((e) => e.estacion.codigo === gasolineraCercana.codigo);
+      elemento.indicacion.textContent = "Más cercana · " + textoDistancia + " en línea recta";
+      lista.prepend(elemento.nodo);
+      mostrarTablero(entidad, true);
+      visor.flyTo([puntoUsuario, entidad], { duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : .6 });
+      visor.scene.requestRender();
+    } catch (error) {
+      estado.textContent = "No fue posible encontrar la gasolinera más cercana. Puedes seguir usando el mapa e intentar nuevamente.";
+      estado.classList.add("estado--error");
+      console.error(error);
+    } finally { botonUbicacion.disabled = false; }
+  }, (error) => {
+    botonUbicacion.disabled = false;
+    estado.textContent = error.code === 1
+      ? "No autorizaste tu ubicación. Puedes seguir usando el mapa y buscar por nombre."
+      : "No pudimos obtener tu ubicación. Puedes seguir usando el mapa e intentar nuevamente.";
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+});
 
 await Promise.allSettled([cargarMapaSatelital(), (async () => {
   if (esPublico) await cargarRegiones({ inicial: true });

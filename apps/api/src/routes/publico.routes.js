@@ -1,3 +1,4 @@
+import { leerCoordenadas, encontrarGasolineraCercana } from "../services/gasolinera-cercana.service.js";
 import { Router } from "express";
 import { listarGasolinerasConPrecios } from "../services/gasolineras.service.js";
 import { database } from "../config/database.js";
@@ -65,6 +66,15 @@ export function crearPublicoRouter(listar = listarGasolinerasConPrecios, db = da
     const gasolineras = await listar({ soloVisibles: true, ...filtros, limite });
     res.json({ data: gasolineras.slice(0, 300).map(prepararGasolineraPublica),
       total: Math.min(gasolineras.length, 300), hayMas: gasolineras.length > 300 });
+  });
+  router.get("/gasolineras/cercana", async (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const ubicacion = leerCoordenadas(req.query);
+    const cercana = await encontrarGasolineraCercana(ubicacion, db);
+    if (!cercana) return res.json({ data: null, message: "No existen gasolineras disponibles registradas." });
+    const [gasolinera] = await listar({ soloVisibles: true, codigo: cercana.codigo, limite: 1 });
+    res.json({ data: gasolinera ? { ...prepararGasolineraPublica(gasolinera), distanciaKm: Number(cercana.distancia_km) } : null,
+      message: gasolinera ? undefined : "La gasolinera ya no está disponible. Intenta nuevamente." });
   });
   router.get("/gasolineras/:codigo/precios", async (req, res) => {
     const { codigo } = leerFiltrosPublicos({ codigo: req.params.codigo });
