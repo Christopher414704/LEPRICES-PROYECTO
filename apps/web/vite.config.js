@@ -34,6 +34,7 @@ export default defineConfig({
         historialPrecios: path.resolve(directorioActual, "historial-precios.html"),
         compararPrecios: path.resolve(directorioActual, "comparar-precios.html"),
         usuarios: path.resolve(directorioActual, "usuarios.html"),
+        auditoria: path.resolve(directorioActual, "auditoria.html"),
         gasolineras: path.resolve(directorioActual, "gasolineras.html"),
         editarGasolinera: path.resolve(directorioActual, "editar-gasolinera.html"),
         publico: path.resolve(directorioActual, "publico.html"),

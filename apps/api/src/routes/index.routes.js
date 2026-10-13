@@ -9,6 +9,7 @@ import { crearPublicoRouter } from "./publico.routes.js";
 import { gasolinerasRouter } from "./gasolineras.routes.js";
 import { crearPreciosRouter } from "./precios.routes.js";
 import { crearUsuariosRouter } from "./usuarios.routes.js";
+import { crearAuditoriaRouter } from "./auditoria.routes.js";
 
 export function crearApiRouter(auth = crearServicioAuth(database)) {
   const router = Router();
@@ -25,6 +26,7 @@ export function crearApiRouter(auth = crearServicioAuth(database)) {
   router.use("/gasolineras", gasolinerasRouter);
   router.use("/precios", crearPreciosRouter());
   router.use("/usuarios", crearUsuariosRouter());
+  router.use("/auditoria", crearAuditoriaRouter());
 
   return router;
 }
