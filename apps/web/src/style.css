@@ -202,6 +202,37 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   outline: 3px solid #fff;
   outline-offset: 2px;
 }
+.detalle-ubicacion {
+  margin-bottom: 9px;
+  padding: 10px 12px;
+  border: 1px solid #c3cad4;
+  border-radius: 10px;
+  background: #fff;
+}
+.detalle-ubicacion h3 { margin: 0 0 5px; font-size: 12px; }
+.detalle-ubicacion p { margin: 4px 0; font-size: 11px; line-height: 1.4; }
+.detalle-ubicacion .coordenadas-gasolinera { color: #677281; font-variant-numeric: tabular-nums; }
+.acciones-ubicacion { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.enlace-navegacion, .boton-distancia {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid #bd1721;
+  border-radius: 7px;
+  color: #fff;
+  background: #bd1721;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+}
+.boton-distancia { color: #bd1721; background: #fff; }
+.enlace-navegacion:hover, .boton-distancia:hover { filter: brightness(.93); }
+.enlace-navegacion:focus-visible, .boton-distancia:focus-visible { outline: 2px solid #28313f; outline-offset: 2px; }
+.boton-distancia:disabled { opacity: .65; cursor: wait; }
+.detalle-ubicacion .distancia-gasolinera { margin-top: 8px; font-weight: 700; }
 .contenido-tablero {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

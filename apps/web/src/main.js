@@ -77,7 +77,28 @@ estaciones.clustering.clusterEvent.addEventListener((entidades, grupo) => {
 let seleccionada = null;
 let fijada = false;
 let cierrePendiente;
-const tablero = crearTableroPrecios(panel, ocultarTablero);
+let ubicacionUsuario = null;
+
+function solicitarUbicacionUsuario() {
+  if (!navigator.geolocation) {
+    return Promise.reject(new Error("Tu navegador no permite consultar la ubicación."));
+  }
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(({ coords }) => {
+      ubicacionUsuario = { latitud: coords.latitude, longitud: coords.longitude };
+      resolve(ubicacionUsuario);
+    }, (error) => {
+      reject(new Error(error.code === 1
+        ? "No autorizaste tu ubicación. Puedes seguir consultando la gasolinera."
+        : "No pudimos obtener tu ubicación. Intenta nuevamente."));
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+  });
+}
+
+const tablero = crearTableroPrecios(panel, ocultarTablero, {
+  ubicacionActual: () => ubicacionUsuario,
+  solicitarUbicacion: solicitarUbicacionUsuario,
+});
 
 function ocultarTablero() {
   clearTimeout(cierrePendiente);
@@ -549,6 +570,8 @@ botonUbicacion?.addEventListener("click", () => {
   botonUbicacion.disabled = true;
   estado.textContent = "Esperando autorización para consultar tu ubicación…";
   navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+    ubicacionUsuario = { latitud: coords.latitude, longitud: coords.longitude };
+    tablero.actualizarDistancia();
     try {
       estado.textContent = "Buscando la gasolinera más cercana…";
       const parametros = new URLSearchParams({ latitud: coords.latitude, longitud: coords.longitude });

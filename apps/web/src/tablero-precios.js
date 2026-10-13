@@ -1,4 +1,5 @@
 import { calcularPosicionTarjeta, formatearPrecio } from "./precios.js";
+import { distanciaEnLineaRecta, enlaceNavegacion, formatearDistancia } from "./ubicacion-gasolinera.js";
 
 function elemento(etiqueta, clase, texto) {
   const nodo = document.createElement(etiqueta);
@@ -27,8 +28,69 @@ function crearColumna(titulo, modalidad, combustibles) {
   return columna;
 }
 
-export function crearTableroPrecios(panel, alCerrar) {
+export function crearTableroPrecios(panel, alCerrar, { ubicacionActual = () => null, solicitarUbicacion } = {}) {
   let fichaActual;
+  let distanciaVisible;
+  let botonDistancia;
+
+  function actualizarDistancia() {
+    if (!fichaActual || !distanciaVisible) return;
+    const distancia = distanciaEnLineaRecta(ubicacionActual(), fichaActual.ubicacion);
+    distanciaVisible.hidden = distancia == null;
+    if (botonDistancia) botonDistancia.hidden = distancia != null;
+    if (distancia != null) {
+      distanciaVisible.textContent = `A ${formatearDistancia(distancia)} en línea recta de tu ubicación.`;
+    }
+  }
+
+  function crearDetalleUbicacion(ficha) {
+    const detalle = elemento("section", "detalle-ubicacion");
+    detalle.append(elemento("h3", "", "Ubicación"));
+    const direccion = [ficha.direccion, ficha.municipio, ficha.departamento].filter(Boolean).join(", ");
+    detalle.append(elemento("p", "direccion-gasolinera", direccion || "Ubicación señalada en el mapa"));
+    const enlace = enlaceNavegacion(ficha.ubicacion);
+    if (enlace) {
+      detalle.append(elemento("p", "coordenadas-gasolinera",
+        `${Number(ficha.ubicacion.latitud).toFixed(5)}, ${Number(ficha.ubicacion.longitud).toFixed(5)}`));
+    }
+
+    const acciones = elemento("div", "acciones-ubicacion");
+    if (enlace) {
+      const navegar = elemento("a", "enlace-navegacion", "Cómo llegar");
+      navegar.href = enlace;
+      navegar.target = "_blank";
+      navegar.rel = "noopener noreferrer";
+      navegar.setAttribute("aria-label", `Abrir indicaciones hacia ${ficha.nombre} en Google Maps`);
+      acciones.append(navegar);
+    }
+    const mensajeDistancia = elemento("p", "distancia-gasolinera");
+    mensajeDistancia.setAttribute("role", "status");
+    mensajeDistancia.hidden = true;
+    distanciaVisible = mensajeDistancia;
+    if (solicitarUbicacion && enlace) {
+      const boton = elemento("button", "boton-distancia", "Calcular distancia");
+      boton.type = "button";
+      boton.addEventListener("click", async () => {
+        boton.disabled = true;
+        mensajeDistancia.hidden = false;
+        mensajeDistancia.textContent = "Consultando tu ubicación…";
+        try {
+          await solicitarUbicacion();
+          if (fichaActual?.codigo === ficha.codigo) actualizarDistancia();
+        } catch (error) {
+          if (fichaActual?.codigo === ficha.codigo) {
+            mensajeDistancia.textContent = error.message || "No fue posible consultar tu ubicación.";
+          }
+        } finally {
+          boton.disabled = false;
+        }
+      });
+      botonDistancia = boton;
+      acciones.append(boton);
+    } else botonDistancia = null;
+    detalle.append(acciones, mensajeDistancia);
+    return detalle;
+  }
 
   function mostrar(ficha, posicion) {
     if (fichaActual !== ficha || panel.hidden) {
@@ -55,7 +117,7 @@ export function crearTableroPrecios(panel, alCerrar) {
       const pie = elemento("p", "pie-tablero", unidades.length
         ? `Precio por ${unidades.map((u) => u === "galon" ? "galón" : u).join(" / ")}`
         : "Precios pendientes de actualización");
-      panel.replaceChildren(encabezado, contenido, pie);
+      panel.replaceChildren(encabezado, crearDetalleUbicacion(ficha), contenido, pie);
       if (ficha.ultimaActualizacion) {
         const fecha = new Date(ficha.ultimaActualizacion);
         if (!Number.isNaN(fecha.getTime())) {
@@ -77,6 +139,7 @@ export function crearTableroPrecios(panel, alCerrar) {
         ], { duration: 210, easing: "cubic-bezier(.2,.8,.2,1)" });
       }
     }
+    actualizarDistancia();
     posicionar(posicion);
   }
 
@@ -97,5 +160,5 @@ export function crearTableroPrecios(panel, alCerrar) {
     fichaActual = null;
   }
 
-  return { mostrar, posicionar, ocultar };
+  return { mostrar, posicionar, ocultar, actualizarDistancia };
 }

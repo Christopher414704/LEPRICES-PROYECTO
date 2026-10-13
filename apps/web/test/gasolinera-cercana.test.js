@@ -36,7 +36,7 @@ test("navegador sin geolocalización y timeout dejan el botón disponible", () =
 });
 
 test("ubicación autorizada consulta la API, muestra la estación y encuadra ambos puntos", async () => {
-  let click, success, consultas = 0, seleccion, vuelo, datos;
+  let click, success, consultas = 0, actualizacionesDistancia = 0, seleccion, vuelo, datos;
   const boton = { addEventListener: (_e, callback) => { click = callback; } };
   const estacion = { codigo: "cerca", nombre: "Estación cercana", distanciaKm: 0.125 };
   const elemento = { estacion, indicacion: {}, nodo: {} };
@@ -47,6 +47,7 @@ test("ubicación autorizada consulta la API, muestra la estación y encuadra amb
     navigator: { geolocation: { getCurrentPosition: (ok) => { success = ok; } } },
     estado, urlApi: "/api", URLSearchParams, AbortSignal,
     fetch: async (url) => { consultas++; assert.match(url, /latitud=14&longitud=-90/); return { ok: true, json: async () => ({ data: estacion }) }; },
+    ubicacionUsuario: null, tablero: { actualizarDistancia() { actualizacionesDistancia++; } },
     gasolineraCercana: null, buscador: { value: "otra" }, seleccionDepartamento: null, seleccionMunicipio: null,
     actualizarMunicipios() {}, fichas: new Map(), agregarEstaciones: (value) => { datos = value; },
     estaciones: { entities: { getById: () => entidad } },
@@ -60,6 +61,8 @@ test("ubicación autorizada consulta la API, muestra la estación y encuadra amb
   click();
   await success({ coords: { latitude: 14, longitude: -90 } });
   assert.equal(consultas, 1);
+  assert.equal(context.ubicacionUsuario.latitud, 14);
+  assert.equal(actualizacionesDistancia, 1);
   assert.equal(datos[0], estacion);
   assert.equal(seleccion, entidad);
   assert.equal(vuelo[1], entidad);
