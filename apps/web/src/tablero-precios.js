@@ -1,3 +1,4 @@
+import { urlGoogleMaps } from "./publico.js";
 import { calcularPosicionTarjeta, formatearPrecio } from "./precios.js";
 import { distanciaEnLineaRecta, enlaceNavegacion, formatearDistancia } from "./ubicacion-gasolinera.js";
 
@@ -127,6 +128,12 @@ export function crearTableroPrecios(panel, alCerrar, { ubicacionActual = () => n
           });
           panel.append(elemento("p", "fecha-tablero", `Último precio reportado: ${formato.format(fecha)} · Guatemala`));
         }
+      }
+      const urlRuta = urlGoogleMaps(ficha.ubicacion);
+      if (urlRuta) {
+        const enlace = elemento("a", "pie-tablero", "Abrir ruta en Google Maps");
+        enlace.href = urlRuta; enlace.target = "_blank"; enlace.rel = "noopener noreferrer";
+        panel.append(enlace);
       }
       panel.hidden = false;
       // Solo anima al entrar o cambiar de estación, nunca en cada movimiento del ratón.

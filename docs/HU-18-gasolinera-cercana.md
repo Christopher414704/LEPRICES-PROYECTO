@@ -13,3 +13,5 @@ La distancia corresponde a línea recta, no a un recorrido por carretera. La geo
 Las coordenadas no se guardan y la respuesta de proximidad usa Cache-Control: no-store.
 
 Validación: pruebas de coordenadas, consulta parametrizada, endpoint HTTP, ausencia de estaciones, autorización denegada, navegador sin soporte y timeout; además de las pruebas existentes y compilación web.
+
+Estado: Implementada. Tras autorizar la ubicación, las estaciones cargadas se ordenan por distancia en metros o kilómetros, incluso al actualizar el catálogo. Cada tarjeta permite abrir una ruta en Google Maps.

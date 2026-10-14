@@ -47,8 +47,9 @@ test("ubicación autorizada consulta la API, muestra la estación y encuadra amb
     navigator: { geolocation: { getCurrentPosition: (ok) => { success = ok; } } },
     estado, urlApi: "/api", URLSearchParams, AbortSignal,
     fetch: async (url) => { consultas++; assert.match(url, /latitud=14&longitud=-90/); return { ok: true, json: async () => ({ data: estacion }) }; },
-    ubicacionUsuario: null, tablero: { actualizarDistancia() { actualizacionesDistancia++; } },
+    ordenarPorDistancia() {}, ubicacionUsuario: null, tablero: { actualizarDistancia() { actualizacionesDistancia++; } },
     gasolineraCercana: null, buscador: { value: "otra" }, seleccionDepartamento: null, seleccionMunicipio: null,
+
     actualizarMunicipios() {}, fichas: new Map(), agregarEstaciones: (value) => { datos = value; },
     estaciones: { entities: { getById: () => entidad } },
     visor: { entities: { add: (value) => value }, flyTo: (value) => { vuelo = value; }, scene: { requestRender() {} } },
@@ -74,3 +75,4 @@ test("ubicación autorizada consulta la API, muestra la estación y encuadra amb
   assert.match(estado.textContent, /No existen/);
   assert.equal(boton.disabled, false);
 });
+

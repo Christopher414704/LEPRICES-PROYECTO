@@ -1,3 +1,4 @@
+import { distanciaKm } from "./publico.js";
 import {
   ArcGisMapServerImageryProvider, Cartesian2, Cartesian3, Color,
   CustomDataSource, DistanceDisplayCondition, HeadingPitchRange, ImageryLayer, LabelStyle,
@@ -371,6 +372,8 @@ function agregarEstaciones(publicadas) {
     }
   }
   if (!esPublico) actualizarRegionesDesdeCatalogo(publicadas);
+  ordenarPorDistancia();
+
   filtrarGasolineras();
   estaciones.entities.resumeEvents();
   visor.scene.requestRender();
@@ -559,6 +562,15 @@ async function cargarPrecios({ forzar = false } = {}) {
 }
 
 
+function ordenarPorDistancia() {
+  if (!ubicacionUsuario) return;
+  elementosLista.sort((a, b) => distanciaKm(ubicacionUsuario, a.estacion.ubicacion) - distanciaKm(ubicacionUsuario, b.estacion.ubicacion));
+  for (const elemento of elementosLista) {
+    const distancia = distanciaKm(ubicacionUsuario, elemento.estacion.ubicacion);
+    elemento.indicacion.textContent = (distancia < 1 ? Math.round(distancia * 1000) + " m" : distancia.toFixed(1) + " km") + " en línea recta · Ver precios y ruta";
+    lista.append(elemento.nodo);
+  }
+}
 // La ubicación se solicita exclusivamente después de pulsar el botón.
 const botonUbicacion = document.querySelector("#miUbicacion");
 let puntoUsuario = null;
@@ -585,6 +597,7 @@ botonUbicacion?.addEventListener("click", () => {
         estado.textContent = resultado.message;
         return;
       }
+      ubicacionUsuario = { latitud: coords.latitude, longitud: coords.longitude };
       buscador.value = "";
       if (seleccionDepartamento) seleccionDepartamento.value = "";
       actualizarMunicipios();
@@ -605,6 +618,7 @@ botonUbicacion?.addEventListener("click", () => {
       const elemento = elementosLista.find((e) => e.estacion.codigo === gasolineraCercana.codigo);
       elemento.indicacion.textContent = "Más cercana · " + textoDistancia + " en línea recta";
       lista.prepend(elemento.nodo);
+      ordenarPorDistancia();
       mostrarTablero(entidad, true);
       visor.flyTo([puntoUsuario, entidad], { duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : .6 });
       visor.scene.requestRender();
@@ -667,3 +681,4 @@ async function actualizarCatalogo() {
 }
 setInterval(actualizarCatalogo, 30000);
 window.addEventListener("focus", actualizarCatalogo);
+
