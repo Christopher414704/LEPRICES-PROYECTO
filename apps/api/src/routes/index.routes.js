@@ -1,3 +1,4 @@
+import { crearMiAutomovilRouter } from './mi-automovil.routes.js';
 import { Router } from "express";
 
 import { database } from "../config/database.js";
@@ -23,6 +24,8 @@ export function crearApiRouter(auth = crearServicioAuth(database)) {
     if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
     return seguridad.validarOrigen(req, res, next);
   });
+  router.use('/mi-automovil', crearMiAutomovilRouter());
+  router.use((req,res,next)=>req.usuario.rol==='conductor' ? res.status(403).json({message:'Esta opción requiere una cuenta del personal de gasolineras.'}) : next());
   router.use("/gasolineras", gasolinerasRouter);
   router.use("/precios", crearPreciosRouter());
   router.use("/usuarios", crearUsuariosRouter());

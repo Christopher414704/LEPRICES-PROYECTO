@@ -28,6 +28,7 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         inicio: path.resolve(directorioActual, "index.html"),
+        miAutomovil: path.resolve(directorioActual, "mi-automovil.html"),
         login: path.resolve(directorioActual, "login.html"),
         mapa: path.resolve(directorioActual, "mapa.html"),
         precios: path.resolve(directorioActual, "precios.html"),

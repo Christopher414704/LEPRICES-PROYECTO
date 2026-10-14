@@ -7,8 +7,8 @@ const mostrar = document.querySelector("#mostrarPassword");
 const ingresar = document.querySelector("#botonIngresar");
 const mensaje = document.querySelector("#mensajeLogin");
 
-function entrarAlMapa() {
-  window.location.replace(`${import.meta.env.BASE_URL}mapa.html`);
+function entrarAlMapa(sesion) {
+  window.location.replace(`${import.meta.env.BASE_URL}${sesion?.rol === "conductor" ? "mi-automovil.html" : "mapa.html"}`);
 }
 
 mostrar.addEventListener("click", () => {
@@ -29,12 +29,12 @@ formulario.addEventListener("submit", async (evento) => {
   mensaje.hidden = true;
 
   try {
-    await enviarFormulario("/auth/login", {
+    const resultado = await enviarFormulario("/auth/login", {
       usuario: usuario.value.trim(),
       password: password.value,
     });
     password.value = "";
-    entrarAlMapa();
+    entrarAlMapa(resultado.usuario);
   } catch (error) {
     mensaje.textContent = mensajeError(error);
     mensaje.hidden = false;
@@ -48,7 +48,7 @@ formulario.addEventListener("submit", async (evento) => {
 ingresar.disabled = true;
 consultarSesion()
   .then((sesion) => {
-    if (sesion) entrarAlMapa();
+    if (sesion) entrarAlMapa(sesion);
   })
   .catch((error) => {
     mensaje.textContent = mensajeError(error);
