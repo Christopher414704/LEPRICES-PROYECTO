@@ -31,6 +31,7 @@ export const env = {
   frontendUrl:
     process.env.FRONTEND_URL ?? "http://localhost:5173",
 
+  push: { publicKey: process.env.PUSH_VAPID_PUBLIC_KEY ?? "", privateKey: process.env.PUSH_VAPID_PRIVATE_KEY ?? "", subject: process.env.PUSH_VAPID_SUBJECT ?? "mailto:admin@leprices.gt" },
   database: {
     host: process.env.DB_HOST ?? "127.0.0.1",
 

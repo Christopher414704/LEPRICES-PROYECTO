@@ -1,3 +1,4 @@
+import { configurarRutasAlertas } from "../services/alertas.service.js";
 import { crearMiAutomovilRouter } from './mi-automovil.routes.js';
 import { Router } from "express";
 
@@ -24,6 +25,9 @@ export function crearApiRouter(auth = crearServicioAuth(database)) {
     if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
     return seguridad.validarOrigen(req, res, next);
   });
+  const alertas = Router();
+  configurarRutasAlertas(alertas, database);
+  router.use("/avisos", alertas);
   router.use('/mi-automovil', crearMiAutomovilRouter());
   router.use((req,res,next)=>req.usuario.rol==='conductor' ? res.status(403).json({message:'Esta opción requiere una cuenta del personal de gasolineras.'}) : next());
   router.use("/gasolineras", gasolinerasRouter);
@@ -35,3 +39,4 @@ export function crearApiRouter(auth = crearServicioAuth(database)) {
 }
 
 export const apiRouter = crearApiRouter();
+
