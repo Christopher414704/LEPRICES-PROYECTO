@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#d71920" />
+    <title>Crear cuenta de conductor | LEPRICES</title>
+    <link rel="stylesheet" href="/src/login.css" />
+    <link rel="stylesheet" href="/src/registro.css" />
+  </head>
+  <body>
+    <header class="barra-marca">
+      <a class="marca" href="/publico.html"><img src="/images/leprices-logo.png" alt="" width="86" height="62" /><span>LEPRICES<small>Precios de combustible</small></span></a>
+      <span class="ubicacion">Jalapa, Guatemala</span>
+    </header>
+    <main class="registro-publico">
+      <p class="bienvenida">CUENTA PERSONAL</p>
+      <h1>Regístrate como conductor</h1>
+      <p class="descripcion">Crea una cuenta para guardar tus vehículos y acceder a las funciones para conductores.</p>
+      <p class="nota-seguridad">Este registro asigna únicamente el rol Conductor. Los permisos administrativos solo pueden otorgarse desde el área protegida del sistema.</p>
+      <form id="formularioRegistro" class="rejilla-registro">
+        <div class="campo campo-ancho"><label for="nombre">Nombre completo</label><input id="nombre" name="nombre" maxlength="150" autocomplete="name" required /></div>
+        <div class="campo"><label for="usuario">Nombre de usuario</label><input id="usuario" name="usuario" minlength="4" maxlength="100" pattern="[A-Za-z0-9._-]+" autocomplete="username" autocapitalize="none" required /></div>
+        <div class="campo"><label for="correo">Correo electrónico</label><input id="correo" name="correo" type="email" maxlength="254" autocomplete="email" required /></div>
+        <div class="campo"><label for="password">Contraseña</label><input id="password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required /></div>
+        <div class="campo"><label for="confirmarPassword">Confirmar contraseña</label><input id="confirmarPassword" name="confirmarPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required /></div>
+        <button id="botonRegistrar" class="boton-ingresar" type="submit">Crear cuenta de conductor</button>
+        <p id="mensajeRegistro" class="mensaje" role="status" aria-live="polite" hidden></p>
+        <p class="acciones-registro"><a id="enlaceLogin" class="enlace-publico" href="/login.html">Ya tengo cuenta · Iniciar sesión</a><a class="enlace-publico" href="/publico.html">Volver al mapa público</a></p>
+      </form>
+    </main>
+    <script type="module" src="/src/registro-page.js"></script>
+  </body>
+</html>

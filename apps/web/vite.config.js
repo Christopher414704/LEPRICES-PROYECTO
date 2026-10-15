@@ -30,6 +30,7 @@ export default defineConfig({
         inicio: path.resolve(directorioActual, "index.html"),
         miAutomovil: path.resolve(directorioActual, "mi-automovil.html"),
         login: path.resolve(directorioActual, "login.html"),
+        registro: path.resolve(directorioActual, "registro.html"),
         mapa: path.resolve(directorioActual, "mapa.html"),
         precios: path.resolve(directorioActual, "precios.html"),
         historialPrecios: path.resolve(directorioActual, "historial-precios.html"),

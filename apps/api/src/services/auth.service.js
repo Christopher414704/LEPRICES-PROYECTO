@@ -5,10 +5,44 @@ export const DURACION_SESION_MS = 8 * 60 * 60 * 1000;
 
 const tokenValido = (token) => typeof token === "string" && /^[a-f0-9]{64}$/.test(token);
 const resumenToken = (token) => createHash("sha256").update(token).digest("hex");
+const USUARIO = /^[\p{L}\p{N}._-]{4,100}$/u;
+const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 let hashFicticio;
 
 function errorHttp(statusCode, message) {
   return Object.assign(new Error(message), { statusCode });
+}
+
+function textoRegistro(valor, campo, maximo) {
+  if (typeof valor !== "string") throw errorHttp(400, `Ingresa ${campo}.`);
+  const limpio = valor.trim().replace(/\s+/g, " ");
+  if (!limpio || limpio.length > maximo || /[\u0000-\u001f\u007f]/.test(limpio)) {
+    throw errorHttp(400, `Ingresa ${campo} válido.`);
+  }
+  return limpio;
+}
+
+export function validarRegistroConductor(datos) {
+  for (const campo of ["rol", "idRol", "idGasolinera", "activo", "permisos"]) {
+    if (Object.hasOwn(datos ?? {}, campo)) {
+      throw errorHttp(400, "El registro público no permite seleccionar roles ni permisos.");
+    }
+  }
+  const nombre = textoRegistro(datos?.nombre, "el nombre completo", 150);
+  const usuario = textoRegistro(datos?.usuario, "el nombre de usuario", 100);
+  const correo = textoRegistro(datos?.correo, "el correo electrónico", 254).toLocaleLowerCase("es");
+  const password = datos?.password;
+  if (!USUARIO.test(usuario)) {
+    throw errorHttp(400, "El usuario debe tener entre 4 y 100 letras, números, puntos, guiones o guiones bajos.");
+  }
+  if (!CORREO.test(correo)) throw errorHttp(400, "Ingresa un correo electrónico válido.");
+  if (typeof password !== "string" || password.length < 12 || password.length > 128) {
+    throw errorHttp(400, "La contraseña debe tener entre 12 y 128 caracteres.");
+  }
+  if (datos?.confirmarPassword !== password) {
+    throw errorHttp(400, "Las contraseñas no coinciden.");
+  }
+  return { nombre, usuario, correo, password };
 }
 
 function usuarioPublico(fila) {
@@ -121,5 +155,37 @@ export function crearServicioAuth(database) {
     );
   }
 
-  return { iniciarSesion, obtenerSesion, cerrarSesion };
+  async function registrarConductor(datos) {
+    const nuevo = validarRegistroConductor(datos);
+    const hash = await argon2.hash(nuevo.password, { type: argon2.argon2id });
+    const cliente = await database.connect();
+    try {
+      await cliente.query("BEGIN");
+      const { rows: [rol] } = await cliente.query(`
+        SELECT id FROM roles
+        WHERE codigo = 'conductor' AND activo = TRUE
+        FOR SHARE
+      `);
+      if (!rol) throw errorHttp(503, "El registro de conductores no está disponible temporalmente.");
+      const { rows: [fila] } = await cliente.query(`
+        INSERT INTO usuarios
+          (id_rol, id_gasolinera, nombre_completo, nombre_usuario,
+            correo_electronico, contrasena_hash, debe_cambiar_contrasena)
+        VALUES ($1, NULL, $2, $3, $4, $5, FALSE)
+        RETURNING id, nombre_completo, nombre_usuario, id_gasolinera
+      `, [rol.id, nuevo.nombre, nuevo.usuario, nuevo.correo, hash]);
+      await cliente.query("COMMIT");
+      return usuarioPublico({ ...fila, rol: "conductor" });
+    } catch (error) {
+      await cliente.query("ROLLBACK");
+      if (error.code === "23505") {
+        throw errorHttp(409, "El nombre de usuario o correo electrónico ya está registrado.");
+      }
+      throw error;
+    } finally {
+      cliente.release();
+    }
+  }
+
+  return { iniciarSesion, obtenerSesion, cerrarSesion, registrarConductor };
 }

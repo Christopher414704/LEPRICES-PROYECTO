@@ -1,0 +1,13 @@
+.registro-publico { width: min(680px, calc(100% - 32px)); margin: 38px auto; padding: clamp(24px, 5vw, 48px); border: 1px solid #d3d8e0; border-radius: 22px; background: #fff; box-shadow: 0 20px 60px #20273312; }
+.barra-marca .marca { color: inherit; text-decoration: none; }
+.registro-publico .descripcion { margin-bottom: 24px; }
+.rejilla-registro { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+.rejilla-registro .campo-ancho, .rejilla-registro .boton-ingresar, .rejilla-registro .mensaje, .rejilla-registro .acciones-registro { grid-column: 1 / -1; }
+.acciones-registro { text-align: center; }
+.mensaje.exito { border-color: #bcd7c7; color: #1a6741; background: #e9f6ee; }
+.nota-seguridad { margin: 0 0 22px; padding: 11px 13px; border-radius: 9px; color: #4f5c6c; background: #f1f3f6; font-size: 12px; line-height: 1.5; }
+@media (max-width: 600px) {
+  .registro-publico { margin: 20px auto; padding: 26px 22px; }
+  .rejilla-registro { grid-template-columns: 1fr; }
+  .rejilla-registro .campo-ancho, .rejilla-registro .boton-ingresar, .rejilla-registro .mensaje, .rejilla-registro .acciones-registro { grid-column: auto; }
+}

@@ -31,6 +31,8 @@ test("autenticación con PostgreSQL y Argon2 reales", {
     "0001_crear_marcas_y_gasolineras",
     "0002_crear_roles_y_usuarios",
     "0008_crear_sesiones_usuario",
+    "0016_registrar_mi_automovil",
+    "0017_habilitar_registro_conductores",
   ]) {
     const migracion = await import(`../../../database/migrations/${archivo}.mjs`);
     const consultas = [];
@@ -42,6 +44,23 @@ test("autenticación con PostgreSQL y Argon2 reales", {
   const clave = "Prueba_inicial_2026!";
   const hash = await argon2.hash(clave, { type: argon2.argon2id });
   let contador = 0;
+
+  await t.test("el registro público persiste un conductor sin permisos administrativos", async () => {
+    const resultado = await auth.registrarConductor({
+      nombre: "Conductor de prueba", usuario: "conductor_prueba",
+      correo: "conductor@example.test", password: clave, confirmarPassword: clave,
+    });
+    assert.equal(resultado.rol, "conductor");
+    assert.equal(resultado.idGasolinera, null);
+    const { rows: [fila] } = await db.query(`
+      SELECT r.codigo AS rol, u.id_gasolinera, u.contrasena_hash, u.debe_cambiar_contrasena
+      FROM usuarios u JOIN roles r ON r.id=u.id_rol WHERE u.id=$1
+    `, [resultado.id]);
+    assert.equal(fila.rol, "conductor");
+    assert.equal(fila.id_gasolinera, null);
+    assert.equal(fila.debe_cambiar_contrasena, false);
+    assert.equal(await argon2.verify(fila.contrasena_hash, clave), true);
+  });
 
   async function crearUsuario() {
     const nombre = `usuario_${++contador}`;

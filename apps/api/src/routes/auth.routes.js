@@ -78,6 +78,13 @@ export function crearAuth(auth, env) {
     });
     res.json({ autenticado: true, usuario: resultado.usuario });
   });
+  router.post("/registro-conductor", validarOrigen, limitarIntentos, async (req, res) => {
+    const usuario = await auth.registrarConductor(req.body);
+    res.status(201).json({
+      message: "Cuenta de conductor creada correctamente.",
+      data: usuario,
+    });
+  });
   router.get("/sesion", exigirSesion, (req, res) => {
     res.json({ autenticado: true, usuario: req.usuario });
   });

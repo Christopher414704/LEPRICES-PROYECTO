@@ -23,6 +23,7 @@ function crearAplicacion({ production = false } = {}) {
     iniciarSesion: async () => ({ token, usuario }),
     obtenerSesion: async (valor) => valor === token && vigente ? usuario : null,
     cerrarSesion: async () => { vigente = false; },
+    registrarConductor: async () => ({ id: "8", rol: "conductor", usuario: "nuevo.conductor" }),
   };
   const api = express();
   api.use(cors({ origin, credentials: true }), express.json());
@@ -63,12 +64,26 @@ test("login establece una cookie HttpOnly, SameSite, duración y Secure en produ
 
 test("las mutaciones de autenticación rechazan un origen ajeno o ausente", async (t) => {
   await ejecutarServidor(t, crearAplicacion(), async (url) => {
-    for (const ruta of ["login", "logout"]) {
+    for (const ruta of ["login", "logout", "registro-conductor"]) {
       for (const headers of [{}, { origin: "https://otro.example" }]) {
         const res = await fetch(`${url}/api/auth/${ruta}`, { method: "POST", headers });
         assert.equal(res.status, 403);
       }
     }
+  });
+});
+
+test("el registro público crea únicamente una cuenta de conductor", async (t) => {
+  await ejecutarServidor(t, crearAplicacion(), async (url) => {
+    const respuesta = await fetch(`${url}/api/auth/registro-conductor`, {
+      method: "POST",
+      headers: { origin, "content-type": "application/json" },
+      body: JSON.stringify({ nombre: "Nuevo", idRol: "1" }),
+    });
+    assert.equal(respuesta.status, 201);
+    const cuerpo = await respuesta.json();
+    assert.equal(cuerpo.data.rol, "conductor");
+    assert.equal(cuerpo.data.idRol, undefined);
   });
 });
 
