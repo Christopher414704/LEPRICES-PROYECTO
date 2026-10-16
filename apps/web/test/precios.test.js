@@ -1,6 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { calcularPosicionTarjeta, formatearPrecio } from "../src/precios.js";
+import {
+  calcularPosicionTarjeta,
+  formatearPrecio,
+  mensajeActualizacionPrecios,
+} from "../src/precios.js";
 
 test("precios ausentes o inválidos nunca aparecen como gasolina gratis", () => {
   for (const valor of [null, undefined, "", " ", NaN, Infinity, false, true, 0, -1, "sin dato"]) {
@@ -8,6 +12,13 @@ test("precios ausentes o inválidos nunca aparecen como gasolina gratis", () => 
   }
   assert.equal(formatearPrecio(29.19), "29.19");
   assert.equal(formatearPrecio("30.5"), "30.50");
+});
+
+test("la interfaz muestra la confirmación devuelta al actualizar precios", () => {
+  assert.equal(mensajeActualizacionPrecios({
+    message: "3 precios actualizados correctamente.",
+  }), "3 precios actualizados correctamente.");
+  assert.equal(mensajeActualizacionPrecios({}), "Precios actualizados correctamente.");
 });
 
 test("tarjeta anclada cabe junto a los bordes tanto en móvil como escritorio", () => {

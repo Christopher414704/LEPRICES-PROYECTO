@@ -1,4 +1,5 @@
 import { apiAutenticada, consultarSesion, irAlLogin, mensajeError } from "./auth.js";
+import { mensajeActualizacionPrecios } from "./precios.js";
 
 const $ = (selector) => document.querySelector(selector);
 const nodos = {
@@ -145,14 +146,17 @@ async function recargar(conservar = true) {
   renderEditor();
 }
 
-async function ejecutar(accion, exito) {
+async function ejecutar(accion, exito, boton) {
   nodos.mensaje.hidden = true;
+  if (boton) boton.disabled = true;
   try {
-    await accion();
+    const resultado = await accion();
     await recargar();
-    mostrarMensaje(exito);
+    mostrarMensaje(typeof exito === "function" ? exito(resultado) : exito);
   } catch (error) {
     mostrarMensaje(mensajeError(error), true);
+  } finally {
+    if (boton) actualizarEstadoHorario(seleccionActual());
   }
 }
 
@@ -197,8 +201,11 @@ async function iniciar() {
         precio: input.value,
       }));
     if (!cambios.length) return mostrarMensaje("No hay precios nuevos que guardar.");
-    ejecutar(() => solicitar("/precios/registrar", "POST", { idGasolinera: estacion.id, cambios }),
-      "Precios guardados. El mapa ya mostrará los valores nuevos.");
+    ejecutar(
+      () => solicitar("/precios/registrar", "POST", { idGasolinera: estacion.id, cambios }),
+      mensajeActualizacionPrecios,
+      nodos.guardarPrecios,
+    );
   });
   $("#salir").addEventListener("click", async () => {
     try { await solicitar("/auth/logout", "POST", {}); } finally { irAlLogin(); }

@@ -5,6 +5,13 @@ export function formatearPrecio(valor) {
   return Number.isFinite(numero) && numero > 0 ? numero.toFixed(2) : "--.--";
 }
 
+export function mensajeActualizacionPrecios(resultado) {
+  const mensaje = resultado?.message;
+  return typeof mensaje === "string" && mensaje.trim()
+    ? mensaje.trim()
+    : "Precios actualizados correctamente.";
+}
+
 export function calcularPosicionTarjeta({ x, y, ancho, alto, ventanaAncho, ventanaAlto, techo = 84 }) {
   const margen = 10;
   const izquierda = Math.max(margen, Math.min(x - ancho / 2, ventanaAncho - ancho - margen));
