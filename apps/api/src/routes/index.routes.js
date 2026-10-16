@@ -14,7 +14,7 @@ import { crearUsuariosRouter } from "./usuarios.routes.js";
 import { crearAuditoriaRouter } from "./auditoria.routes.js";
 import { crearFavoritosRouter } from "./favoritos.routes.js";
 
-export function crearApiRouter(auth = crearServicioAuth(database), favoritos = crearFavoritosRouter()) {
+export function crearApiRouter(auth = crearServicioAuth(database), favoritos = crearFavoritosRouter(), miAutomovil = crearMiAutomovilRouter()) {
   const router = Router();
   const seguridad = crearAuth(auth, env);
 
@@ -29,7 +29,7 @@ export function crearApiRouter(auth = crearServicioAuth(database), favoritos = c
   const alertas = Router();
   configurarRutasAlertas(alertas, database);
   router.use("/avisos", alertas);
-  router.use('/mi-automovil', crearMiAutomovilRouter());
+  router.use('/mi-automovil', miAutomovil);
   router.use("/favoritos", favoritos);
   router.use((req,res,next)=>req.usuario.rol==='conductor' ? res.status(403).json({message:'Esta opción requiere una cuenta del personal de gasolineras.'}) : next());
   router.use("/gasolineras", gasolinerasRouter);
