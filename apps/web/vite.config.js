@@ -28,6 +28,7 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         alertas: path.resolve(directorioActual, "alertas.html"),
+        favoritos: path.resolve(directorioActual, "favoritos.html"),
         inicio: path.resolve(directorioActual, "index.html"),
         miAutomovil: path.resolve(directorioActual, "mi-automovil.html"),
         login: path.resolve(directorioActual, "login.html"),

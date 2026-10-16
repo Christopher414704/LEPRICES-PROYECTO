@@ -8,6 +8,10 @@ const ingresar = document.querySelector("#botonIngresar");
 const mensaje = document.querySelector("#mensajeLogin");
 
 function entrarAlMapa(sesion) {
+  if (new URLSearchParams(window.location.search).get("volver") === "favoritos") {
+    window.location.replace(`${import.meta.env.BASE_URL}favoritos.html`);
+    return;
+  }
   window.location.replace(`${import.meta.env.BASE_URL}${sesion?.rol === "conductor" ? "mi-automovil.html" : "mapa.html"}`);
 }
 

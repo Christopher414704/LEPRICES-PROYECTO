@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#d71920" />
+    <title>Mis favoritos | LEPRICES</title>
+    <link rel="stylesheet" href="/src/precios-page.css" />
+    <link rel="stylesheet" href="/src/favoritos-page.css" />
+  </head>
+  <body>
+    <header class="barra">
+      <a class="marca" href="/publico.html" aria-label="LEPRICES: volver al mapa"><img src="/images/leprices-logo.png" alt="" width="100" height="65" /><span>LEPRICES<small>Precios de combustible</small></span></a>
+      <nav aria-label="Apartados principales">
+        <a class="opcion activa" href="/favoritos.html" aria-current="page">★ Mis favoritos</a>
+        <a class="opcion" href="/alertas.html">Alertas</a>
+        <a class="opcion" href="/publico.html">Mapa</a>
+        <button id="salir" class="opcion" type="button">Salir</button>
+      </nav>
+    </header>
+    <section id="espera" class="espera" role="status">Comprobando tu sesión…</section>
+    <main id="app" hidden>
+      <div class="intro"><p class="sobretitulo">TUS ESTACIONES, A MANO</p><h1>Mis favoritos</h1><p>Guarda una gasolinera y el combustible que te interesa para consultar sus precios fácilmente.</p></div>
+      <p id="mensaje" class="mensaje" role="status" aria-live="polite" hidden></p>
+      <section class="tarjeta" aria-labelledby="tituloAgregar">
+        <h2 id="tituloAgregar">Agregar un favorito</h2>
+        <p class="ayuda">Tus favoritos se guardan en tu cuenta. No necesitas activar las notificaciones.</p>
+        <form id="formFavorito" class="rejilla-form">
+          <label>Gasolinera<select id="gasolineraFavorita" required disabled><option value="">Cargando gasolineras…</option></select></label>
+          <label>Combustible<select id="combustibleFavorito" required disabled><option value="">Selecciona una gasolinera</option></select></label>
+          <div class="acciones"><button id="guardarFavorito" class="boton-primario" type="submit" disabled>Guardar favorito</button><span id="ayudaSeleccion" class="ayuda" role="status"></span></div>
+        </form>
+      </section>
+      <section class="tarjeta" aria-labelledby="tituloGuardados">
+        <div class="cabecera-favoritos"><div><p class="sobretitulo">PRECIOS DE TU INTERÉS</p><h2 id="tituloGuardados">Favoritos guardados</h2></div><button id="actualizarFavoritos" class="boton-secundario" type="button">Actualizar</button></div>
+        <p id="estadoFavoritos" class="vacio" role="status">Cargando favoritos…</p>
+        <ul id="listaFavoritos" class="lista-favoritos"></ul>
+      </section>
+    </main>
+    <script type="module" src="/src/favoritos-page.js"></script>
+  </body>
+</html>

@@ -56,6 +56,9 @@ export function crearTableroPrecios(panel, alCerrar, { ubicacionActual = () => n
     }
 
     const acciones = elemento("div", "acciones-ubicacion");
+    const favorito = elemento("a", "enlace-navegacion", "Guardar favorito");
+    favorito.href = `${import.meta.env.BASE_URL}favoritos.html?gasolinera=${encodeURIComponent(ficha.codigo)}`;
+    acciones.append(favorito);
     if (enlace) {
       const navegar = elemento("a", "enlace-navegacion", "Cómo llegar");
       navegar.href = enlace;

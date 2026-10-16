@@ -13,7 +13,8 @@ export function solicitarApi(ruta, opciones = {}) {
 export function irAlLogin() {
   const app = document.querySelector("#app");
   if (app) app.hidden = true;
-  window.location.replace(urlLogin);
+  const volver = window.location.pathname.endsWith("/favoritos.html") ? "?volver=favoritos" : "";
+  window.location.replace(`${urlLogin}${volver}`);
 }
 
 export async function consultarSesion() {
