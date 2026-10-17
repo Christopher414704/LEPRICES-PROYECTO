@@ -29,6 +29,7 @@ export default defineConfig({
       input: {
         alertas: path.resolve(directorioActual, "alertas.html"),
         favoritos: path.resolve(directorioActual, "favoritos.html"),
+        rutas: path.resolve(directorioActual, "rutas.html"),
         inicio: path.resolve(directorioActual, "index.html"),
         miAutomovil: path.resolve(directorioActual, "mi-automovil.html"),
         login: path.resolve(directorioActual, "login.html"),

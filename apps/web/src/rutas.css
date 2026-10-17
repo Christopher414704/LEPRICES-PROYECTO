@@ -1,0 +1,71 @@
+@import './precios-page.css';
+[hidden] { display: none !important; }
+.opcion-subidas { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.opcion-subidas input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--rojo); }
+.credito-rutas a { color: #a81925; }
+.tramos-ruta { display: grid; gap: 12px; }
+.tramo-ruta { padding: 16px; border-radius: 12px; background: #f2f6fa; border-left: 3px solid #2676b6; }
+.tramo-ruta.vuelta { border-color: var(--rojo); }
+.tramo-ruta h4 { margin: 0 0 8px; }
+.tramo-ruta p, .avisos-carretera { font-size: 12px; line-height: 1.65; }
+.tramo-ruta svg { display: block; width: 100%; max-height: 140px; }
+.tramo-ruta small { display: block; color: #657184; font-size: 10px; }
+.avisos-carretera { padding: 14px 18px 14px 30px; background: #fff8ed; border-radius: 10px; color: #705023; }
+.avisos-carretera li + li { margin-top: 8px; }
+main { width: min(1260px, calc(100% - 40px)); margin-top: 26px; }
+.hero-rutas { display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: clamp(24px, 4vw, 46px); border-radius: 22px; color: #fff; background: radial-gradient(ellipse at 90% 0, #495666, transparent 65%), #1d2632; border-bottom: 5px solid var(--rojo); }
+.hero-rutas .sobretitulo { color: #ff9299; }
+.hero-rutas h1 { margin: 14px 0; font-size: clamp(30px, 4vw, 48px); letter-spacing: -.045em; line-height: 1.08; }
+.hero-rutas p:last-child { color: #d1d8e1; font-size: 14px; line-height: 1.7; }
+.viaje-hero { display: flex; position: relative; align-items: center; padding: 25px 10px 50px; }
+.viaje-hero span { display: grid; place-items: center; width: 62px; height: 62px; border: 3px solid #e4e8ed; border-radius: 50%; background: linear-gradient(120deg, #ef2935, #ae0d16); font-size: 28px; font-weight: 800; box-shadow: 0 8px 25px #0004; }
+.viaje-hero i { width: 120px; height: 0; border-top: 3px dashed #d4dae4; }
+.viaje-hero small { position: absolute; bottom: 12px; width: calc(100% - 20px); text-align: center; color: #b7c1ce; }
+.icono-rutas { font-size: 30px; color: #d71920; width: 38px; text-align: center; }
+.columnas-rutas { display: grid; grid-template-columns: minmax(310px, 410px) minmax(0, 1fr); gap: 22px; align-items: start; }
+.columnas-rutas > *, .detalle-rutas { min-width: 0; }
+fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.planificador h3 { padding-top: 22px; border-top: 1px solid #e2e6ec; margin-top: 24px; font-size: 16px; }
+.planificador label { margin-top: 18px; }
+.punto-viaje { display: flex; align-items: center; gap: 12px; }
+.punto-viaje label { flex: 1; min-width: 0; }
+.letra-punto { display: grid; place-items: center; flex: 0 0 32px; height: 32px; margin-top: 29px; border-radius: 50%; background: #283444; color: white; font-weight: 800; font-size: 14px; }
+.letra-punto.destino { background: var(--rojo); }
+.enlace-ubicacion { display: flex; align-items: center; gap: 5px; min-height: 44px; margin-left: 44px; border: 0; background: transparent; color: #ac1821; font: inherit; font-size: 11px; font-weight: 750; }
+.planificador .ayuda { margin-top: 10px; font-size: 11px; }
+.coordenadas { margin-top: 12px; padding: 10px 12px; border: 1px solid #e0e5eb; border-radius: 9px; background: #f8fafc; font-size: 12px; }
+.coordenadas summary { cursor: pointer; min-height: 26px; line-height: 26px; }
+.rejilla-form { gap: 12px; margin-top: 0; }
+.nota-distancia { border-left: 3px solid #d3dae4; padding-left: 10px; }
+#calcularRuta { display: flex; justify-content: space-between; width: 100%; margin-top: 24px; }
+#mensajeRuta.error { color: #ab1721; }
+.tarjeta-mapa { padding: 22px; }
+.cabecera-mapa { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.cabecera-mapa h2 { font-size: 21px; }
+.controles-mapa { display: flex; gap: 8px; margin: 14px 0; }
+.controles-mapa button { flex: 1; min-height: 44px; border: 1px solid #cfd7e1; border-radius: 9px; background: #f5f7f9; color: #445063; font: inherit; font-size: 12px; font-weight: 700; }
+.controles-mapa button[aria-pressed=true] { background: #fff0f1; border-color: var(--rojo); color: #ae1620; }
+#mapaRuta { height: 370px; border-radius: 12px; overflow: hidden; background: #192330; }
+#estadoMapaRuta, .leyenda-mapa { margin-top: 12px; font-size: 11px; }
+.resultado-ruta { border-top: 4px solid var(--rojo); }
+.resumen-simulacion { margin: 22px 0; padding: 18px; border: 1px solid #e0e5eb; border-radius: 12px; background: #f8fafc; }
+.resumen-simulacion h3 { margin: 8px 0 14px; }
+.resumen-simulacion p, .resumen-simulacion li { font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; }
+#tramosSimulacion p { padding: 10px 12px; background: #fff; border-left: 3px solid var(--rojo); border-radius: 6px; }
+.metricas-ruta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+.metricas-ruta div { padding: 18px 14px; border-radius: 12px; background: #f0f3f7; }
+.metricas-ruta div:last-child { background: #fff0f1; color: #ac1520; }
+.metricas-ruta dt { font-size: 11px; margin-bottom: 7px; }
+.metricas-ruta dd { margin: 0; font-size: clamp(20px, 2.5vw, 28px); font-weight: 850; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.resultado-ruta .ayuda { margin-top: 10px; }
+.acciones-navegar { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 14px; }
+.acciones-navegar a { display: flex; align-items: center; text-align: center; justify-content: center; text-decoration: none; }
+.estaciones-ruta { list-style: none; margin: 18px 0; padding: 0; max-height: 420px; overflow: auto; }
+.estaciones-ruta li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 0; border-bottom: 1px solid #e1e6ee; }
+.estaciones-ruta strong { display: block; font-size: 14px; }
+.estaciones-ruta small { display: block; color: #657184; font-size: 11px; margin-top: 6px; line-height: 1.5; }
+.precio-estacion { white-space: nowrap; font-weight: 800; color: #b31620; font-size: 16px; }
+.estaciones-ruta a { display: inline-flex; min-height: 44px; align-items: center; font-size: 12px; color: #af1721; }
+@media(max-width: 900px) { .columnas-rutas { grid-template-columns: minmax(290px, 1fr) minmax(0, 1.15fr); gap: 14px; } .planificador, .tarjeta-mapa { padding: 20px; } .viaje-hero i { width: 65px; } }
+@media(max-width: 700px) { main { width: calc(100% - 24px); margin-top: 18px; } .columnas-rutas { grid-template-columns: 1fr; } .viaje-hero { display: none; } .hero-rutas { padding: 26px; } .barra .opcion { flex-direction: column; gap: 0; } .barra .opcion img, .icono-rutas { height: 32px; } .rejilla-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } #mapaRuta { height: 280px; } .acciones-navegar a { width: 100%; } }

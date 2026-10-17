@@ -1,3 +1,4 @@
+import { crearRutasRouter } from './rutas.routes.js';
 import { leerCoordenadas, encontrarGasolineraCercana } from "../services/gasolinera-cercana.service.js";
 import { Router } from "express";
 import { listarGasolinerasConPrecios } from "../services/gasolineras.service.js";
@@ -58,6 +59,7 @@ export function prepararGasolineraPublica(gasolinera) {
 
 export function crearPublicoRouter(listar = listarGasolinerasConPrecios, db = database) {
   const router = Router();
+  router.use("/rutas", crearRutasRouter(undefined, true));
   // Revalida también respuestas 404 para reflejar desactivaciones y reactivaciones.
   router.use((_req, res, next) => { res.set("Cache-Control", "no-cache"); next(); });
   router.get("/gasolineras", async (req, res) => {

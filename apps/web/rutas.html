@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#d71920" /><title>Rutas | LEPRICES</title>
+  <link rel="stylesheet" href="/src/rutas.css" />
+</head>
+<body>
+  <header class="barra">
+    <a class="marca" href="/publico.html"><img src="/images/leprices-logo.png" alt="" width="100" height="65" /><span>LEPRICES<small>Planifica tu próximo viaje</small></span></a>
+    <nav aria-label="Apartados principales">
+      <a class="opcion" href="/publico.html"><img src="/images/gasolinera.png" alt="" width="40" height="40" />Gasolineras</a>
+      <a class="opcion" href="/mi-automovil.html"><img src="/images/mi-vehiculo.png" alt="" width="40" height="40" />MiAutomóvil</a>
+      <a class="opcion activa" href="/rutas.html" aria-current="page"><span class="icono-rutas" aria-hidden="true">↗</span>Rutas</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero-rutas">
+      <div><p class="sobretitulo">LEPRICES RUTAS · GUATEMALA</p><h1>Un destino.<br />Un presupuesto claro.</h1><p>Calcula el combustible y el costo de tu próximo viaje<br />con tu vehículo y los precios de las gasolineras.</p></div>
+      <div class="viaje-hero" aria-hidden="true"><span>A</span><i></i><span>B</span><small>Tu próxima aventura</small></div>
+    </section>
+    <div class="columnas-rutas">
+      <section class="tarjeta planificador" aria-labelledby="tituloPlan">
+        <p class="sobretitulo">PLANIFICA TU VIAJE</p><h2 id="tituloPlan">¿A dónde vamos?</h2>
+        <form id="formRuta">
+          <fieldset id="camposRuta">
+            <legend class="solo-lector">Datos para calcular el viaje</legend>
+            <div class="punto-viaje"><span class="letra-punto">A</span><label for="origenRuta">Origen<select id="origenRuta"></select></label></div>
+            <button id="ubicacionRuta" type="button" class="enlace-ubicacion"><img src="/images/mi-ubicacion.png" alt="" width="24" height="24" />Usar mi ubicación como origen</button>
+            <div class="punto-viaje"><span class="letra-punto destino">B</span><label for="destinoRuta">Destino<select id="destinoRuta"></select></label></div>
+            <p class="ayuda">Las ciudades señalan un centro aproximado. Elige una gasolinera o marca el punto exacto en el mapa.</p>
+            <details class="coordenadas"><summary>Ver o escribir coordenadas</summary><div class="rejilla-form">
+              <label for="latOrigen">Latitud de origen<input id="latOrigen" type="number" min="13.5" max="18.1" step="any" required /></label>
+              <label for="lonOrigen">Longitud de origen<input id="lonOrigen" type="number" min="-92.3" max="-88" step="any" required /></label>
+              <label for="latDestino">Latitud de destino<input id="latDestino" type="number" min="13.5" max="18.1" step="any" required /></label>
+              <label for="lonDestino">Longitud de destino<input id="lonDestino" type="number" min="-92.3" max="-88" step="any" required /></label>
+            </div></details>
+            <label for="viajeRuta">Tipo de viaje<select id="viajeRuta"><option value="ida">Solo ida · A → B</option><option value="vuelta">Solo regreso · B → A</option><option value="ida_vuelta">Ida y vuelta · A → B → A</option></select></label>
+            <label for="distanciaModo">Distancia<select id="distanciaModo"><option value="api">Calcular por carretera · automático</option><option value="manual">Kilómetros manuales · alternativa</option></select></label>
+            <div id="distanciasManuales" class="rejilla-form distancias" hidden>
+              <label id="campoKmIda" for="kmIda">Carretera de ida · km<input id="kmIda" type="number" min="0.1" max="3000" step="0.1" inputmode="decimal" required placeholder="Distancia por carretera" /></label>
+              <label id="campoKmVuelta" for="kmVuelta" hidden>Carretera de regreso · km<input id="kmVuelta" type="number" min="0.1" max="3000" step="0.1" inputmode="decimal" disabled placeholder="Puede ser distinta a la ida" /></label>
+            </div>
+            <p id="notaDistancia" class="ayuda nota-distancia">Al calcular, enviamos los puntos A y B y el tipo de vehículo a Valhalla para obtener la carretera y sus elevaciones. Tu bitácora y datos personales permanecen en LEPRICES.</p>
+            <h3>Tu vehículo y combustible</h3>
+            <label for="vehiculoRuta">Consumo del vehículo<select id="vehiculoRuta"><option value="">Ingresar consumo o estimar cualquier vehículo</option></select></label>
+            <p id="estadoGarajeRuta" class="ayuda" role="status">Puedes calcular sin cuenta o usar tu garaje si ya iniciaste sesión.</p>
+            <p id="consumoVehiculoRuta" class="ayuda" role="status" hidden></p>
+            <label id="campoTipoVehiculo" for="tipoVehiculoRuta">Tipo de vehículo<select id="tipoVehiculoRuta"><option value="auto">Automóvil</option><option value="moto">Motocicleta</option></select></label>
+            <label id="campoConsumoManual" for="consumoManual"><span id="unidadConsumoManual">Consumo · L/100 km</span><input id="consumoManual" type="number" min="0.1" max="100" step="0.01" inputmode="decimal" required placeholder="Por ejemplo: 7.5" /></label>
+            <p id="conversionConsumo" class="ayuda"></p>
+            <div class="rejilla-form">
+              <label for="combustibleRuta">Combustible<select id="combustibleRuta" required><option value="">Selecciona el combustible</option><option value="regular">Regular</option><option value="super">Súper</option><option value="premium">Premium</option><option value="diesel">Diésel</option><option value="electricidad">Electricidad · kWh</option></select></label>
+              <label for="modalidadRuta">Servicio<select id="modalidadRuta"><option value="autoservicio">Autoservicio</option><option value="servicio_manual">Servicio Completo</option></select></label>
+              <label for="margenRuta">Margen adicional · %<input id="margenRuta" type="number" value="0" min="0" max="50" step="1" inputmode="decimal" /></label>
+              <label for="precioManualRuta"><span id="unidadPrecioRuta">Precio por galón · Q · opcional</span><input id="precioManualRuta" type="number" min="0.01" max="1000" step="0.01" inputmode="decimal" placeholder="Usar promedio publicado" /></label>
+            </div>
+            <p class="ayuda">El margen que elijas añade combustible al presupuesto. No es una medición de tráfico ni de pendientes.</p>
+            <h3>Velocidad y consumo</h3>
+            <label for="modeloConsumoRuta">Método de cálculo<select id="modeloConsumoRuta"><option value="consumo">Presupuesto con mi consumo</option><option value="teorico">Estimar vehículo y condiciones del recorrido</option><option value="fastsim">Simular conducción · FASTSim</option></select></label>
+            <p id="notaSimulacion" class="ayuda">La simulación compara velocidad, peso y relieve. Necesita parámetros físicos; el consumo medido de tu bitácora conserva su cálculo habitual.</p>
+            <div id="camposTeoricos" hidden>
+              <p class="ayuda">Disponible para carros y motos de cualquier marca, con o sin ficha en la API. Usa pendientes y velocidades de la carretera cuando están disponibles. Los valores iniciales son supuestos editables.</p>
+              <label for="propulsionTeorica">Propulsión<select id="propulsionTeorica" disabled><option value="combustion">Gasolina o diésel</option><option value="hibrido">Híbrido · modo combustible</option><option value="electrico">Eléctrico · batería</option></select></label>
+              <div class="rejilla-form">
+                <label for="pesoTeorico">Peso total · kg<input id="pesoTeorico" type="number" min="60" max="10000" step="1" disabled placeholder="Vehículo + personas + carga" /></label>
+                <label for="velocidadTeorica">Techo de velocidad · km/h<input id="velocidadTeorica" type="number" min="10" max="110" step="1" value="60" disabled /></label>
+                <label for="eficienciaTeorica">Eficiencia global supuesta · %<input id="eficienciaTeorica" type="number" min="10" max="45" step="1" value="25" disabled /></label>
+                <label for="cdaTeorico">Cd × área frontal supuesto · m²<input id="cdaTeorico" type="number" min="0.1" max="3" step="0.01" value="0.7" disabled /></label>
+                <label for="rodaduraTeorica">Rodadura supuesta<input id="rodaduraTeorica" type="number" min="0.004" max="0.04" step="0.001" value="0.01" disabled /></label>
+                <label for="auxiliaresTeoricos">Carga auxiliar supuesta · kW<input id="auxiliaresTeoricos" type="number" min="0" max="5" step="0.1" value="0.5" disabled /></label>
+                <label for="ralentiTeorico">Motor al ralentí sin auxiliares · L/h<input id="ralentiTeorico" type="number" min="0" max="5" step="0.01" value="0.6" disabled /></label>
+                <label for="regeneracionTeorica">Recuperación equivalente · %<input id="regeneracionTeorica" type="number" min="0" max="85" step="1" value="0" disabled /></label>
+              </div>
+              <h4>Condiciones de este viaje</h4>
+              <div class="rejilla-form">
+                <label for="paradasTeoricas">Paradas completas adicionales por km<input id="paradasTeoricas" type="number" min="0" max="5" step="0.1" value="0.5" disabled /></label>
+                <label for="minutosTeoricos">Tiempo detenido en todo el viaje · min<input id="minutosTeoricos" type="number" min="0" max="180" step="1" value="10" disabled /></label>
+                <label for="temperaturaTeorica">Temperatura supuesta · °C<input id="temperaturaTeorica" type="number" min="0" max="45" step="1" value="25" disabled /></label>
+                <label for="altitudTeorica">Altitud si falta el perfil · m<input id="altitudTeorica" type="number" min="0" max="5000" step="1" value="0" disabled /></label>
+                <label for="ascensoTeoricoIda">Ascenso de ida si falta el perfil · m<input id="ascensoTeoricoIda" type="number" min="0" max="30000" step="1" value="0" disabled /></label>
+                <label for="ascensoTeoricoVuelta">Ascenso de regreso si falta el perfil · m<input id="ascensoTeoricoVuelta" type="number" min="0" max="30000" step="1" value="0" disabled /></label>
+              </div>
+              <p class="ayuda">El techo reduce la velocidad del mapa; no supone viajar siempre a esa velocidad. Paradas y minutos son previsiones tuyas, sin tráfico en vivo. Rodadura mayor representa más resistencia de neumáticos/superficie; no se aplica una penalización fija por ser Guatemala.</p>
+              <details class="coordenadas"><summary>Calibrar con un recorrido medido</summary>
+                <label class="opcion-subidas" for="calibrarTeorico"><input id="calibrarTeorico" type="checkbox" disabled />Usar una medición de este mismo vehículo</label>
+                <p class="ayuda">Distancia y litros realmente consumidos entre llenados completos (kWh de batería para eléctricos), con las mismas personas/carga y parámetros físicos. Describe las condiciones del recorrido medido, que pueden ser distintas a las de este viaje. No uses la capacidad del tanque ni lo pagado como litros.</p>
+                <div id="camposCalibracion" class="rejilla-form" hidden>
+                  <label for="kmCalibracion">Distancia medida · km<input id="kmCalibracion" type="number" min="1" max="3000" step="0.1" disabled /></label>
+                  <label for="cantidadCalibracion"><span id="unidadCantidadCalibracion">Litros consumidos</span><input id="cantidadCalibracion" type="number" min="0.01" max="3000" step="0.01" disabled /></label>
+                  <label for="velocidadCalibracion">Velocidad en movimiento · km/h<input id="velocidadCalibracion" type="number" min="10" max="110" step="1" disabled /></label>
+                  <label for="paradasCalibracion">Paradas adicionales por km<input id="paradasCalibracion" type="number" min="0" max="5" step="0.1" value="0" disabled /></label>
+                  <label for="minutosCalibracion">Tiempo detenido · min<input id="minutosCalibracion" type="number" min="0" max="180" step="1" value="0" disabled /></label>
+                  <label for="ascensoCalibracion">Ascenso acumulado · m<input id="ascensoCalibracion" type="number" min="0" max="30000" step="1" value="0" disabled /></label>
+                  <label for="altitudCalibracion">Altitud media · m<input id="altitudCalibracion" type="number" min="0" max="5000" step="1" value="0" disabled /></label>
+                  <label for="temperaturaCalibracion">Temperatura · °C<input id="temperaturaCalibracion" type="number" min="0" max="45" step="1" value="25" disabled /></label>
+                </div>
+              </details>
+              <p class="ayuda">Sin mediciones es un modelo orientativo. La calibración ajusta este presupuesto a tu referencia; no se guarda en la ficha ni demuestra precisión para todo Guatemala. En híbridos enchufables no calcula el reparto entre gasolina y batería.</p>
+            </div>
+            <div id="camposSimulacion" hidden>
+              <label for="perfilFisicoRuta">Punto de partida · supuestos editables<select id="perfilFisicoRuta"><option value="personalizado">Introducir datos de mi vehículo</option><option value="sedan">Automóvil mediano · ejemplo</option><option value="suv">SUV · ejemplo</option><option value="deportivo">Deportivo · ejemplo</option><option value="moto">Motocicleta · ejemplo</option></select></label>
+              <p class="ayuda">Estos ejemplos no son especificaciones de un modelo. Usa el peso al que corresponde tu consumo; añade por separado las personas y carga extra de este viaje.</p>
+              <div class="rejilla-form">
+                <label for="pesoSimulacion">Peso de referencia · kg<input id="pesoSimulacion" type="number" min="100" max="10000" step="1" disabled /></label>
+                <label for="cargaSimulacion">Personas/carga extra · kg<input id="cargaSimulacion" type="number" min="0" max="2000" step="1" value="0" disabled /></label>
+                <label for="potenciaSimulacion">Potencia · kW<input id="potenciaSimulacion" type="number" min="5" max="1500" step="0.1" disabled /></label>
+                <label for="cdaSimulacion">Cd × área frontal · m²<input id="cdaSimulacion" type="number" min="0.1" max="3" step="0.01" disabled /></label>
+                <label for="rodaduraSimulacion">Rodadura · supuesto<input id="rodaduraSimulacion" type="number" min="0.004" max="0.03" step="0.001" value="0.01" disabled /></label>
+              </div>
+              <label for="referenciaSimulacion">Mi consumo corresponde a<select id="referenciaSimulacion" disabled><option value="combinado">Combinado · ciudad y carretera</option><option value="carretera">Carretera · referencia HWFET</option><option value="constante">Velocidad constante en llano</option></select></label>
+              <label id="campoReferenciaVelocidad" for="velocidadReferencia" hidden>Velocidad de ese consumo · km/h<input id="velocidadReferencia" type="number" min="20" max="110" step="1" value="80" disabled /></label>
+              <div class="rejilla-form">
+                <label for="velocidadMaximaRuta">Techo de velocidad · km/h<input id="velocidadMaximaRuta" type="number" min="20" max="110" step="1" value="80" disabled /></label>
+                <label for="paradasSimulacion">Paradas extra con motor · min<input id="paradasSimulacion" type="number" min="0" max="180" step="1" value="0" disabled /></label>
+              </div>
+              <p class="ayuda">El techo solo reduce las velocidades estimadas por el mapa; no significa conducir a esa velocidad todo el viaje. Respeta los límites y condiciones de cada vía. Las paradas son minutos adicionales que tú prevés.</p>
+              <label class="opcion-subidas" for="relieveSimulacion"><input id="relieveSimulacion" type="checkbox" checked disabled />Incluir pendientes del terreno</label>
+            </div>
+            <details class="coordenadas ajuste-terreno"><summary>Montañas y condiciones del viaje</summary>
+              <label class="opcion-subidas" for="ajustarSubidas"><input id="ajustarSubidas" type="checkbox" />Estimar combustible adicional por subidas</label>
+              <p id="notaSubidas" class="ayuda">Úsalo si el consumo base corresponde a terreno llano. Un consumo combinado puede incluir pendientes; añadirlas puede sobreestimar. El relieve se mostrará aunque no actives el ajuste.</p>
+              <div id="camposSubidas" class="rejilla-form" hidden>
+                <label for="masaRuta">Peso total cargado · kg<input id="masaRuta" type="number" min="100" max="10000" step="1" disabled placeholder="Vehículo + personas + carga" /></label>
+                <label for="eficienciaRuta">Eficiencia supuesta · %<input id="eficienciaRuta" type="number" min="10" max="45" step="1" value="25" disabled /></label>
+              </div>
+              <p class="ayuda">El 25 % es una hipótesis editable, no una medición de tu motor. El modelo usa peso y ascenso; no mide baches, lluvia ni tráfico. No resta combustible por las bajadas. Puedes elegir un margen para reservar combustible.</p>
+            </details>
+          </fieldset>
+          <button id="calcularRuta" class="boton-primario" type="submit">Calcular mi viaje <span aria-hidden="true">→</span></button>
+          <p id="mensajeRuta" class="ayuda" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <div class="detalle-rutas">
+        <section class="tarjeta tarjeta-mapa" aria-labelledby="tituloMapaRuta">
+          <div class="cabecera-mapa"><div><p class="sobretitulo">EXPLORA EL MAPA</p><h2 id="tituloMapaRuta">De A hasta B</h2></div><button id="centrarRuta" type="button" class="boton-secundario">Ver puntos</button></div>
+          <div class="controles-mapa" role="group" aria-label="Punto que se marcará al tocar el mapa"><button id="marcarOrigen" type="button" aria-pressed="false">Marcar origen A</button><button id="marcarDestino" type="button" aria-pressed="true">Marcar destino B</button></div>
+          <div id="mapaRuta" aria-label="Mapa para marcar origen y destino"></div>
+          <p id="estadoMapaRuta" class="ayuda" role="status">Cargando mapa…</p>
+          <p id="leyendaRuta" class="ayuda leyenda-mapa">A = origen · B = destino · Línea punteada = guía entre puntos. Calcula para ver la carretera.</p>
+          <p class="ayuda credito-rutas">Rutas: <a href="https://github.com/valhalla/valhalla" target="_blank" rel="noopener noreferrer">Valhalla</a> · Datos © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">Corregir el mapa ↗</a></p>
+        </section>
+        <section id="resultadoRuta" class="tarjeta resultado-ruta" aria-labelledby="tituloResultado" hidden>
+          <p class="sobretitulo">TU PRESUPUESTO ESTIMADO</p><h2 id="tituloResultado" tabindex="-1">Así se ve tu viaje</h2>
+          <p id="descripcionRuta" class="ayuda"></p><dl id="metricasRuta" class="metricas-ruta"></dl>
+          <div id="fuenteConsumo" class="ayuda"></div><p id="fuentePrecio" class="ayuda"></p>
+          <p id="detalleMargen" class="ayuda"></p>
+          <section id="resultadoSimulacion" class="resumen-simulacion" hidden><p class="sobretitulo">SIMULACIÓN DE CONDUCCIÓN</p><h3>Velocidad, carretera y vehículo</h3><p id="detalleSimulacion"></p><div id="tramosSimulacion"></div><ul id="avisosSimulacion" class="avisos-carretera"></ul></section>
+          <div id="detalleCarretera" hidden><h3>Carretera y relieve</h3><div id="tramosRuta" class="tramos-ruta"></div><p id="detalleTerreno" class="ayuda"></p><ul id="avisosCarretera" class="avisos-carretera"></ul></div>
+          <div class="acciones-navegar"><a id="navegarIda" class="boton-primario" target="_blank" rel="noopener noreferrer">Ir a B con Google Maps ↗</a><a id="navegarVuelta" class="boton-secundario" target="_blank" rel="noopener noreferrer" hidden>Regresar a A con Google Maps ↗</a></div>
+          <p class="ayuda">Consumo y costo estimados, sin garantía de estado actual de la carretera. Google Maps calculará su propia ruta, que puede diferir de la mostrada.</p>
+        </section>
+        <section id="panelEstacionesRuta" class="tarjeta" aria-labelledby="tituloEstacionesRuta" hidden>
+          <p class="sobretitulo">PRECIOS PARA COMPARAR</p><h2 id="tituloEstacionesRuta">Gasolineras cerca del recorrido</h2>
+          <p id="estadoPreciosRuta" class="ayuda"></p>
+          <label for="buscarEstacionRuta">Buscar gasolinera<input id="buscarEstacionRuta" type="search" maxlength="100" placeholder="Nombre de la estación" /></label>
+          <ul id="estacionesRuta" class="estaciones-ruta"></ul>
+          <p id="notaEstacionesRuta" class="ayuda">Hasta 2 km en línea recta de la carretera calculada. No confirma acceso desde la vía ni incluye desvíos.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="/src/rutas.js"></script>
+</body>
+</html>
