@@ -31,3 +31,5 @@ docker/backups/*
 # Sistema operativo
 .DS_Store
 Thumbs.db
+# OCR cache generated during vehicle research
+.cache/ocr/
