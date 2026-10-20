@@ -1,3 +1,4 @@
+import { crearEspecificaciones } from "./especificaciones-tecnicas.js";
 const combustibles = { "Regular Gasoline": "Gasolina regular", "Premium Gasoline": "Gasolina premium", "Midgrade Gasoline": "Gasolina intermedia", Diesel: "Diésel", Electricity: "Electricidad", E85: "E85" };
 const tracciones = { "Front-Wheel Drive": "Delantera", "Rear-Wheel Drive": "Trasera", "All-Wheel Drive": "Integral (AWD)", "4-Wheel Drive": "4×4", "4-Wheel or All-Wheel Drive": "4×4 / integral", "2-Wheel Drive": "Dos ruedas", "Part-time 4-Wheel Drive": "4×4 conectable" };
 const formato = new Intl.NumberFormat("es-GT", { maximumFractionDigits: 2 });
@@ -69,22 +70,4 @@ export function filasFicha(ficha) {
   return filas.filter(f=>!f.nombre.startsWith('Consumo ') || f.valor!=='No disponible');
 }
 
-export function crearDatosFicha(ficha) {
-  const lista = document.createElement("dl");
-  lista.className = "datos-ficha";
-  for (const {nombre,valor,referencia} of filasFicha(ficha)) {
-    const grupo = document.createElement("div");
-    const termino = document.createElement("dt");
-    const descripcion = document.createElement("dd");
-    termino.textContent = nombre;
-    descripcion.textContent = valor;
-    if(referencia) {
-      const nota=document.createElement('small');nota.textContent=` · Referencia del modelo${referencia.estado==='publicado_sin_ciclo'?' · Sin ciclo especificado':''}${referencia.conversion && typeof referencia.valorOriginal==='number' ? ` (${referencia.valorOriginal} ${referencia.unidadOriginal}; convertido)` : ''}${referencia.lectura==='ocr'?' · PDF escaneado':''} `;
-      descripcion.append(nota);
-      try {const url=new URL(referencia.urlFuente);if(url.protocol==='https:'){const fuente=document.createElement('a');fuente.href=url.href;fuente.target='_blank';fuente.rel='noopener noreferrer';fuente.textContent='Fuente ↗';fuente.title=referencia.cita;descripcion.append(fuente);}}catch{ /* Sin enlace válido. */ }
-    }
-    grupo.append(termino, descripcion);
-    lista.append(grupo);
-  }
-  return lista;
-}
+export function crearDatosFicha(ficha) { return crearEspecificaciones(ficha, { combustible: nombreCombustible, transmision: nombreTransmision, traccion: nombreTraccion }); }
