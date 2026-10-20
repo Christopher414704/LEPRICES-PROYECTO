@@ -10,7 +10,7 @@ const nodos = {
   contenidoEditor: $("#contenidoEditor"), tipoNuevo: $("#tipoNuevo"), filasPrecios: $("#filasPrecios"),
   guardarPrecios: $("#guardarPrecios"), formAgregar: $("#formAgregar"),
 };
-let estado;
+let estado; let descargando=false;
 let estaciones = [];
 
 function mostrarMensaje(texto, error = false) {
@@ -166,6 +166,20 @@ async function iniciar() {
   await recargar(false);
   nodos.espera.hidden = true;
   nodos.app.hidden = false;
+
+  for(const [id,formato] of [['descargarExcel','xlsx'],['descargarPdf','pdf']])$("#"+id).addEventListener('click',async()=>{
+    if(descargando)return;
+    const estacion=seleccionActual();if(!estacion)return;
+    descargando=true;
+    for(const boton of ['descargarExcel','descargarPdf'])$("#"+boton).disabled=true;
+    try{
+      const {data}=await solicitar('/precios/reporte/'+encodeURIComponent(estacion.id));
+      const {descargarPrecios}=await import('./reporte-precios.js');
+      await descargarPrecios(data,formato);
+      mostrarMensaje('Archivo generado con los precios guardados de '+data.gasolinera.nombre+'.');
+    }catch(error){mostrarMensaje(mensajeError(error),true);}
+    finally{descargando=false;for(const boton of ['descargarExcel','descargarPdf'])$("#"+boton).disabled=false;}
+  });
 
   nodos.gestor.addEventListener("change", actualizarGestor);
   nodos.gasolineraEditor.addEventListener("change", renderEditor);
