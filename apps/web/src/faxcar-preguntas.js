@@ -1,0 +1,10 @@
+import {apiAutenticada,mensajeError} from './auth.js';
+export function crearPreguntasDocumentos(vehiculo){
+ const panel=document.createElement('section'),titulo=document.createElement('h4'),nota=document.createElement('p'),form=document.createElement('form'),label=document.createElement('label'),input=document.createElement('input'),boton=document.createElement('button'),estado=document.createElement('p'),respuestas=document.createElement('div');
+ titulo.textContent='FAXCAR · Preguntar a los documentos';nota.textContent='Consulta las evidencias ya investigadas de este vehículo. No realiza diagnósticos ni inspecciones.';label.textContent='Tu pregunta';input.required=true;input.minLength=5;input.maxLength=400;input.placeholder='¿Qué aceite indica la documentación?';label.append(input);boton.type='submit';boton.textContent='Consultar documentos';estado.setAttribute('role','status');form.append(label,boton);panel.append(titulo,nota,form,estado,respuestas);
+ form.addEventListener('submit',async e=>{e.preventDefault();if(boton.disabled)return;boton.disabled=true;estado.textContent='Consultando evidencia documental…';respuestas.replaceChildren();try{
+ const r=await apiAutenticada('/faxcar/vehiculos/'+encodeURIComponent(vehiculo.id)+'/preguntar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pregunta:input.value}),signal:AbortSignal.timeout(35000)});const j=await r.json();if(!r.ok)throw Error(j.message??'No se pudo consultar la IA.');
+ estado.textContent=j.data.estado==='sin_documentos'?j.data.aviso:j.data.citas.length?j.data.aviso:'Los documentos disponibles no contienen una respuesta respaldada.';
+ for(const cita of j.data.citas){const bloque=document.createElement('blockquote'),a=document.createElement('a');bloque.textContent=cita.cita;const u=new URL(cita.url);if(u.protocol==='https:'){a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';a.textContent=cita.titulo||'Ver referencia';bloque.append(document.createElement('br'),a);}respuestas.append(bloque);}
+ }catch(error){estado.textContent=mensajeError(error);}finally{boton.disabled=false;}});return panel;
+}

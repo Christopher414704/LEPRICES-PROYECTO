@@ -1,3 +1,4 @@
+import {crearPreguntasFaxcarRouter} from './faxcar-preguntas.routes.js';
 import { crearRutasRouter } from './rutas.routes.js';
 import { configurarRutasAlertas } from "../services/alertas.service.js";
 import { crearMiAutomovilRouter } from './mi-automovil.routes.js';
@@ -27,6 +28,7 @@ export function crearApiRouter(auth = crearServicioAuth(database), favoritos = c
     if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
     return seguridad.validarOrigen(req, res, next);
   });
+  router.use('/faxcar', crearPreguntasFaxcarRouter());
   const alertas = Router();
   configurarRutasAlertas(alertas, database);
   router.use("/avisos", alertas);
