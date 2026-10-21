@@ -2,6 +2,7 @@
 [hidden] { display: none !important; }
 .opcion-subidas { display: flex; align-items: center; gap: 10px; min-height: 44px; }
 .opcion-subidas input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--rojo); }
+#preferenciasRuta:has(:disabled) { opacity: .58; }
 .credito-rutas a { color: #a81925; }
 .tramos-ruta { display: grid; gap: 12px; }
 .tramo-ruta { padding: 16px; border-radius: 12px; background: #f2f6fa; border-left: 3px solid #2676b6; }

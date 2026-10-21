@@ -26,12 +26,18 @@ test('ida, regreso e ida y vuelta tienen distancias independientes, margen expl�
 test('coordenadas, kilómetros, consumo, precio y margen se validan en servidor', () => {
   for (const extra of [{ origen: null }, { origen: { ...origen, latitud: '' } }, { destino: origen }, { kmIda: 1 }, { kmVuelta: '' },
     { viaje: 'teleport' }, { kmIda: false }, { kmIda: Infinity }, { kmIda: 3001 }, { margen: -1 }, { margen: 51 },
-    { precioManual: 0 }, { precioManual: ' ' }, { combustible: 'hidrogeno' }, { modalidad: 'manual' }, { codigoGasolinera: '<x>' }]) {
+    { precioManual: 0 }, { precioManual: ' ' }, { combustible: 'hidrogeno' }, { modalidad: 'manual' }, { codigoGasolinera: '<x>' },
+    { criterioRuta: 'teletransporte' }, { evitarPeajes: 'true' }, { evitarAutopistas: 1 }, { evitarNoPavimentadas: null }]) {
     assert.throws(() => validarViaje({ ...viaje, ...extra }), { statusCode: 400 });
   }
   const p = validarViaje(viaje);
   for (const l100km of [undefined, null, true, '', 0, -1, 101]) assert.throws(() => calcularEstimacion(p, { l100km }, []), { statusCode: 400 });
   assert.ok(distanciaRecta(origen, destino) > 50);
+});
+test('preferencias de ruta tienen valores seguros y conservan elecciones válidas', () => {
+  assert.deepEqual(validarViaje(viaje).preferenciasRuta, { criterio: 'rapida', evitarPeajes: false, evitarAutopistas: false, evitarNoPavimentadas: true });
+  assert.deepEqual(validarViaje({ ...viaje, criterioRuta: 'corta', evitarPeajes: true, evitarAutopistas: true, evitarNoPavimentadas: false }).preferenciasRuta,
+    { criterio: 'corta', evitarPeajes: true, evitarAutopistas: true, evitarNoPavimentadas: false });
 });
 test('precios: deduplicación, distancia a extremos, unidad, moneda, futuro y modalidad', () => {
   const lista = [estacion('a', 30), estacion('a', 30), estacion('b', 8, { unidadMedida: 'litro' }),

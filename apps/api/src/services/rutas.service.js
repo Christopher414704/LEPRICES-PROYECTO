@@ -22,6 +22,11 @@ function numero(valor, min, max, nombre) {
   }
   return Number(valor);
 }
+function booleano(valor, predeterminado, nombre) {
+  if (valor === undefined) return predeterminado;
+  if (typeof valor !== 'boolean') throw error(400, `${nombre}: selecciona una opción válida.`);
+  return valor;
+}
 export function puntoGuatemala(punto) {
   if (!punto || typeof punto !== 'object') throw error(400, 'Selecciona origen y destino.');
   // Área de trabajo del mapa, no una comprobación de frontera política.
@@ -41,6 +46,14 @@ export function validarViaje(datos = {}) {
   if (!['ida', 'vuelta', 'ida_vuelta'].includes(datos.viaje)) throw error(400, 'Selecciona el tipo de viaje.');
   const distanciaModo = datos.distanciaModo ?? 'manual'; // Compatibilidad con clientes de la primera versión.
   if (!['api', 'manual'].includes(distanciaModo)) throw error(400, 'Selecciona distancia por carretera o kilómetros manuales.');
+  const criterioRuta = datos.criterioRuta ?? 'rapida';
+  if (!['rapida', 'equilibrada', 'corta'].includes(criterioRuta)) throw error(400, 'Selecciona una prioridad de ruta válida.');
+  const preferenciasRuta = {
+    criterio: criterioRuta,
+    evitarPeajes: booleano(datos.evitarPeajes, false, 'Evitar peajes'),
+    evitarAutopistas: booleano(datos.evitarAutopistas, false, 'Evitar autopistas'),
+    evitarNoPavimentadas: booleano(datos.evitarNoPavimentadas, true, 'Evitar caminos no pavimentados'),
+  };
   const ida = distanciaModo === 'manual' && datos.viaje !== 'vuelta' ? numero(datos.kmIda, 0.1, 3000, 'Distancia de ida') : 0;
   const vuelta = distanciaModo === 'manual' && datos.viaje !== 'ida' ? numero(datos.kmVuelta, 0.1, 3000, 'Distancia de regreso') : 0;
   if ([ida, vuelta].some(km => km > 0 && km < recta * 0.98)) {
@@ -59,7 +72,7 @@ export function validarViaje(datos = {}) {
   if(datos.modeloConsumo==='teorico' && ajustarSubidas)throw error(400,'El modelo teórico ya incluye pendientes. Desactiva el ajuste adicional por subidas.');
   if(datos.combustible==='electricidad' && (ajustarSubidas || datos.modeloConsumo==='fastsim' || datos.codigoGasolinera))throw error(400,'Para electricidad usa consumo en kWh o el modelo teórico, sin seleccionar un precio de gasolinera ni ajuste adicional por subidas.');
   const simulacion = datos.modeloConsumo==='teorico'?null:validarSimulacion(datos, numero);
-  return { origen, destino, viaje: datos.viaje, distanciaModo, simulacion, modeloConsumo: datos.modeloConsumo==='teorico'?'teorico':simulacion ? 'fastsim' : 'consumo', ajustarSubidas, masaKg, eficiencia, kmIda: ida, kmVuelta: vuelta, kilometros: ida + vuelta,
+  return { origen, destino, viaje: datos.viaje, distanciaModo, preferenciasRuta, simulacion, modeloConsumo: datos.modeloConsumo==='teorico'?'teorico':simulacion ? 'fastsim' : 'consumo', ajustarSubidas, masaKg, eficiencia, kmIda: ida, kmVuelta: vuelta, kilometros: ida + vuelta,
     combustible: datos.combustible, modalidad: datos.modalidad, margen, precioManual,
     codigoGasolinera: datos.codigoGasolinera ?? null, distanciaRectaKm: recta };
 }

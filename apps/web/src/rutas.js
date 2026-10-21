@@ -83,6 +83,7 @@ $('centrarRuta').addEventListener('click', () => mapa?.centrar());
 function ajustarCampos() {
   const viaje = $('viajeRuta').value;
   const manual = $('distanciaModo').value === 'manual';
+  for (const id of ['criterioRuta', 'evitarPeajesRuta', 'evitarAutopistasRuta', 'evitarNoPavimentadasRuta']) $(id).disabled = manual;
   const opcionFisica = $('modeloConsumoRuta').querySelector('option[value="fastsim"]');
   const electrico=$('combustibleRuta').value==='electricidad';
   opcionFisica.disabled = electrico || manual || consumoMedido || !consumoListo || !simulacionCompatible;
@@ -123,7 +124,7 @@ function ajustarCampos() {
   for (const [suffix, visible] of [['Ida', viaje !== 'vuelta'], ['Vuelta', viaje !== 'ida']]) {
     $(`campoKm${suffix}`).hidden = !visible; $(`km${suffix}`).disabled = !visible || !manual; $(`km${suffix}`).required = visible && manual;
   }
-  $('notaDistancia').textContent = manual ? 'Indica los kilómetros por carretera de cada sentido. La línea punteada es una guía; esta alternativa no obtiene elevaciones ni tiempos.' : 'Al calcular, enviamos los puntos A y B y el tipo de vehículo a Valhalla para obtener la carretera y sus elevaciones. Tu bitácora y datos personales permanecen en LEPRICES.';
+  $('notaDistancia').textContent = manual ? 'Indica los kilómetros por carretera de cada sentido. La línea punteada es una guía; esta alternativa no obtiene elevaciones, tiempos ni aplica preferencias de ruta.' : 'Al calcular, enviamos los puntos A y B, el tipo de vehículo y las preferencias de ruta a Valhalla para obtener la carretera y sus elevaciones. Tu bitácora y datos personales permanecen en LEPRICES.';
   // El consumo medido ya puede incluir pendientes; evita sumar ese esfuerzo dos veces.
   $('ajustarSubidas').disabled = electrico || manual || consumoMedido || !consumoListo || fisica || teorico;
   if ($('ajustarSubidas').disabled) $('ajustarSubidas').checked = false;
@@ -292,7 +293,10 @@ function mostrarResultado(data) {
   ultimoResultado = data;
   const electrico=data.combustible==='electricidad';
   const viajes = { ida: 'Solo ida · A → B', vuelta: 'Solo regreso · B → A', ida_vuelta: 'Ida y vuelta · A → B → A' };
-  $('descripcionRuta').textContent = `${viajes[data.viaje]} · ${data.ruta ? `Carretera calculada con ${data.ruta.proveedor}. Duración: ${formato(data.ruta.segundos / 60)} min, sin tráfico en vivo.` : 'Kilómetros por carretera ingresados por ti.'}`;
+  const criterios = { rapida: 'más rápida', equilibrada: 'equilibrada', corta: 'más corta' };
+  const condiciones = data.ruta?.preferencias ? [data.ruta.preferencias.evitarPeajes && 'sin peajes', data.ruta.preferencias.evitarAutopistas && 'sin autopistas', data.ruta.preferencias.evitarNoPavimentadas && 'sin caminos no pavimentados'].filter(Boolean) : [];
+  const perfil = data.ruta?.preferencias ? ` Perfil ${criterios[data.ruta.preferencias.criterio] ?? data.ruta.preferencias.criterio}${condiciones.length ? `; intenta evitar ${condiciones.join(', ').replaceAll('sin ', '')}` : ''}.` : '';
+  $('descripcionRuta').textContent = `${viajes[data.viaje]} · ${data.ruta ? `Carretera calculada con ${data.ruta.proveedor}. Duración: ${formato(data.ruta.segundos / 60)} min, sin tráfico en vivo.${perfil}` : 'Kilómetros por carretera ingresados por ti.'}`;
   const metricas=[['Distancia total',`${formato(data.kilometros)} km`],...(electrico?[['Energía de batería',`${formato(data.kwh)} kWh`]]:[['Combustible',`${formato(data.galones)} gal`],['Equivalente en litros',`${formato(data.litros)} L`]]),['Costo estimado',data.costo==null?'Sin precio':dinero(data.costo)]];
   $('metricasRuta').replaceChildren(...metricas.map(([nombre, valor]) => {
     const grupo = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = nombre; dd.textContent = valor; grupo.append(dt, dd); return grupo;
@@ -343,6 +347,8 @@ $('formRuta').addEventListener('submit', async evento => {
   $('calcularRuta').textContent = 'Calculando viaje…'; estado('Consultando precios y calculando tu presupuesto…');
   const vehiculoId = $('vehiculoRuta').value;
   const datos = { ...puntos(), viaje: $('viajeRuta').value, distanciaModo: $('distanciaModo').value, tipoVehiculo: $('tipoVehiculoRuta').value,
+    criterioRuta: $('criterioRuta').value, evitarPeajes: $('evitarPeajesRuta').checked,
+    evitarAutopistas: $('evitarAutopistasRuta').checked, evitarNoPavimentadas: $('evitarNoPavimentadasRuta').checked,
     modeloConsumo: $('modeloConsumoRuta').value,
     estimacionTeorica:{propulsion:$('propulsionTeorica').value,masaKg:$('pesoTeorico').value,velocidadKmh:$('velocidadTeorica').value,eficienciaPct:$('eficienciaTeorica').value,cda:$('cdaTeorico').value,rodadura:$('rodaduraTeorica').value,auxiliaresKw:$('auxiliaresTeoricos').value,
       ralentiLitrosHora:$('combustibleRuta').value==='electricidad'?0:$('ralentiTeorico').value,regeneracionPct:$('propulsionTeorica').value==='combustion'?0:$('regeneracionTeorica').value,

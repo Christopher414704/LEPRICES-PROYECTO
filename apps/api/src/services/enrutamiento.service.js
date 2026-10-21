@@ -123,9 +123,10 @@ export function crearEnrutador({ fetchFn = fetch, url = process.env.RUTAS_VALHAL
   if (endpoint.protocol !== 'https:' && !(endpoint.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname))) throw new Error('RUTAS_VALHALLA_URL requiere HTTPS o un servidor local.');
   const cache = new Map(), pendientes = new Map();
   let cola = Promise.resolve(), ultimoInicio = -Infinity, enfriarHasta = 0;
-  async function consultar({ origen, destino, viaje, tipo }) {
+  async function consultar({ origen, destino, viaje, tipo, preferenciasRuta }) {
     const ubicaciones = viaje === 'ida_vuelta' ? [origen, destino, origen] : viaje === 'vuelta' ? [destino, origen] : [origen, destino];
-    const clave = JSON.stringify([ubicaciones, tipo, viaje]);
+    const preferencias = preferenciasRuta ?? { criterio: 'rapida', evitarPeajes: false, evitarAutopistas: false, evitarNoPavimentadas: true };
+    const clave = JSON.stringify([ubicaciones, tipo, viaje, preferencias]);
     const previo = cache.get(clave);
     if (previo && ahora() - previo.fecha < 600_000) return structuredClone(previo.data);
     cache.delete(clave);
@@ -137,12 +138,17 @@ export function crearEnrutador({ fetchFn = fetch, url = process.env.RUTAS_VALHAL
       const pausa = intervaloMs - (ahora() - ultimoInicio); if (pausa > 0) await esperar(pausa);
       ultimoInicio = ahora();
       const costing = tipo === 'moto' ? 'motorcycle' : 'auto';
+      const opciones = { use_ferry: 0, use_tracks: preferencias.evitarNoPavimentadas ? 0 : .5,
+        exclude_unpaved: preferencias.evitarNoPavimentadas, use_tolls: preferencias.evitarPeajes ? 0 : .5,
+        use_highways: preferencias.evitarAutopistas ? 0 : .5,
+        use_distance: { rapida: 0, equilibrada: .5, corta: 1 }[preferencias.criterio],
+        speed_types: ['freeflow', 'constrained'] };
       let respuesta;
       try {
         respuesta = await fetchFn(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json',
           'User-Agent': 'LEPRICES/1.0 local-development', 'X-Client-Id': 'leprices-local-development' },
         body: JSON.stringify({ locations: ubicaciones.map(p => ({ lat: p.latitud, lon: p.longitud, type: 'break' })),
-          costing, costing_options: { [costing]: { use_ferry: 0, use_tracks: 0, speed_types: ['freeflow', 'constrained'] } }, units: 'kilometers', language: 'es-ES',
+          costing, costing_options: { [costing]: opciones }, units: 'kilometers', language: 'es-ES',
           directions_type: 'maneuvers', elevation_interval: 30, admin_crossings: true }), signal: AbortSignal.timeout(timeoutMs) });
         if (respuesta.status === 429) { enfriarHasta = ahora() + 60_000; throw fallo(429, 'El proveedor de carreteras alcanzó su límite. Espera un minuto o usa kilómetros manuales.'); }
         if (!respuesta.ok) throw indisponible();
@@ -154,6 +160,7 @@ export function crearEnrutador({ fetchFn = fetch, url = process.env.RUTAS_VALHAL
           chunks.push(value);
         }
         const data = interpretarRuta(JSON.parse(Buffer.concat(chunks).toString('utf8')), ubicaciones, viaje);
+        data.preferencias = { tipo, ...preferencias };
         if (cache.size >= 50) cache.delete(cache.keys().next().value);
         cache.set(clave, { fecha: ahora(), data }); return data;
       } catch (e) { if (e.statusCode) throw e; throw indisponible(); }

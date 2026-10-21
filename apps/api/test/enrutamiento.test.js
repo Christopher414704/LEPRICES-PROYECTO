@@ -72,6 +72,21 @@ test('peticiones compartidas, caché sin datos del usuario y pausa entre salidas
   assert.deepEqual(llamadas[1].body.costing_options.motorcycle.speed_types, ['freeflow', 'constrained']);
   tiempo += 600_001; await proveedor.consultar(consulta); assert.equal(llamadas.length, 3);
 });
+test('personaliza prioridad y condiciones, y separa sus resultados en caché', async () => {
+  const llamadas = [];
+  const proveedor = crearEnrutador({ intervaloMs: 0, fetchFn: async (_url, opts) => {
+    llamadas.push(JSON.parse(opts.body)); return respuesta(json());
+  } });
+  const base = { origen: a, destino: b, viaje: 'ida', tipo: 'auto' };
+  const preferenciasRuta = { criterio: 'corta', evitarPeajes: true, evitarAutopistas: true, evitarNoPavimentadas: false };
+  const resultado = await proveedor.consultar({ ...base, preferenciasRuta });
+  await proveedor.consultar({ ...base, preferenciasRuta: { ...preferenciasRuta, evitarPeajes: false } });
+  assert.equal(llamadas.length, 2);
+  assert.deepEqual(resultado.preferencias, { tipo: 'auto', ...preferenciasRuta });
+  assert.deepEqual(llamadas[0].costing_options.auto, { use_ferry: 0, use_tracks: .5, exclude_unpaved: false,
+    use_tolls: 0, use_highways: 0, use_distance: 1, speed_types: ['freeflow', 'constrained'] });
+  assert.equal(llamadas[1].costing_options.auto.use_tolls, .5);
+});
 test('regreso invierte puntos; ida y vuelta usa tres paradas en una petición', async () => {
   let body;
   const p = crearEnrutador({ intervaloMs: 0, fetchFn: async (_url, opts) => { body = JSON.parse(opts.body); return respuesta(json(body.locations.slice(1).map((_, i) => leg(body.locations.slice(i, i + 2).map(p => ({ latitud: p.lat, longitud: p.lon })))))); } });

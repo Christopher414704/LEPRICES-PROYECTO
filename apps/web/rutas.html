@@ -42,6 +42,14 @@
               <label id="campoKmVuelta" for="kmVuelta" hidden>Carretera de regreso · km<input id="kmVuelta" type="number" min="0.1" max="3000" step="0.1" inputmode="decimal" disabled placeholder="Puede ser distinta a la ida" /></label>
             </div>
             <p id="notaDistancia" class="ayuda nota-distancia">Al calcular, enviamos los puntos A y B y el tipo de vehículo a Valhalla para obtener la carretera y sus elevaciones. Tu bitácora y datos personales permanecen en LEPRICES.</p>
+            <div id="preferenciasRuta">
+              <h3>Modalidad y condiciones de la ruta</h3>
+              <label for="criterioRuta">Prioridad<select id="criterioRuta"><option value="rapida">Más rápida</option><option value="equilibrada">Equilibrar tiempo y distancia</option><option value="corta">Más corta</option></select></label>
+              <label class="opcion-subidas"><input id="evitarPeajesRuta" type="checkbox" />Evitar peajes cuando sea posible</label>
+              <label class="opcion-subidas"><input id="evitarAutopistasRuta" type="checkbox" />Evitar autopistas cuando sea posible</label>
+              <label class="opcion-subidas"><input id="evitarNoPavimentadasRuta" type="checkbox" checked />Evitar caminos no pavimentados</label>
+              <p class="ayuda">Estas preferencias orientan al proveedor, pero una vía puede ser necesaria para completar el recorrido. Verifica siempre la carretera antes de viajar.</p>
+            </div>
             <h3>Tu vehículo y combustible</h3>
             <label for="vehiculoRuta">Consumo del vehículo<select id="vehiculoRuta"><option value="">Ingresar consumo o estimar cualquier vehículo</option></select></label>
             <p id="estadoGarajeRuta" class="ayuda" role="status">Puedes calcular sin cuenta o usar tu garaje si ya iniciaste sesión.</p>
