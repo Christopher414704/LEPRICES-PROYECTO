@@ -1,3 +1,4 @@
+import {compararEscenariosConsumo} from './escenarios-consumo.js';
 import { listarGasolinerasConPrecios } from './gasolineras.service.js';
 import { crearServicioMiAutomovil } from './mi-automovil.service.js';
 import { crearServicioBitacoraCombustible } from './bitacora-combustible.service.js';
@@ -218,7 +219,9 @@ export function crearServicioRutas({ listar = listarGasolinerasConPrecios,
       consumo={vehiculo:consumo.vehiculo,...estimarConsumoTeorico({...datos.estimacionTeorica,...(propulsion?{propulsion}:{})},viaje.combustible,viaje)};
     }
     const estaciones = viaje.combustible==='electricidad'?[]:elegirPrecios(grupos.flatMap(g => g.slice(0, 300)), viaje);
-    return calcularEstimacion(viaje, consumo, estaciones, grupos.some(g => g.length > 300), simulacion);
+    const resultado=calcularEstimacion(viaje, consumo, estaciones, grupos.some(g => g.length > 300), simulacion);
+    resultado.escenariosConsumo=compararEscenariosConsumo({viaje,consumo,datos,estaciones,calcular:calcularEstimacion,estimar:estimarConsumoTeorico});
+    return resultado;
   }
   return { estimar, consumoVehiculo };
 }
