@@ -1,3 +1,4 @@
+import { textoCelda } from "./comparacion-vehiculos.js";
 import { categoriasTecnicas, fuenteSegura } from './especificaciones-tecnicas.js';
 
 const texto = valor => String(valor ?? '').normalize('NFKC').replace(/[–—]/g, '-').replace(/[^\x20-\x7e\u00a0-\u00ff\n]/g, '?');
@@ -34,7 +35,7 @@ export function datosInformeFaxcar(vehiculo, generadoEn = new Date()) {
     contradicciones: ficha.complemento?.conflictos?.length ?? 0 };
 }
 
-export async function crearPdfInformeFaxcar(vehiculo, generadoEn) {
+export async function crearPdfInformeFaxcar(vehiculo, generadoEn, comparacion = null) {
   const datos = datosInformeFaxcar(vehiculo, generadoEn);
   const { jsPDF } = await import('jspdf');
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
@@ -61,11 +62,15 @@ export async function crearPdfInformeFaxcar(vehiculo, generadoEn) {
     pdf.setFillColor(231, 236, 242); pdf.rect(margen, y - 4, ancho, 9, 'F');
     escribir(t, margen + 2, y + 2, 11, true); y += 13;
   }
+  let titulosTabla = ['Característica', 'Información disponible / fuente', 'Estado de verificación'];
   function cabecera() {
-    let x = margen;
-    for (const [i, t] of ['Característica', 'Información disponible / fuente', 'Estado de verificación'].entries()) {
-      escribir(t, x + 2, y, 8, true); x += anchos[i];
-    } y += 6;
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8);
+    const lineas = titulosTabla.map((t,i)=>pdf.splitTextToSize(texto(t),anchos[i]-4));
+    const alto = Math.max(...lineas.map(l=>l.length))*4+4;
+    if(y+alto+10>limite) pagina(true);
+    let x=margen;
+    lineas.forEach((ls,i)=>{ls.forEach((l,j)=>escribir(l,x+2,y+j*4,8,true));x+=anchos[i];});
+    y+=alto;
   }
   function fila(valores, categoria) {
     pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9);
@@ -108,6 +113,14 @@ export async function crearPdfInformeFaxcar(vehiculo, generadoEn) {
     const campos = datos.categorias.flatMap(c => c.campos);
     parrafo('Campos pendientes: ' + datos.pendientes.map(c => campos.find(f => f.campo === c)?.nombre || 'Dato técnico sin respaldo').join(', '));
   }
+  if (comparacion) {
+    seccion('Comparación de vehículos seleccionados');
+    parrafo('Valores originales sin conversiones. Una ausencia puede corresponder a información no disponible o a un campo no aplicable.');
+    titulosTabla = ['Característica', ...comparacion.columnas.map(c=>c.nombre)];
+    anchos.splice(0, anchos.length, 40, ...comparacion.columnas.map(()=>136/comparacion.columnas.length));
+    cabecera();
+    for (const f of comparacion.filas) fila([f.categoria+' / '+f.nombre,...f.celdas.map(textoCelda)],'Comparación');
+  }
   seccion('5. Fuentes y citas documentales');
   if (!datos.fuentes.length) parrafo('No hay fuentes documentales enlazables en la ficha. La ausencia de evidencia no se sustituye por información generada.');
   for (const fuente of datos.fuentes) {
@@ -121,8 +134,8 @@ export async function crearPdfInformeFaxcar(vehiculo, generadoEn) {
   return pdf;
 }
 
-export async function descargarInformeFaxcar(vehiculo, { crearPdf = crearPdfInformeFaxcar } = {}) {
-  const pdf = await crearPdf(vehiculo);
+export async function descargarInformeFaxcar(vehiculo, { crearPdf = crearPdfInformeFaxcar, comparacion = null } = {}) {
+  const pdf = await crearPdf(vehiculo, undefined, comparacion);
   const nombre = `FAXCAR-${vehiculo.ficha.marca}-${vehiculo.ficha.modelo}-${vehiculo.ficha.anio ?? 'sin-anio'}`.replace(/[^\p{L}\p{N}-]/gu, '_').slice(0, 120) + '.pdf';
   await pdf.save(nombre, { returnPromise: true });
 }
