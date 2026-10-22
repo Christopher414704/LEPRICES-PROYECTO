@@ -1,3 +1,5 @@
+import {asistenteRutas} from './qwen-rutas.js';
+import {evaluarRespaldo} from './evaluacion-rutas.js';
 import {compararEscenariosConsumo} from './escenarios-consumo.js';
 import { listarGasolinerasConPrecios } from './gasolineras.service.js';
 import { crearServicioMiAutomovil } from './mi-automovil.service.js';
@@ -149,7 +151,7 @@ export function calcularEstimacion(viaje, consumo, estaciones, hayMas = false, s
     estaciones, calculadoEn: new Date().toISOString() };
 }
 export function crearServicioRutas({ listar = listarGasolinerasConPrecios,
-  garaje = crearServicioMiAutomovil(database, {}), bitacora = crearBitacoraVehiculos(database), proveedor = enrutador, simulador = simuladorConsumo } = {}) {
+  garaje = crearServicioMiAutomovil(database, {}), bitacora = crearBitacoraVehiculos(database), proveedor = enrutador, simulador = simuladorConsumo, asistente = asistenteRutas } = {}) {
   async function consumoVehiculo(usuario, id) {
     if (usuario?.rol !== 'conductor') throw error(403, 'Seleccionar tu vehículo requiere una cuenta de conductor.');
     if (!/^[1-9]\d{0,17}$/.test(String(id ?? ''))) throw error(400, 'Vehículo inválido.');
@@ -221,6 +223,15 @@ export function crearServicioRutas({ listar = listarGasolinerasConPrecios,
     const estaciones = viaje.combustible==='electricidad'?[]:elegirPrecios(grupos.flatMap(g => g.slice(0, 300)), viaje);
     const resultado=calcularEstimacion(viaje, consumo, estaciones, grupos.some(g => g.length > 300), simulacion);
     resultado.escenariosConsumo=compararEscenariosConsumo({viaje,consumo,datos,estaciones,calcular:calcularEstimacion,estimar:estimarConsumoTeorico});
+    resultado.respaldo=evaluarRespaldo(resultado);
+    const disponibles=resultado.escenariosConsumo.filter(e=>!e.error);
+    const consultar=disponibles.length?async nombre=>{
+      const escenario=disponibles.find(e=>e.escenario===nombre);
+      if(!escenario)throw Error('Escenario no disponible');
+      return structuredClone(escenario);
+    }:null;
+    try{resultado.analisisIA=await asistente.analizar(structuredClone(resultado),consultar);}
+    catch{resultado.analisisIA={estado:'no_disponible',modificaConsumo:false};}
     return resultado;
   }
   return { estimar, consumoVehiculo };

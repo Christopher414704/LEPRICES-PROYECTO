@@ -1,3 +1,4 @@
+import {mostrarInterpretacionRutas} from './interpretacion-rutas.js';
 import {mostrarEscenariosConsumo} from './escenarios-consumo.js';
 import { consultarSesion, solicitarApi, mensajeError } from './auth.js';
 import { CIUDADES_RUTA, LITROS_GALON, enlaceNavegacion, nombreConsumo } from './rutas-utils.js';
@@ -291,6 +292,7 @@ function mostrarCarretera(data) {
   mapa?.centrar();
 }
 function mostrarResultado(data) {
+  mostrarInterpretacionRutas(data);
   let escenarios=document.getElementById('escenariosConsumo');if(!escenarios){escenarios=document.createElement('section');escenarios.id='escenariosConsumo';document.getElementById('resultadoRuta').append(escenarios);}mostrarEscenariosConsumo(data,escenarios);
   ultimoResultado = data;
   const electrico=data.combustible==='electricidad';
