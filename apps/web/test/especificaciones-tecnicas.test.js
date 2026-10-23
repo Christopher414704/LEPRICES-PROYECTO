@@ -34,7 +34,7 @@ test('autos, motos y eléctricos solo muestran campos aplicables',()=>{
  assert.equal(fuenteSegura('javascript:alert(1)'),null);
 });
 test('renderiza fuentes y categorías como texto sin interpretar HTML de los datos',()=>{
- class Nodo {constructor(tag){this.tag=tag;this.children=[];}append(...h){this.children.push(...h);}}
+ class Nodo {constructor(tag){this.tag=tag;this.children=[];}append(...h){this.children.push(...h);}setAttribute(nombre,valor){this[nombre]=valor;}}
  globalThis.document={createElement:tag=>new Nodo(tag)};
  try {const r=crearEspecificaciones({tipo:'moto',transmision:'<script>peligro</script>'});
  const recorrer=n=>[n,...n.children.flatMap(recorrer)];const nodos=recorrer(r);

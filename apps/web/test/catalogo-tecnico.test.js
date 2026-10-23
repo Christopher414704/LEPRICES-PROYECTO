@@ -4,7 +4,7 @@ import { crearVisorCatalogo } from '../src/catalogo-tecnico.js';
 
 function nodo(tag = 'div') {
   return { tag, children: [], disabled: false, append(...hijos) { this.children.push(...hijos); },
-    replaceChildren(...hijos) { this.children = hijos; } };
+    replaceChildren(...hijos) { this.children = hijos; }, setAttribute(nombre, valor) { this[nombre] = valor; } };
 }
 
 function preparar(t, consultar) {

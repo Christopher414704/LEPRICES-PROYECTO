@@ -1,5 +1,6 @@
 import { textoCelda } from "./comparacion-vehiculos.js";
 import { categoriasTecnicas, fuenteSegura } from './especificaciones-tecnicas.js';
+import { interpretarTraccion } from './traccion-vehiculo.js';
 
 const texto = valor => String(valor ?? '').normalize('NFKC').replace(/[–—]/g, '-').replace(/[^\x20-\x7e\u00a0-\u00ff\n]/g, '?');
 const urlSegura = valor => {
@@ -99,6 +100,22 @@ export async function crearPdfInformeFaxcar(vehiculo, generadoEn, comparacion = 
   parrafo('Documento de consulta técnica del modelo. Las referencias generales y los datos declarados requieren confirmación para la versión y unidad seleccionadas. Los campos incompletos y las contradicciones se conservan visibles.');
   parrafo('No acredita reparaciones, accidentes, inspecciones, estado mecánico ni historial individual. No se han realizado inspecciones físicas ni verificaciones por VIN para generar este documento.');
   seccion('3. Ficha técnica y evidencia disponible');
+  const traccion = interpretarTraccion(vehiculo.ficha);
+  seccion('Sistema de tracción');
+  parrafo(`${traccion.titulo}. ${traccion.estado}. ${traccion.aviso}`);
+  if (y + 34 > limite) pagina(true);
+  const xRuedas = traccion.tipo === 'moto' ? [103] : [91, 119];
+  const dibujarRueda = (x, cy, motriz) => {
+    pdf.setFillColor(...(motriz ? [181, 25, 40] : [222, 228, 235]));
+    pdf.setDrawColor(83, 99, 115); pdf.roundedRect(x, cy, 8, 12, 2, 2, 'FD');
+  };
+  pdf.setDrawColor(137, 151, 168); pdf.roundedRect(84, y - 2, 51, 34, 5, 5, 'S');
+  escribir('Delante', margen, y + 6, 8); escribir('Atrás', margen, y + 26, 8);
+  for (const x of xRuedas) {
+    dibujarRueda(x, y, traccion.tipo === 'moto' ? traccion.ruedas.delantera : traccion.ruedas[x === xRuedas[0] ? 'delanteraIzquierda' : 'delanteraDerecha']);
+    dibujarRueda(x, y + 18, traccion.tipo === 'moto' ? traccion.ruedas.trasera : traccion.ruedas[x === xRuedas[0] ? 'traseraIzquierda' : 'traseraDerecha']);
+  }
+  y += 40;
   for (const categoria of datos.categorias) {
     seccion(categoria.nombre); cabecera();
     for (const campo of categoria.campos) {

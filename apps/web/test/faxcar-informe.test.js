@@ -42,6 +42,20 @@ test('PDF reabre, contiene secciones, citas, estados y enlaces reales sin confir
   } finally { await doc.destroy(); }
 });
 
+test('HU-35 el informe muestra el esquema de tracción sin confirmar 4x2 ni conflictos', async () => {
+  const ficha = structuredClone(vehiculo); ficha.ficha.traccion = '4x2';
+  let datos = datosInformeFaxcar(ficha, ahora);
+  assert.equal(datos.categorias.flatMap(c => c.campos).find(c => c.campo === 'traccion').estado, 'Declarado por el usuario');
+  const pdf = await crearPdfInformeFaxcar(ficha, ahora), doc = await abrir(pdf);
+  try {
+    let contenido = '';
+    for (let i = 1; i <= doc.numPages; i++) contenido += (await (await doc.getPage(i)).getTextContent()).items.map(t => t.str).join(' ');
+    assert.match(contenido, /Sistema de tracción/);
+    assert.match(contenido, /Eje motriz sin confirmar/);
+    assert.ok(!contenido.includes('Tracción delantera. Confirmado'));
+  } finally { await doc.destroy(); }
+});
+
 test('campos y citas extensos continúan en páginas legibles sin perder el final ni salirse del área', async () => {
   const largo = structuredClone(vehiculo);
   largo.ficha.complemento.datos[0].valor = 'Gasolina de referencia '.repeat(220) + 'FIN_VALOR';

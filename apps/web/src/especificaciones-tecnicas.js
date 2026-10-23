@@ -1,3 +1,5 @@
+import { crearDiagramaTraccion } from './traccion-vehiculo.js';
+
 // Catálogo explícito: nunca inferir equipamiento por marca, gama o tipo de vehículo.
 const campos = [
  ['motorCc','Cilindrada','Motor','cc'], ['motorLitros','Cilindrada','Motor','L'],
@@ -75,6 +77,7 @@ export function crearEspecificaciones(ficha, formatos = {}) {
   }
   raiz.append(seccion);
  }
+ raiz.append(crearDiagramaTraccion(ficha));
  return raiz;
 }
 
