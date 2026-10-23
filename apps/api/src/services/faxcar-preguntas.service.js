@@ -31,9 +31,9 @@ export function crearPreguntasFaxcar(db,{solicitar=fetch,variables=process.env}=
  return {async preguntar(usuario,id,pregunta){
  if(!usuario?.id)throw fallo(401,'Inicia sesión para continuar.');
  if(!/^[1-9]\d{0,17}$/.test(String(id??''))||typeof pregunta!=='string'||pregunta.trim().length<5||pregunta.length>400)throw fallo(400,'Selecciona un vehículo y escribe una pregunta de 5 a 400 caracteres.');
- const {rows:[v]}=await db.query(`SELECT v.ficha_personal,c.ficha FROM vehiculos_usuario v LEFT JOIN catalogo_vehiculos c ON c.id=v.id_catalogo WHERE v.id=$1 AND v.id_usuario=$2`,[id,usuario.id]);
+ const {rows:[v]}=await db.query(`SELECT v.ficha_personal,v.complemento_personal,c.ficha FROM vehiculos_usuario v LEFT JOIN catalogo_vehiculos c ON c.id=v.id_catalogo WHERE v.id=$1 AND v.id_usuario=$2`,[id,usuario.id]);
  if(!v)throw fallo(404,'No encontramos el vehículo en tu cuenta.');
- const ficha=v.ficha_personal??v.ficha;
+ const ficha={...(v.ficha_personal??v.ficha),...(v.complemento_personal?{complemento:v.complemento_personal}:{})};
  const fuentes=fuentesDeFicha(ficha);
  if(!fuentes.length)return {estado:'sin_documentos',citas:[],aviso:'Este vehículo no tiene evidencia documental consultada. Una ficha sin citas no basta para responder.'};
  if(ocupado)throw fallo(429,'La IA está ocupada. Reintenta en un momento.');

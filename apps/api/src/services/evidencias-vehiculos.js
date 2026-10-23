@@ -2,6 +2,9 @@ export const camposVehiculo = ['motorLitros','motorCc','cilindros','transmision'
 export const revisionInvestigacion = 13;
 export function faltantesFicha(ficha = {}, datos = []) {
   const presentes = new Set(datos.map(d => d.campo));
+  if (/^(?:electricity|electricidad|el[eé]ctrico)$/i.test(String(ficha.combustible ?? '').trim())) {
+    for (const campo of ['motorLitros', 'motorCc', 'cilindros', 'consumoCiudadL100', 'consumoCarreteraL100', 'consumoCombinadoL100']) presentes.add(campo);
+  }
   for (const c of camposVehiculo) {
     const ciclo = {consumoCiudadL100:'ciudad',consumoCarreteraL100:'carretera',consumoCombinadoL100:'combinado'}[c];
     if (ciclo ? ficha.consumo?.[ciclo] > 0 : ficha[c] != null && ficha[c] !== '') presentes.add(c);

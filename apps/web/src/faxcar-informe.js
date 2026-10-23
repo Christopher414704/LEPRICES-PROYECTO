@@ -32,7 +32,7 @@ export function datosInformeFaxcar(vehiculo, generadoEn = new Date()) {
     identidad: [ficha.marca, ficha.modelo, ficha.anio ?? 'Año por confirmar'].join(' · '),
     version: ficha.version || 'Sin versión confirmada', mercado: ficha.mercado || 'Sin mercado confirmado',
     generadoEn: new Date(generadoEn).toISOString(), investigadoEn: ficha.complemento?.actualizadoEn || null,
-    categorias, fuentes, pendientes: ficha.complemento?.faltantes ?? [],
+    categorias, fuentes, pendientes: categorias.flatMap(c => c.campos.filter(campo => campo.estado === 'Información incompleta').map(campo => campo.campo)),
     contradicciones: ficha.complemento?.conflictos?.length ?? 0 };
 }
 

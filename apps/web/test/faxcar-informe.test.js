@@ -20,6 +20,16 @@ test('reutiliza categorías y estados, conserva evidencia, excluye URLs insegura
   assert.equal(datos.generadoEn, ahora.toISOString());
 });
 
+test('informe cuenta campos realmente incompletos aunque aún no exista investigación', () => {
+  const sinInvestigar = { id: '8', ficha: { tipo: 'auto', marca: 'Demo', modelo: 'Base', anio: 2025 } };
+  const datos = datosInformeFaxcar(sinInvestigar, ahora);
+  const incompletos = datos.categorias.flatMap(c => c.campos).filter(c => c.estado === 'Información incompleta');
+  assert.ok(incompletos.length > 0);
+  assert.deepEqual(datos.pendientes, incompletos.map(c => c.campo));
+  const electrico = datosInformeFaxcar({ id: '9', ficha: { ...sinInvestigar.ficha, combustible: 'Electricity' } }, ahora);
+  assert.ok(!electrico.pendientes.some(c => c === 'motorLitros' || c.startsWith('consumo')));
+});
+
 async function abrir(pdf) {
   const requireApi = createRequire(new URL('../../api/package.json', import.meta.url));
   const { getDocument } = await import(pathToFileURL(requireApi.resolve('pdfjs-dist/legacy/build/pdf.mjs')).href);

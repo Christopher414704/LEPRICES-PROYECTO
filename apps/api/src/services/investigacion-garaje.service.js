@@ -38,11 +38,14 @@ export function crearInvestigacionGaraje(db, { ejecutar = ejecutarInvestigacion,
   }
   async function vehiculo(usuario, id) {
     acceso(usuario, id);
-    const { rows: [v] } = await db.query(`SELECT v.id, COALESCE(v.ficha_personal,c.ficha) AS ficha
+    const { rows: [v] } = await db.query(`SELECT v.id, v.ficha_personal, v.complemento_personal, v.anio_declarado, c.ficha
       FROM vehiculos_usuario v LEFT JOIN catalogo_vehiculos c ON c.id=v.id_catalogo
       WHERE v.id=$1 AND v.id_usuario=$2`, [id, usuario.id]);
     if (!v) throw fallo(404, 'No encontramos el vehículo en tu garaje.');
-    return v;
+    const fichaBase = v.ficha_personal ?? v.ficha;
+    return { id: v.id, ficha: { ...fichaBase,
+      ...(v.complemento_personal ? { complemento: v.complemento_personal } : {}),
+      ...(v.anio_declarado ? { anio: v.anio_declarado } : {}) } };
   }
   async function iniciar(usuario, id) {
     const v = await vehiculo(usuario, id);
@@ -78,10 +81,9 @@ export function crearInvestigacionGaraje(db, { ejecutar = ejecutarInvestigacion,
         const complemento = { ...resultado, origen: 'investigacion', actualizadoEn: new Date(ahora()).toISOString(),
           datos: datos.map(d => ({ ...d, estado: 'pendiente_revision', alcance: 'modelo' })),
           faltantes: faltantesFicha(actual.ficha, datos) };
-        // Conservar cambios personales realizados mientras investigábamos.
-        const ficha = { ...actual.ficha, complemento };
-        const { rowCount } = await db.query('UPDATE vehiculos_usuario SET ficha_personal=$3::jsonb WHERE id=$1 AND id_usuario=$2',
-          [id, usuario.id, JSON.stringify(ficha)]);
+        // La investigación se guarda separada: jamás congela ni reemplaza la ficha del catálogo.
+        const { rowCount } = await db.query('UPDATE vehiculos_usuario SET complemento_personal=$3::jsonb WHERE id=$1 AND id_usuario=$2',
+          [id, usuario.id, JSON.stringify(complemento)]);
         if (!rowCount) throw fallo(404, 'El vehículo fue eliminado durante la investigación.');
         trabajo.estado = 'terminada'; trabajo.resultado = complemento;
         trabajo.progreso = 'Investigación terminada. Revisa fuentes, contradicciones y campos pendientes.';

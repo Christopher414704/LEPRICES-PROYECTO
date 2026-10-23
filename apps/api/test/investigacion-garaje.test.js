@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { crearInvestigacionGaraje, ejecutarInvestigacion } from '../src/services/investigacion-garaje.service.js';
+import * as migracionComplemento from '../../../database/migrations/0022_separar_complemento_vehicular.mjs';
 
 const usuario = { id: '1', rol: 'conductor' };
 const ficha = { tipo: 'moto', marca: 'Suzuki', modelo: 'GN125', anio: 2022, version: 'F', motorCc: 125 };
@@ -10,16 +11,23 @@ const resultado = { fuentes: [{ id: 'f', url: 'https://suzuki.com.gt/manual.pdf'
     urlFuente: 'https://suzuki.com.gt/manual.pdf', cita: 'Transmission: Manual.' }],
   conflictos: [{ campo: 'transmision', opciones: [] }], faltantes: ['combustible'] };
 function base() {
-  let guardada, actual = { ...ficha };
+  let guardada, complemento, actual = { ...ficha };
   const llamadas = [];
   return { llamadas, get guardada() { return guardada; }, cambiar(f) { actual = f; },
     async query(sql, parametros) {
       llamadas.push({ sql, parametros });
-      if (sql.startsWith('UPDATE')) { guardada = JSON.parse(parametros[2]); return { rowCount: 1 }; }
-      return { rows: parametros[1] === '1' && parametros[0] === '7' ? [{ id: '7', ficha: actual }] : [] };
+      if (sql.startsWith('UPDATE')) { complemento = JSON.parse(parametros[2]); guardada = { ...actual, complemento }; return { rowCount: 1 }; }
+      return { rows: parametros[1] === '1' && parametros[0] === '7' ? [{ id: '7', ficha: actual, complemento_personal: complemento }] : [] };
     } };
 }
 const esperar = () => new Promise(resolve => setImmediate(resolve));
+test('la migración agrega un complemento separado sin relajar la restricción del origen', () => {
+  const sentencias=[];
+  migracionComplemento.up({sql: texto => sentencias.push(texto)});
+  assert.match(sentencias[0], /ADD COLUMN complemento_personal JSONB/);
+  assert.match(sentencias[0], /jsonb_typeof\(complemento_personal\) = 'object'/);
+  assert.doesNotMatch(sentencias[0], /DROP CONSTRAINT vehiculo_origen/);
+});
 test('requiere vehículo seleccionado del propietario y toma identidad del servidor', async () => {
   const db = base(); let recibida, liberar;
   const servicio = crearInvestigacionGaraje(db, { ejecutar: async (consulta, id, informar) => {
@@ -48,6 +56,7 @@ test('requiere vehículo seleccionado del propietario y toma identidad del servi
   assert.equal(db.guardada.notaPersonal, 'Conservar');
   assert.equal(db.guardada.motorCc, 125);
   assert.equal(db.guardada.complemento.conflictos.length, 1);
+  assert.match(db.llamadas.find(c => c.sql.startsWith('UPDATE')).sql, /SET complemento_personal=/);
 });
 
 test('HU-40 ficha completa conserva el catálogo y no consume el proveedor ni cuota', async () => {
@@ -63,6 +72,15 @@ test('HU-40 ficha completa conserva el catálogo y no consume el proveedor ni cu
   }
   assert.equal(llamadas, 0);
   assert.equal(db.guardada, undefined);
+});
+
+test('ficha eléctrica completa no investiga cilindrada ni consumo de combustible', async () => {
+  const db = base(); let llamadas = 0;
+  db.cambiar({ tipo: 'auto', marca: 'Demo', modelo: 'EV', anio: 2025, combustible: 'Electricity',
+    transmision: 'Automática', traccion: 'AWD' });
+  const servicio = crearInvestigacionGaraje(db, { ejecutar: async () => { llamadas++; } });
+  assert.equal((await servicio.iniciar(usuario, '7')).estado, 'terminada');
+  assert.equal(llamadas, 0);
 });
 
 test('HU-40 solo almacena propuestas para campos todavía faltantes y conserva el resto', async () => {

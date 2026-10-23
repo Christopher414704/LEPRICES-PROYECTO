@@ -5,7 +5,12 @@ const cita='El aceite del motor se sustituye cada 5000 km.',url='https://fabrica
 const ficha={complemento:{datos:[{cita,urlFuente:url}]}};
 const variables={VEHICULOS_LLM_URL:'http://127.0.0.1:1234/v1',VEHICULOS_LLM_MODELO:'qwen3-4b-instruct-2507'};
 const usuario={id:'7',rol:'conductor'};
-function servicio({documentos=true,propio=true,solicitar=async()=>Response.json({choices:[{message:{content:JSON.stringify({citas:[{fuenteId:'0',cita}]})}}]})}={}){return crearPreguntasFaxcar({query:async(sql,p)=>{assert.match(sql,/v.id_usuario=\$2/);assert.deepEqual(p,['5','7']);assert.doesNotMatch(sql,/complemento_personal/);return {rows:propio?[{ficha:documentos?ficha:{}}]:[]};}},{variables,solicitar});}
+function servicio({documentos=true,propio=true,solicitar=async()=>Response.json({choices:[{message:{content:JSON.stringify({citas:[{fuenteId:'0',cita}]})}}]})}={}){return crearPreguntasFaxcar({query:async(sql,p)=>{assert.match(sql,/v.id_usuario=\$2/);assert.deepEqual(p,['5','7']);assert.match(sql,/complemento_personal/);return {rows:propio?[{ficha:documentos?ficha:{}}]:[]};}},{variables,solicitar});}
+test('preguntas FAXCAR leen el complemento separado de un vehículo del catálogo', async () => {
+ const db={query:async()=>({rows:[{ficha:{marca:'Demo',modelo:'Auto'},ficha_personal:null,complemento_personal:ficha.complemento}]})};
+ const r=await crearPreguntasFaxcar(db,{variables,solicitar:async()=>Response.json({choices:[{message:{content:JSON.stringify({citas:[{fuenteId:'0',cita}]})}}]})}).preguntar(usuario,'5','¿Qué aceite indica el documento?');
+ assert.equal(r.estado,'con_fuentes');assert.equal(r.citas[0].url,url);
+});
 test('HU32 respuestas literales enlazan la fuente sin publicar diagnóstico libre',async()=>{
  const r=await servicio().preguntar(usuario,'5','¿Qué aceite indica el documento?');assert.equal(r.estado,'con_fuentes');assert.equal(r.citas[0].url,url);assert.equal(r.citas[0].cita,cita);assert.match(r.aviso,/no es un diagnóstico/);
 });
