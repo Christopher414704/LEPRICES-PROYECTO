@@ -6,8 +6,8 @@ import { crearInvestigacionGaraje, ejecutarInvestigacion } from '../src/services
 const usuario = { id: '1', rol: 'conductor' };
 const ficha = { tipo: 'moto', marca: 'Suzuki', modelo: 'GN125', anio: 2022, version: 'F', motorCc: 125 };
 const resultado = { fuentes: [{ id: 'f', url: 'https://suzuki.com.gt/manual.pdf', titulo: 'Manual' }],
-  datos: [{ campo: 'motorCc', valor: 125, estado: 'confirmado', alcance: 'version', fuenteId: 'f',
-    urlFuente: 'https://suzuki.com.gt/manual.pdf', cita: 'Engine displacement: 125 cc.' }],
+  datos: [{ campo: 'transmision', valor: 'Manual', estado: 'confirmado', alcance: 'version', fuenteId: 'f',
+    urlFuente: 'https://suzuki.com.gt/manual.pdf', cita: 'Transmission: Manual.' }],
   conflictos: [{ campo: 'transmision', opciones: [] }], faltantes: ['combustible'] };
 function base() {
   let guardada, actual = { ...ficha };
@@ -32,7 +32,8 @@ test('requiere vehículo seleccionado del propietario y toma identidad del servi
   await assert.rejects(servicio.iniciar(usuario, '../7'), { statusCode: 400 });
   const trabajo = await servicio.iniciar(usuario, '7');
   assert.equal(trabajo.estado, 'investigando');
-  assert.deepEqual(recibida.consulta, { tipo: 'moto', marca: 'Suzuki', modelo: 'GN125', anio: 2022, version: 'F', mercado: '' });
+  assert.deepEqual(recibida.consulta, { tipo: 'moto', marca: 'Suzuki', modelo: 'GN125', anio: 2022, version: 'F', mercado: '',
+    camposPendientes: ['cilindros', 'transmision', 'traccion', 'combustible', 'consumoCiudadL100', 'consumoCarreteraL100', 'consumoCombinadoL100'] });
   assert.equal(recibida.id, '1');
   await assert.rejects(servicio.iniciar(usuario, '7'), { statusCode: 429 });
   assert.match((await servicio.consultar(usuario, '7', trabajo.id)).progreso, /Leyendo/);
@@ -47,6 +48,54 @@ test('requiere vehículo seleccionado del propietario y toma identidad del servi
   assert.equal(db.guardada.notaPersonal, 'Conservar');
   assert.equal(db.guardada.motorCc, 125);
   assert.equal(db.guardada.complemento.conflictos.length, 1);
+});
+
+test('HU-40 ficha completa conserva el catálogo y no consume el proveedor ni cuota', async () => {
+  const db = base(); let llamadas = 0;
+  db.cambiar({ ...ficha, cilindros: 1, transmision: 'Manual', traccion: '2x2', combustible: 'Gasolina',
+    consumo: { ciudad: 3, carretera: 2.5, combinado: 2.8 } });
+  const servicio = crearInvestigacionGaraje(db, { ejecutar: async () => { llamadas++; } });
+  for (let i = 0; i < 4; i++) {
+    const trabajo = await servicio.iniciar(usuario, '7');
+    assert.equal(trabajo.estado, 'terminada');
+    assert.equal(trabajo.id, null);
+    assert.match(trabajo.progreso, /catálogo/);
+  }
+  assert.equal(llamadas, 0);
+  assert.equal(db.guardada, undefined);
+});
+
+test('HU-40 solo almacena propuestas para campos todavía faltantes y conserva el resto', async () => {
+  const db = base(); let liberar, consulta;
+  const servicio = crearInvestigacionGaraje(db, { ejecutar: c => { consulta = c; return new Promise(resolve => { liberar = resolve; }); } });
+  const trabajo = await servicio.iniciar(usuario, '7');
+  assert.ok(!consulta.camposPendientes.includes('motorCc'));
+  assert.ok(!consulta.camposPendientes.includes('motorLitros'));
+  db.cambiar({ ...ficha, combustible: 'Gasolina', notaPersonal: 'Preservar' });
+  liberar({ ...resultado, datos: [
+    { campo: 'motorCc', valor: 150 }, { campo: 'combustible', valor: 'Diésel' },
+    { campo: 'transmision', valor: 'Manual', fuenteId: 'f', cita: 'Transmisión: Manual.' },
+  ] });
+  await esperar();
+  assert.equal((await servicio.consultar(usuario, '7', trabajo.id)).estado, 'terminada');
+  assert.deepEqual(db.guardada.complemento.datos.map(d => d.campo), ['transmision']);
+  assert.equal(db.guardada.combustible, 'Gasolina');
+  assert.equal(db.guardada.notaPersonal, 'Preservar');
+  assert.ok(!db.guardada.complemento.faltantes.includes('motorCc'));
+  assert.ok(!db.guardada.complemento.faltantes.includes('combustible'));
+  assert.deepEqual(db.guardada.complemento.fuentes, resultado.fuentes);
+});
+
+test('HU-40 no asocia resultados a otra versión si la ficha cambia durante la búsqueda', async () => {
+  const db = base(); let liberar;
+  const servicio = crearInvestigacionGaraje(db, { ejecutar: () => new Promise(resolve => { liberar = resolve; }) });
+  const trabajo = await servicio.iniciar(usuario, '7');
+  db.cambiar({ ...ficha, version: 'Sport' });
+  liberar(resultado); await esperar();
+  const fin = await servicio.consultar(usuario, '7', trabajo.id);
+  assert.equal(fin.estado, 'error');
+  assert.match(fin.progreso, /versión del vehículo cambió/);
+  assert.equal(db.guardada, undefined);
 });
 
 test('año requerido, errores no escriben datos y límite por cuenta sobrevive al proceso', async () => {

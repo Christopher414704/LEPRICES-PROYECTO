@@ -2,7 +2,7 @@ export function crearPanelInvestigacion(vehiculo, api, recargar) {
   const panel = document.createElement('section');
   const titulo = document.createElement('h4'); titulo.textContent = 'Investigación con fuentes documentadas';
   const aviso = document.createElement('p');
-  aviso.textContent = 'Investiga marca, modelo, año y versión registrados. Las citas respaldan referencias del modelo; revisa que correspondan a tu configuración. Plazo máximo: tres minutos.';
+  aviso.textContent = 'Se usa primero la ficha del catálogo. Solo se investigan datos faltantes de la marca, modelo, año y versión registrados; verifica las referencias antes de atribuirlas a tu vehículo. Plazo máximo: tres minutos.';
   const estado = document.createElement('p'); estado.setAttribute('role', 'status'); estado.setAttribute('aria-live', 'polite');
   const boton = document.createElement('button'); boton.type = 'button'; boton.textContent = 'Investigar este vehículo';
   boton.disabled = !vehiculo.ficha?.anio;
@@ -30,7 +30,7 @@ export function crearPanelInvestigacion(vehiculo, api, recargar) {
       while (panel.isConnected) {
         estado.textContent = trabajo.progreso;
         if (trabajo.estado === 'error') return;
-        if (trabajo.estado === 'terminada') { await recargar(); return; }
+        if (trabajo.estado === 'terminada') { if (trabajo.id) await recargar(); return; }
         await new Promise(resolve => setTimeout(resolve, 2000));
         if (!panel.isConnected) return;
         trabajo = await api(`/vehiculos/${encodeURIComponent(vehiculo.id)}/investigacion/${encodeURIComponent(trabajo.id)}`);

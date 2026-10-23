@@ -1,6 +1,7 @@
 import { fork } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
+import { faltantesFicha } from './evidencias-vehiculos.js';
 
 const fallo = (statusCode, message) => Object.assign(new Error(message), { statusCode });
 export function ejecutarInvestigacion(consulta, usuarioId, progreso, { plazoMs = 180000, crearProceso = fork } = {}) {
@@ -47,6 +48,10 @@ export function crearInvestigacionGaraje(db, { ejecutar = ejecutarInvestigacion,
     const v = await vehiculo(usuario, id);
     const f = v.ficha;
     if (!f?.marca || !f.modelo || !f.anio) throw fallo(400, 'Completa marca, modelo y año antes de investigar.');
+    // La ficha del catálogo tiene prioridad; las propuestas previas siguen pendientes de revisión.
+    const camposPendientes = faltantesFicha(f);
+    if (!camposPendientes.length) return { id: null, estado: 'terminada',
+      progreso: 'La ficha del catálogo ya contiene los datos técnicos disponibles. No fue necesario consultar proveedores adicionales.' };
     for (const [k, t] of trabajos) if (t.expira <= ahora() && t.estado !== 'investigando') trabajos.delete(k);
     for (const [k, t] of intentos) if (t.hasta <= ahora()) intentos.delete(k);
     if (ocupado || trabajos.size >= 100 || intentos.size >= 2000) throw fallo(429, 'El servicio está ocupado. Reintenta más tarde.');
@@ -57,15 +62,23 @@ export function crearInvestigacionGaraje(db, { ejecutar = ejecutarInvestigacion,
       progreso: 'Iniciando investigación del vehículo seleccionado.', expira: ahora() + 600000 };
     trabajos.set(trabajo.id, trabajo);
     const consulta = { tipo: f.tipo ?? 'auto', marca: f.marca, modelo: f.modelo, anio: f.anio,
-      version: f.version ?? '', mercado: f.mercado ?? '' };
+      version: f.version ?? '', mercado: f.mercado ?? '', camposPendientes };
     void (async () => {
       try {
         const resultado = await ejecutar(consulta, clave, texto => { trabajo.progreso = texto; });
+        // El catálogo puede actualizarse durante la investigación: nunca sustituir sus valores.
+        const actual = await vehiculo(usuario, id);
+        if (['tipo', 'marca', 'modelo', 'anio', 'version', 'mercado'].some(campo =>
+          String(actual.ficha?.[campo] ?? (campo === 'tipo' ? 'auto' : '')) !== String(consulta[campo]))) {
+          throw fallo(409, 'La versión del vehículo cambió durante la investigación. Reintenta con la ficha actual.');
+        }
+        const pendientesActuales = faltantesFicha(actual.ficha);
+        const datos = (resultado.datos ?? []).filter(d => camposPendientes.includes(d.campo) && pendientesActuales.includes(d.campo));
         // Una coincidencia literal no confirma año, mercado ni configuración.
         const complemento = { ...resultado, origen: 'investigacion', actualizadoEn: new Date(ahora()).toISOString(),
-          datos: (resultado.datos ?? []).map(d => ({ ...d, estado: 'pendiente_revision', alcance: 'modelo' })) };
-        // Releer para conservar cambios personales realizados mientras investigábamos.
-        const actual = await vehiculo(usuario, id);
+          datos: datos.map(d => ({ ...d, estado: 'pendiente_revision', alcance: 'modelo' })),
+          faltantes: faltantesFicha(actual.ficha, datos) };
+        // Conservar cambios personales realizados mientras investigábamos.
         const ficha = { ...actual.ficha, complemento };
         const { rowCount } = await db.query('UPDATE vehiculos_usuario SET ficha_personal=$3::jsonb WHERE id=$1 AND id_usuario=$2',
           [id, usuario.id, JSON.stringify(ficha)]);

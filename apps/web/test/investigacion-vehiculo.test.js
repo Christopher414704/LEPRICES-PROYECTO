@@ -30,3 +30,12 @@ test('investiga el vehículo seleccionado y recarga al terminar; comunica fallos
   assert.match(error.hijos[3].textContent, /Servicio no disponible/);
   assert.equal(error.hijos[2].disabled, false);
 });
+test('HU-40 una ficha completa informa el resultado sin recargar ni consultar otro proveedor', async t => {
+  documento(t); let recargas = 0;
+  const p = crearPanelInvestigacion({ id: '7', ficha: { anio: 2022 } }, async () => ({
+    id: null, estado: 'terminada', progreso: 'La ficha del catálogo ya contiene los datos técnicos disponibles.'
+  }), async () => { recargas++; });
+  await p.hijos[2].onclick();
+  assert.equal(recargas, 0);
+  assert.match(p.hijos[3].textContent, /catálogo/);
+});
