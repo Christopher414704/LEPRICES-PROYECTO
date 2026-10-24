@@ -1,3 +1,4 @@
+import {logoParaPdf,colorMarca} from './marca.js';
 export function fechaReporte(valor){
   if(!valor||!Number.isFinite(new Date(valor).getTime()))return 'Sin registrar';
   return new Intl.DateTimeFormat('es-GT',{timeZone:'America/Guatemala',dateStyle:'short',timeStyle:'short',hour12:false}).format(new Date(valor));
@@ -15,11 +16,11 @@ export async function crearExcelPrecios(datos){
   for(const t of ['LEPRICES · Precios vigentes',datos.gasolinera.nombre,ubicacion(datos.gasolinera),'Descargado: '+fechaReporte(datos.consultadoEn)+' · Hora de Guatemala','Fuente: precios guardados en LEPRICES. Sin registrar = no hay precio vigente.']){
     const r=hoja.addRow([String(t)]);hoja.mergeCells(r.number,1,r.number,6);r.height=30;r.alignment={vertical:'middle',wrapText:true};
   }
-  hoja.getRow(1).font={name:'Calibri',size:18,bold:true,color:{argb:'FFCD1924'}};
+  hoja.getRow(1).font={name:'Calibri',size:18,bold:true,color:{argb:'FF315FBE'}};
   hoja.getRow(2).font={name:'Calibri',size:14,bold:true};
   for(const categoria of datos.categorias){
     hoja.addRow([]);const titulo=hoja.addRow([categoria.nombre]);hoja.mergeCells(titulo.number,1,titulo.number,6);titulo.height=26;
-    titulo.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFCD1924'}};titulo.font={name:'Calibri',bold:true,size:12,color:{argb:'FFFFFFFF'}};
+    titulo.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF315FBE'}};titulo.font={name:'Calibri',bold:true,size:12,color:{argb:'FFFFFFFF'}};
     const cabecera=hoja.addRow(encabezados);cabecera.font={bold:true,color:{argb:'FFFFFFFF'}};cabecera.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF243447'}};cabecera.height=26;
     const filas=filasReporte(categoria);
     if(!filas.length){const r=hoja.addRow(['No hay combustibles registrados.']);hoja.mergeCells(r.number,1,r.number,6);r.height=26;}
@@ -35,14 +36,15 @@ export async function crearExcelPrecios(datos){
   return libro;
 }
 export async function crearPdfPrecios(datos){
+  const logo=await logoParaPdf();
   const {jsPDF}=await import('jspdf');const pdf=new jsPDF({unit:'mm',format:'a4',compress:true});
   const limpio=t=>String(t??'').replace(/[—–]/g,'-').replace(/[^\x20-\x7E\u00A0-\u00FF\n]/g,'');
   let y=0;const anchos=[47,33,23,18,20,35];
   const text=(t,x,cy,size=9,bold=false)=>{pdf.setFont('helvetica',bold?'bold':'normal');pdf.setFontSize(size);pdf.text(limpio(t),x,cy);};
-  function pagina(nueva=false){if(nueva)pdf.addPage();pdf.setFillColor(205,25,36);pdf.rect(0,0,210,3,'F');pdf.setTextColor(205,25,36);text('LEPRICES / PRECIOS VIGENTES',17,14,11,true);pdf.setTextColor(35,48,65);y=26;
+  function pagina(nueva=false){if(nueva)pdf.addPage();pdf.setFillColor(...colorMarca);pdf.rect(0,0,210,3,'F');pdf.setTextColor(...colorMarca);if(logo)pdf.addImage(logo,'PNG',17,7,38,10.8);text('LEPRICES / PRECIOS VIGENTES',logo?62:17,14,logo?9:11,true);pdf.setTextColor(35,48,65);y=26;
     for(const t of [datos.gasolinera.nombre,ubicacion(datos.gasolinera),'Descargado: '+fechaReporte(datos.consultadoEn)+' (Guatemala)']){pdf.setFontSize(10);for(const l of pdf.splitTextToSize(limpio(t),176)){text(l,17,y,10);y+=5;}}y+=4;
   }
-  function cabecera(nombre){pdf.setFillColor(205,25,36);pdf.rect(17,y-4,176,9,'F');pdf.setTextColor(255,255,255);text(nombre,20,y+2,11,true);y+=12;pdf.setTextColor(35,48,65);let x=17;for(let i=0;i<6;i++){text(encabezados[i],x+2,y,8,true);x+=anchos[i];}y+=6;}
+  function cabecera(nombre){pdf.setFillColor(...colorMarca);pdf.rect(17,y-4,176,9,'F');pdf.setTextColor(255,255,255);text(nombre,20,y+2,11,true);y+=12;pdf.setTextColor(35,48,65);let x=17;for(let i=0;i<6;i++){text(encabezados[i],x+2,y,8,true);x+=anchos[i];}y+=6;}
   pagina();
   for(const c of datos.categorias){if(y+40>274)pagina(true);cabecera(c.nombre);
     const filas=filasReporte(c);

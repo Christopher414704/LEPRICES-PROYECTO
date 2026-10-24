@@ -72,7 +72,7 @@ export async function iniciarMapaRutas(alMarcar) {
     gasolineras.entities.removeAll();
     for (const e of lista) {
       const entidad = gasolineras.entities.add({ id: `estacion-${e.codigo}`, position: Cartesian3.fromDegrees(e.ubicacion.longitud, e.ubicacion.latitud),
-        billboard: { image: '/images/ubicacion.png', width: 26, height: 34, verticalOrigin: VerticalOrigin.BOTTOM } });
+        billboard: { image: '/images/pin-gasolinera-azul.webp', width: 23, height: 38, verticalOrigin: VerticalOrigin.BOTTOM } });
       entidad.ubicacionRuta = e.ubicacion;
     }
     visor.scene.requestRender();

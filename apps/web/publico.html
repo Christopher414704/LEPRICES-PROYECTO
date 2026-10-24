@@ -1,19 +1,19 @@
 <!doctype html>
-<html lang="es">
+<html data-liquid-glass lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#d71920" />
+    <meta name="theme-color" content="#315fbe" />
     <meta name="description" content="Mapa público de gasolineras y precios de combustible en Guatemala." />
     <title>Mapa público de gasolineras | LEPRICES</title>
-  </head>
-  <body data-modo="publico">
+  <link rel="stylesheet" href="/src/liquid-glass.css"><link rel="stylesheet" href="/src/identidad-leprices.css"><link rel="stylesheet" href="/src/visuales-grupo.css"></head>
+  <body data-vista="publico" data-modo="publico">
     <div id="app">
       <main id="cesiumContainer" aria-label="Mapa público de gasolineras"></main>
 
       <header class="encabezado">
         <div class="espacio-logotipo">
-          <img src="/images/leprices-logo.png" alt="LEPRICES" width="148" height="72" />
+          <img src="/images/leprices-marca.png" alt="LEPRICES" width="148" height="72" />
         </div>
         <div class="titulo-mapa">
           <p class="subtitulo">Guatemala · precios por región</p>
@@ -63,5 +63,5 @@
       <aside id="tableroPrecios" class="tablero-precios" aria-labelledby="nombreGasolinera" aria-live="polite" hidden></aside>
     </div>
     <script type="module" src="/src/main.js"></script>
-  </body>
+  <script type="module" src="/src/visuales-grupo.js"></script></body>
 </html>

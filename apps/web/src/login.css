@@ -1,81 +1,40 @@
-:root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #202733;
-  background: #edf0f4;
-  font-synthesis: none;
-  --rojo: #d71920;
-}
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body { margin: 0; min-width: 320px; min-height: 100dvh; display: flex; flex-direction: column; }
-button, input { font: inherit; }
-.barra-marca {
-  display: flex; align-items: center; justify-content: space-between; gap: 24px;
-  padding: 8px clamp(20px, 5vw, 72px); min-height: 88px;
-  border-top: 4px solid var(--rojo); border-bottom: 1px solid #d4d8df;
-  background: linear-gradient(120deg, #fff, #f3f4f6);
-}
-.marca { display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 850; letter-spacing: -.04em; }
-.marca img { display: block; width: 86px; height: 62px; object-fit: contain; }
-.marca small { display: block; margin-top: 3px; color: #697380; font-size: 10px; font-weight: 500; letter-spacing: .03em; }
-.ubicacion { color: #6c7582; font-size: 12px; }
-.login {
-  display: grid; grid-template-columns: 1fr 1fr; width: min(1080px, calc(100% - 64px));
-  margin: auto; border: 1px solid #d3d8e0; border-radius: 24px; overflow: hidden;
-  background: #fff; box-shadow: 0 20px 60px #20273312, 0 2px 6px #20273308;
-}
-.panel-visual {
-  position: relative; display: flex; flex-direction: column; justify-content: space-between;
-  min-width: 0; padding: 38px; overflow: hidden;
-  background: radial-gradient(ellipse at 50% 42%, #46515f, transparent 68%), linear-gradient(145deg, #293340, #171e27);
-  color: #fff;
-}
-.logotipo-principal { display: block; width: 100%; height: auto; max-height: 320px; object-fit: contain; margin: 18px 0; filter: drop-shadow(0 18px 15px #0005); }
-.linea-roja { display: block; width: 38px; height: 4px; margin-bottom: 16px; border-radius: 4px; background: #fa3541; }
-.presentacion h2 { margin: 0; font-size: clamp(23px, 2.3vw, 29px); line-height: 1.25; letter-spacing: -.035em; }
-.panel-formulario { min-width: 0; display: flex; align-items: center; padding: 46px 50px; }
-.contenido, .formulario { width: 100%; }
-.bienvenida { margin: 0 0 12px; color: #bc1722; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
-h1 { margin: 0; font-size: clamp(27px, 2.8vw, 36px); line-height: 1.15; font-weight: 800; letter-spacing: -.045em; }
-.descripcion { margin: 14px 0 28px; color: #6c7582; font-size: 13px; line-height: 1.7; }
-.campo { position: relative; margin-bottom: 20px; }
-.campo label { display: block; margin-bottom: 8px; color: #414b59; font-size: 12px; font-weight: 650; }
-.campo input {
-  width: 100%; min-height: 52px; padding: 14px 15px; border: 1px solid #d3d8e0; border-radius: 10px;
-  color: #202733; background: #f8f9fb; outline: none; transition: border-color 150ms, box-shadow 150ms;
-  font-size: 16px;
-}
-.campo input::placeholder { color: #8a929e; font-size: 13px; }
-.campo input:focus { border-color: var(--rojo); background: #fff; box-shadow: 0 0 0 3px #d7192012; }
-.campo:focus-within label { color: #ba1721; }
-.campo-password input { padding-right: 84px; }
-.mostrar-password {
-  position: absolute; right: 8px; bottom: 5px; min-height: 42px; padding: 8px;
-  border: 0; border-radius: 7px; color: #68717e; background: transparent; font-size: 11px; font-weight: 650; cursor: pointer;
-}
-.mostrar-password:hover { color: #b41923; background: #fff0f1; }
-button:focus-visible { outline: 3px solid var(--rojo); outline-offset: 3px; }
-.boton-ingresar {
-  width: 100%; min-height: 52px; margin-top: 4px; border: 1px solid #b91620; border-radius: 10px;
-  color: #fff; background: linear-gradient(110deg, #e82530, #c8111c); box-shadow: 0 5px 13px #d7192020;
-  cursor: pointer; font-size: 14px; font-weight: 750; transition: filter 150ms, transform 150ms;
-}
-.boton-ingresar:hover:not(:disabled) { filter: brightness(.94); transform: translateY(-1px); }
-.boton-ingresar:disabled { opacity: .65; cursor: wait; }
-.enlace-publico { display: block; margin-top: 18px; color: #af1822; font-size: 12px; font-weight: 750; text-align: center; text-decoration: none; }
-.enlace-publico:hover { text-decoration: underline; }
-.boton-secundario { display: block; margin: 14px auto 0; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 8px; color: #ac1620; background: transparent; cursor: pointer; text-decoration: underline; font-size: 13px; }
-.mensaje { margin: 18px 0 0; padding: 12px 14px; border: 1px solid #f1c6ca; border-radius: 10px; color: #9d1520; background: #fff0f1; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
-@media (min-width: 761px) { .login { margin-block: 36px; align-self: center; } body { justify-content: space-between; } }
-@media (max-width: 1000px) { .panel-formulario { padding: 34px; } .panel-visual { padding: 28px; } }
-@media (max-width: 760px) {
-  .barra-marca { padding: 8px 20px; gap: 12px; }
-  .marca { gap: 10px; font-size: 20px; }
-  .marca img { width: 72px; height: 54px; }
-  .ubicacion { display: none; }
-  .login { grid-template-columns: 1fr; width: min(460px, calc(100% - 32px)); margin: 28px auto; border-radius: 20px; }
-  .panel-visual { display: none; }
-  .panel-formulario { padding: 32px 26px; border-top: 4px solid var(--rojo); }
-}
-@media (max-width: 360px) { .panel-formulario { padding: 28px 20px; } }
-@media (prefers-reduced-motion: reduce) { .campo input, .boton-ingresar { transition: none; } }
+:root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#202936;background:#eeede9;font-synthesis:none;--rojo:#3b6bd7}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;min-width:0;min-height:100dvh;background:radial-gradient(ellipse at 5% 90%,#e2e5e8,transparent 50%),radial-gradient(ellipse at 95% 0%,#fff,transparent 55%),#eeede9}
+button,input{font:inherit}a{color:inherit}
+.barra-marca{width:100%;margin:0;min-height:108px;padding:15px max(28px,calc((100% - 1120px)/2));display:flex;justify-content:space-between;align-items:center;gap:24px;border-top:4px solid var(--rojo)}
+.marca{display:flex;align-items:center;gap:16px;font-size:22px;font-weight:850;letter-spacing:-.04em;text-decoration:none}
+.marca img{width:100px;height:74px;object-fit:contain}.marca small{display:block;margin-top:5px;font-size:12px;letter-spacing:.01em;font-weight:500;color:#647181}
+.ubicacion{font-size:12px;color:#68717e;border:1px solid #d5d9dd;padding:9px 13px;border-radius:30px;background:#ffffff80}
+.acceso-cabecera{font-size:14px;color:#626d7b;display:flex;align-items:center;gap:16px}.acceso-cabecera a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;color:#3258af;font-weight:750;text-decoration:none;padding:12px 20px;background:#fff;border:1px solid #dfe2e6;border-radius:13px;white-space:nowrap}
+.login{display:grid;grid-template-columns:.95fr 1.05fr;max-width:1020px;margin:10px auto 36px;width:calc(100% - 56px);background:#fff;border:1px solid #fff;border-radius:22px;padding:9px;box-shadow:0 24px 65px #1d27351c,0 2px 7px #1d27350b;overflow:hidden}
+.panel-visual{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-width:0;padding:34px 38px;color:white;background:radial-gradient(ellipse at 45% 30%,#414a55,transparent 70%),linear-gradient(145deg,#202833,#141a22);border:1px solid #141a22;border-radius:15px;min-height:580px}
+.panel-visual:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(130deg,transparent 0 70px,#ffffff02 71px 72px);pointer-events:none}
+.panel-etiqueta{position:relative;margin:0;color:#c7cdd5;font-size:10px;letter-spacing:.17em;font-weight:650}
+.logotipo-principal{position:relative;width:100%;max-height:245px;height:auto;object-fit:contain;margin:16px 0 24px;filter:drop-shadow(0 18px 18px #0006)}
+.presentacion{position:relative}.linea-roja{display:block;width:30px;height:3px;background:#5f8ffa;border-radius:3px;margin-bottom:16px}
+.presentacion h2{font-size:clamp(24px,2.5vw,32px);line-height:1.15;letter-spacing:-.04em;margin:0 0 14px}.presentacion p{font-size:13px;line-height:1.7;color:#bac3cf;margin:0;max-width:300px}
+.ventajas{list-style:none;padding:18px 0 0;margin:19px 0 0;border-top:1px solid #ffffff17;display:flex;gap:16px;color:#d4dae2;font-size:11px;flex-wrap:wrap}.ventajas li:before{content:"✓";color:#7fa7ff;margin-right:6px}
+.panel-formulario{display:flex;align-items:center;min-width:0;padding:36px 46px}.contenido,.formulario{width:100%}
+.bienvenida{font-size:10px;letter-spacing:.12em;color:#355eba;font-weight:800;margin:0 0 10px}h1{font-size:clamp(27px,2.8vw,35px);letter-spacing:-.045em;line-height:1.12;margin:0}
+.descripcion{color:#6d7683;font-size:13px;line-height:1.65;margin:12px 0 24px}.campo{position:relative;margin-bottom:17px}
+.campo label{display:block;font-size:12px;font-weight:700;margin-bottom:7px;color:#344152}
+.campo input{display:block;width:100%;min-height:48px;border:1px solid #dce1e7;border-radius:9px;padding:12px 13px;font-size:16px;background:#f6f8fa;color:#202936;outline:none;transition:border-color .15s,box-shadow .15s}
+.campo input::placeholder{font-size:13px;color:#929aa5}.campo input:focus{border-color:#3b6bd7;box-shadow:0 0 0 3px #3b6bd710;background:#fff}.campo input[aria-invalid=true]{border-color:#bf1721}
+.campo small{display:block;margin-top:6px;font-size:11px;line-height:1.5;color:#707a88}.entrada-password{position:relative}.entrada-password input,.campo-password input{padding-right:80px}
+.mostrar-password{position:absolute;right:5px;bottom:4px;min-height:40px;border:0;border-radius:7px;padding:8px;background:transparent;color:#576476;font-size:11px;font-weight:700;cursor:pointer}.mostrar-password:hover{background:#e9edf2;color:#3156a9}
+.rejilla-campos{display:grid;grid-template-columns:1fr 1fr;gap:14px}.rejilla-campos .campo{min-width:0}
+.boton-ingresar{width:100%;min-height:48px;border-radius:9px;border:1px solid #2f5ab9;background:linear-gradient(110deg,#4879e5,#315fc5);box-shadow:0 4px 12px #3b6bd724;color:#fff;font-size:13px;font-weight:750;cursor:pointer;transition:filter .15s;margin-top:3px}
+.boton-ingresar:hover:not(:disabled){filter:brightness(.94)}.boton-ingresar:disabled{opacity:.6;cursor:wait}
+.enlace-publico{display:block;text-align:center;font-size:12px;color:#3358a9;font-weight:700;text-decoration:none;margin-top:18px}.enlace-publico:hover{text-decoration:underline}
+.pie-formulario{border-top:1px solid #edf0f3;padding-top:19px;margin-top:23px;text-align:center;color:#75808d;font-size:12px;line-height:1.7}.pie-formulario a{color:#345cb4;font-weight:750;text-decoration:none}.pie-formulario a:hover{text-decoration:underline}
+.nota-registro{font-size:11px;line-height:1.6;text-align:center;color:#7c8591;margin:13px 0 0}
+.boton-secundario{display:block;min-height:44px;margin:12px auto 0;padding:8px 12px;border:0;background:transparent;color:#3257a8;font-size:13px;text-decoration:underline;cursor:pointer}
+.mensaje{padding:12px 14px;margin:16px 0 0;border-radius:9px;background:#fff1f2;border:1px solid #f1cbd0;color:#a01721;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.aviso-teclado{font-size:11px;color:#a01721;margin-top:7px}.pie-acceso{text-align:center;color:#87909b;font-size:11px;margin:0 20px 24px}
+button:focus-visible,a:focus-visible{outline:3px solid #3b6bd7;outline-offset:3px}.registro .panel-formulario{padding-block:30px}.registro .campo{margin-bottom:14px}.registro .descripcion{margin-bottom:20px}
+@media(min-width:1500px){.login{margin-top:5vh}}
+@media(max-width:900px){.panel-formulario{padding:30px}.panel-visual{padding:28px}.ventajas{gap:10px}.rejilla-campos{grid-template-columns:1fr;gap:0}}
+@media(max-width:680px){.barra-marca{padding:12px 16px;min-height:84px;gap:12px}.marca{font-size:18px;gap:10px}.marca img{width:76px;height:56px}.marca small,.ubicacion,.acceso-cabecera span{display:none}.acceso-cabecera a{font-size:12px;min-height:44px;padding:10px 12px}.login{display:block;width:calc(100% - 28px);max-width:450px;margin:8px auto 24px;padding:5px;border-radius:17px}.panel-visual{display:none}.panel-formulario{padding:27px 21px;border-top:3px solid #3b6bd7;border-radius:12px}.registro .panel-formulario{padding:27px 21px}.descripcion{margin-bottom:23px}.rejilla-campos{grid-template-columns:1fr 1fr;gap:12px}.pie-acceso{margin-bottom:18px}.campo input{min-height:48px}h1{font-size:29px}}
+@media(max-width:380px){.marca{font-size:16px;gap:8px}.marca img{width:64px;height:50px}.acceso-cabecera a{padding-inline:10px}.rejilla-campos{grid-template-columns:1fr;gap:0}.panel-formulario,.registro .panel-formulario{padding:25px 18px}}
+@media(prefers-reduced-motion:reduce){.campo input,.boton-ingresar{transition:none}}

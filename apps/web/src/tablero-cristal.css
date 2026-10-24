@@ -1,0 +1,55 @@
+/* Panel de precios inspirado en la referencia: cristal oscuro y lectura cian. */
+html[data-liquid-glass] .tablero-precios {
+  width:min(410px,calc(100vw - 24px));
+  padding:0;
+  border:1px solid #6899f44d;
+  border-radius:18px;
+  color:#edf3ff;
+  background:#0b1021ed;
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  box-shadow:0 24px 60px #02061799,0 0 28px #2563eb20;
+  scrollbar-color:#4367ab #101a30;
+  scrollbar-width:thin;
+}
+html[data-liquid-glass] .encabezado-tablero {
+  position:sticky;
+  top:0;
+  z-index:1;
+  margin:0 0 10px;
+  padding:10px 12px;
+  min-height:50px;
+  border:0;
+  border-bottom:1px solid #ffffff1a;
+  border-radius:0;
+  background:linear-gradient(110deg,#244ca7,#3267d8 55%,#3d47ad);
+}
+html[data-liquid-glass] .encabezado-tablero h2 {font-size:13px;letter-spacing:.035em;line-height:1.4;text-shadow:none}
+html[data-liquid-glass] .cerrar-tablero {width:36px;height:36px;min-height:36px;background:#ffffff24;font-size:25px}
+html[data-liquid-glass] .cerrar-tablero:hover {background:#ffffff40}
+html[data-liquid-glass] .contenido-tablero {margin:0 10px;gap:8px}
+html[data-liquid-glass] .columna-modalidad {padding:6px;border:1px solid #33456580;border-radius:12px;background:#0f172ab3}
+html[data-liquid-glass] .columna-modalidad h3 {margin:0 0 7px;padding:7px 3px;border:1px solid #46567580;border-radius:10px;background:#1e293bcc;color:#e2e8f0;font-size:10px;letter-spacing:.02em}
+html[data-liquid-glass] .fila-precio {grid-template-columns:minmax(0,40fr) minmax(0,60fr);margin-bottom:6px;min-height:40px;border:1px solid #3b82f64d;border-radius:10px;box-shadow:0 0 8px #38bdf808}
+html[data-liquid-glass] .fila-precio:last-child {margin-bottom:0}
+html[data-liquid-glass] .nombre-combustible {padding:5px;color:white;background:#2d61c9;font-size:11px;font-weight:750;text-align:center;justify-content:center}
+html[data-liquid-glass] .celda-precio {padding:5px 4px;gap:2px;border:0;background:#040814;box-shadow:inset 0 0 10px #0008}
+html[data-liquid-glass] .precio-digital {color:#7dd3fc;font-size:clamp(14px,28cqw,25px);text-shadow:0 0 8px #38bdf84d}
+html[data-liquid-glass] .simbolo-moneda {color:#93b4e8;font-size:9px;text-shadow:none}
+html[data-liquid-glass] .pie-tablero {margin:9px 10px;color:#b4c2d8;font-size:11px}
+html[data-liquid-glass] .acciones-tablero {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 10px}
+html[data-liquid-glass] .acciones-tablero button {min-height:40px;padding:8px;border:1px solid #dbe7ff;border-radius:12px;color:#244d9f;background:#f8faff;font-size:12px;box-shadow:none}
+html[data-liquid-glass] .acciones-tablero button:hover {background:#e2ebff}
+html[data-liquid-glass] .fecha-tablero {margin:9px 10px 0;color:#b4c2d8;font-size:11px;line-height:1.6}
+html[data-liquid-glass] .ruta-tablero {margin:9px 10px 20px;min-height:48px;padding:12px;border:1px solid #73a2ff40;border-radius:14px;color:#fff;background:linear-gradient(110deg,#285dcd,#3f72e2,#4851bd);font-size:12px;box-shadow:0 8px 22px #2563eb26}
+html[data-liquid-glass] .ruta-tablero:hover {background:linear-gradient(110deg,#326ce5,#4d83f4,#5662d1)}
+html[data-liquid-glass] .tablero-precios :is(button,a):focus-visible {outline:3px solid #bae6fd;outline-offset:2px}
+@media(max-width:400px){
+  html[data-liquid-glass] .contenido-tablero {margin-inline:8px;gap:6px}
+  html[data-liquid-glass] .columna-modalidad {padding:4px}
+  html[data-liquid-glass] .nombre-combustible {font-size:10px;padding:4px}
+  html[data-liquid-glass] .celda-precio {padding:4px 2px}
+  html[data-liquid-glass] .acciones-tablero button {font-size:11px}
+}
+@media(prefers-reduced-transparency:reduce){html[data-liquid-glass] .tablero-precios{background:#0b1021;backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media(forced-colors:active){html[data-liquid-glass] .tablero-precios,html[data-liquid-glass] .tablero-precios :is(.encabezado-tablero,.columna-modalidad,.fila-precio,.nombre-combustible,.celda-precio,.precio-digital,.simbolo-moneda,button,a){background:Canvas;color:CanvasText;text-shadow:none;border-color:CanvasText}}

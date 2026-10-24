@@ -7,6 +7,7 @@ import {
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./style.css";
+import "./tablero-cristal.css";
 import { apiAutenticada, urlApi } from "./auth.js";
 import { crearTableroPrecios } from "./tablero-precios.js";
 import { coincideFiltrosGasolinera, normalizarNombreGasolinera } from "./busqueda-gasolineras.js";
@@ -18,7 +19,7 @@ const panel = document.querySelector("#tableroPrecios");
 const fichas = new Map();
 const preciosConsultados = new Map();
 const solicitudesPrecios = new Map();
-const imagenUbicacion = `${import.meta.env.BASE_URL}images/ubicacion.png`;
+const imagenUbicacion = `${import.meta.env.BASE_URL}images/pin-gasolinera-azul.webp`;
 const visor = new Viewer("cesiumContainer", {
   baseLayer: false, baseLayerPicker: false, animation: false, timeline: false,
   geocoder: false, homeButton: false, sceneModePicker: false,
@@ -52,7 +53,7 @@ estaciones.clustering.clusterEvent.addEventListener((entidades, grupo) => {
     const dibujo = imagen.getContext("2d");
     dibujo.beginPath();
     dibujo.arc(48, 48, 43, 0, 2 * Math.PI);
-    dibujo.fillStyle = "#d71920";
+    dibujo.fillStyle = "#315fbe";
     dibujo.fill();
     dibujo.strokeStyle = "white";
     dibujo.lineWidth = 4;
@@ -314,7 +315,7 @@ function agregarEstaciones(publicadas) {
       id, name: estacion.nombre,
       position: Cartesian3.fromDegrees(estacion.ubicacion.longitud, estacion.ubicacion.latitud),
       billboard: {
-        image: imagenUbicacion, width: 64, height: 64,
+        image: imagenUbicacion, width: 35, height: 58,
         verticalOrigin: VerticalOrigin.BOTTOM,
         scaleByDistance: new NearFarScalar(1500, 1, 40000, .65),
         disableDepthTestDistance: Number.POSITIVE_INFINITY,

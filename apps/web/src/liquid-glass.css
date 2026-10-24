@@ -1,0 +1,77 @@
+/* Capa visual opcional. No cambia la estructura ni la lógica de los módulos. */
+html[data-liquid-glass]{
+  --cristal-borde:rgba(255,255,255,.94);
+  --cristal-sombra:0 16px 44px rgba(36,49,67,.10),inset 0 1px 0 #fff,inset 0 -1px 0 rgba(255,255,255,.45);
+  --cristal-claro:linear-gradient(135deg,rgba(255,255,255,.94),rgba(255,255,255,.78));
+  background:#edf0f5;
+}
+html[data-liquid-glass] body{
+  background:radial-gradient(ellipse at 3% 16%,#edf3ff4a,transparent 42%),radial-gradient(ellipse at 96% 48%,#bed6f65c,transparent 48%),linear-gradient(145deg,#f5f3f3,#e9eef5);
+}
+html[data-liquid-glass] :is(.barra,.encabezado,.barra-marca){
+  background:var(--cristal-claro);border-bottom-color:#ffffffd9;
+  box-shadow:0 8px 30px #2431430a,inset 0 1px 0 #fff;
+}
+/* El desenfoque se reserva a ventanas y superficies flotantes, no a cada tarjeta. */
+html[data-liquid-glass] :is(.abrir-funciones,.boton-secundario){
+  background:linear-gradient(135deg,#ffffffeb,#ffffffa8);border:1px solid #fff;
+  box-shadow:0 5px 15px #2431430a,inset 0 1px 0 #fff;
+}
+html[data-liquid-glass] .abrir-funciones{border-radius:18px;transition:background .18s,box-shadow .18s,transform .18s}
+html[data-liquid-glass] .abrir-funciones:hover{transform:translateY(-2px);box-shadow:0 8px 22px #2431431c,inset 0 1px 0 #fff}
+html[data-liquid-glass] .inventario-funciones{
+  background:radial-gradient(ellipse at 0 0,#ffffffdc,transparent 70%),linear-gradient(135deg,#f8fafcf0,#e7edf6df);
+  border:1px solid #ffffffed;border-radius:28px;padding:28px;
+  box-shadow:0 32px 90px #1020303d,inset 0 1px 0 #fff,inset 1px 0 0 #ffffffb3;
+}
+html[data-liquid-glass] .inventario-funciones::backdrop{background:#17233766}
+html[data-liquid-glass] .inventario-cabecera h2{letter-spacing:-.035em;font-size:26px}
+html[data-liquid-glass] .inventario-cabecera button{background:#ffffffb3;border:1px solid #ffffffed;color:#344152;border-radius:50%}
+html[data-liquid-glass] .inventario-funciones .opcion-menu{
+  background:linear-gradient(150deg,#ffffffeb,#ffffff80);border:1px solid #ffffffed;
+  border-radius:20px;box-shadow:0 7px 18px #24314309,inset 0 1px 0 #fff;
+  transition:transform .18s,background .18s,box-shadow .18s;
+}
+html[data-liquid-glass] .inventario-funciones .opcion-menu img{width:54px;height:54px;filter:drop-shadow(0 5px 5px #2431431a)}
+html[data-liquid-glass] .inventario-funciones .opcion-menu:hover{background:linear-gradient(145deg,#fff,#edf3ff);border-color:#edf3ff;transform:translateY(-3px);box-shadow:0 10px 22px #3357a714}
+html[data-liquid-glass] .inventario-funciones .opcion-menu[aria-current=page]{background:linear-gradient(145deg,#fff,#edf3ff);border-color:#3b6bd766;box-shadow:inset 0 1px 0 #fff,0 7px 20px #3b6bd710;color:#3157ae}
+html[data-liquid-glass] :is(.inventario-funciones,.ventana-gasolineras,.modal-departamentos,.dialogo-publico)>input{
+  background:#ffffffeb;border:1px solid #d8e0ea;
+}
+html[data-liquid-glass] :is(.tarjeta,.vehiculo-guardado,.resultado-vehiculo,.tarjeta-estacion){
+  background:var(--cristal-claro);border-color:var(--cristal-borde);box-shadow:var(--cristal-sombra);
+}
+html[data-liquid-glass] :is(.hero-rutas,.hero-garaje,.hero-visual){
+  background:radial-gradient(ellipse at 80% 0,#637b9659,transparent 65%),linear-gradient(145deg,#303c4b,#1b2532);
+  box-shadow:0 18px 36px #1b25321a,inset 0 1px 0 #ffffff40;
+}
+html[data-liquid-glass] .hero-rutas,html[data-liquid-glass] .hero-garaje{border-top:1px solid #ffffff66;border-left:1px solid #ffffff45;border-right:1px solid #ffffff26}
+html[data-liquid-glass] :is(.lista-gasolineras,.tablero-precios){
+  background:linear-gradient(135deg,#fffffff5,#f2f6fbe8);border-color:#ffffffd9;
+  box-shadow:0 12px 36px #1420311a,inset 0 1px 0 #fff;
+}
+html[data-liquid-glass] :is(.ventana-gasolineras,.modal-departamentos,.dialogo-publico){
+  background:var(--cristal-claro);border:1px solid #fff;box-shadow:0 28px 75px #16233838,inset 0 1px 0 #fff;
+}
+html[data-liquid-glass] :is(.ventana-gasolineras,.modal-departamentos,.dialogo-publico)::backdrop{background:#18263766}
+html[data-liquid-glass] :is(.tarjeta-gasolinera,.punto-visual){background:linear-gradient(145deg,#fff,#f3f6fb);border-color:#d8e1ec;box-shadow:inset 0 1px 0 #fff,0 5px 15px #24314308}
+/* Datos y formularios descansan sobre superficies casi opacas. */
+html[data-liquid-glass] :is(.datos-ficha,.datos-detalle,.cabecera-informe,.informe>section,.pestanas,.resumen-simulacion,.filas-precios){background:#ffffffed}
+html[data-liquid-glass] .pestanas{box-shadow:inset 0 1px 0 #fff,0 6px 16px #24314305}
+html[data-liquid-glass] :is(input:not([type=checkbox]):not([type=radio]),select,textarea){background-color:#fdfefe}
+html[data-liquid-glass] .login{background:linear-gradient(145deg,#ffffffd9,#ffffff80);border:1px solid #fff;box-shadow:0 25px 65px #2633451c,inset 0 1px 0 #fff}
+html[data-liquid-glass] .login .panel-formulario{background:#ffffffed;border-radius:15px}
+html[data-liquid-glass] .login .panel-visual{box-shadow:inset 0 1px 0 #ffffff30}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  html[data-liquid-glass] :is(.barra,.encabezado,.barra-marca,.inventario-funciones,.tablero-precios,.ventana-gasolineras,.modal-departamentos,.dialogo-publico){-webkit-backdrop-filter:blur(16px) saturate(125%);backdrop-filter:blur(16px) saturate(125%)}
+  html[data-liquid-glass] .inventario-funciones::backdrop{-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+}
+@media(max-width:680px){
+  html[data-liquid-glass] .inventario-funciones{padding:20px;border-radius:23px}
+  html[data-liquid-glass] .inventario-funciones .opcion-menu{border-radius:16px}
+  html[data-liquid-glass] :is(.barra,.encabezado,.barra-marca,.inventario-funciones,.tablero-precios,.ventana-gasolineras,.modal-departamentos,.dialogo-publico){-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+}
+@media(prefers-reduced-motion:reduce){html[data-liquid-glass] :is(.abrir-funciones,.inventario-funciones .opcion-menu){transition:none;transform:none}}
+@media(prefers-reduced-transparency:reduce){html[data-liquid-glass] :is(.barra,.encabezado,.barra-marca,.inventario-funciones,.lista-gasolineras,.tablero-precios,.ventana-gasolineras,.modal-departamentos,.dialogo-publico,.tarjeta,.login){background:#f8fafc;-webkit-backdrop-filter:none;backdrop-filter:none}}
+@media(forced-colors:active){html[data-liquid-glass] :is(.abrir-funciones,.inventario-funciones,.opcion-menu,.tarjeta,.lista-gasolineras,.tablero-precios,.login){background:Canvas;color:CanvasText;border:1px solid CanvasText;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}}
+@media print{html[data-liquid-glass] *{box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}

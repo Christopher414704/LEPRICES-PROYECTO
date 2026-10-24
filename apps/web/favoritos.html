@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="es">
+<html data-liquid-glass lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#d71920" />
+    <meta name="theme-color" content="#315fbe" />
     <title>Mis favoritos | LEPRICES</title>
     <link rel="stylesheet" href="/src/precios-page.css" />
     <link rel="stylesheet" href="/src/favoritos-page.css" />
-  </head>
-  <body>
+  <link rel="stylesheet" href="/src/liquid-glass.css"><link rel="stylesheet" href="/src/identidad-leprices.css"><link rel="stylesheet" href="/src/visuales-grupo.css"></head>
+  <body data-vista="favoritos">
     <header class="barra">
-      <a class="marca" href="/publico.html" aria-label="LEPRICES: volver al mapa"><img src="/images/leprices-logo.png" alt="" width="100" height="65" /><span>LEPRICES<small>Precios de combustible</small></span></a>
+      <a class="marca" href="/publico.html" aria-label="LEPRICES: volver al mapa"><img src="/images/leprices-marca.png" alt="" width="100" height="65" /><span>LEPRICES<small>Precios de combustible</small></span></a>
       <nav aria-label="Apartados principales">
         <a class="opcion activa" href="/favoritos.html" aria-current="page">★ Mis favoritos</a>
         <a class="opcion" href="/alertas.html">Alertas</a>
@@ -38,5 +38,5 @@
       </section>
     </main>
     <script type="module" src="/src/favoritos-page.js"></script>
-  </body>
+  <script type="module" src="/src/visuales-grupo.js"></script></body>
 </html>

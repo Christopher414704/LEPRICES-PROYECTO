@@ -1,4 +1,5 @@
 import { textoCelda } from "./comparacion-vehiculos.js";
+import {logoParaPdf,colorMarca} from './marca.js';
 import { categoriasTecnicas, fuenteSegura } from './especificaciones-tecnicas.js';
 import { interpretarTraccion } from './traccion-vehiculo.js';
 
@@ -38,6 +39,7 @@ export function datosInformeFaxcar(vehiculo, generadoEn = new Date()) {
 
 export async function crearPdfInformeFaxcar(vehiculo, generadoEn, comparacion = null) {
   const datos = datosInformeFaxcar(vehiculo, generadoEn);
+  const logo=await logoParaPdf();
   const { jsPDF } = await import('jspdf');
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
   const margen = 17, ancho = 176, limite = 276, anchos = [40, 82, 54]; let y = 25;
@@ -46,8 +48,9 @@ export async function crearPdfInformeFaxcar(vehiculo, generadoEn, comparacion = 
   }
   function pagina(nueva = false) {
     if (nueva) pdf.addPage();
-    pdf.setFillColor(181, 25, 40); pdf.rect(0, 0, 210, 3, 'F'); pdf.setTextColor(30, 44, 60);
-    escribir('LEPRICES / FAXCAR - INFORME TÉCNICO', margen, 14, 11, true); y = 25;
+    pdf.setFillColor(...colorMarca); pdf.rect(0, 0, 210, 3, 'F'); pdf.setTextColor(30, 44, 60);
+    if(logo)pdf.addImage(logo,'PNG',margen,7,38,10.8);
+    escribir('LEPRICES / FAXCAR - INFORME TÉCNICO', logo?62:margen, 14, logo?9:11, true); y = 25;
   }
   function parrafo(t, size = 9, url = null) {
     pdf.setFont('helvetica', 'normal'); pdf.setFontSize(size);

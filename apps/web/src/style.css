@@ -2,7 +2,7 @@
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #202733;
   background: #e9ecf0;
-  --rojo: #d71920;
+  --rojo: #1954d7;
   --barra-alto: 88px;
   --panel-ancho: 320px;
 }
@@ -12,7 +12,7 @@ html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; }
 body { min-width: 320px; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
-button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #d71920; outline-offset: 3px; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #1954d7; outline-offset: 3px; }
 #app { position: relative; }
 #cesiumContainer { position: absolute; inset: var(--barra-alto) 0 0 var(--panel-ancho); }
 .verificacion-sesion {
@@ -48,7 +48,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .opcion-menu img { width: 44px; height: 44px; object-fit: contain; }
 .opcion-menu small { display: block; margin-top: 3px; font-size: 9px; color: #747d88; font-weight: 500; }
 .opcion-menu:hover:not(:disabled) { background: #e9ecf0; transform: translateY(-1px); }
-.opcion-menu--activa { background: #fff0f1; border-color: #f1c6ca; color: #b50f18; }
+.opcion-menu--activa { background: #fff0f1; border-color: #f1c6ca; color: #0f42b5; }
 .opcion-menu:disabled { cursor: not-allowed; color: #6a717c; }
 .estado { display: none; }
 .estado--error {
@@ -69,7 +69,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   background: #f7f8fa; border-right: 1px solid #d4d8de; box-shadow: 4px 0 18px #11182714;
 }
 .cabecera-lista { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.etiqueta-seccion { margin: 0 0 5px; font-size: 9px; font-weight: 800; letter-spacing: .13em; color: #be1822; }
+.etiqueta-seccion { margin: 0 0 5px; font-size: 9px; font-weight: 800; letter-spacing: .13em; color: #184bbe; }
 .cabecera-lista h2 { margin: 0; font-size: 23px; letter-spacing: -.04em; }
 .plegar-lista { display: none; }
 .contenido-lista { display: flex; flex-direction: column; min-height: 0; flex: 1; }
@@ -81,7 +81,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   display: flex; align-items: center; gap: 9px; padding: 0 12px; min-height: 46px;
   flex-shrink: 0; border: 1px solid #d4d9e1; border-radius: 11px; background: white; color: #828b97;
 }
-.buscador-gasolineras:focus-within { border-color: #d71920; box-shadow: 0 0 0 3px #d7192010; }
+.buscador-gasolineras:focus-within { border-color: #1954d7; box-shadow: 0 0 0 3px #1954d710; }
 .buscador-gasolineras svg { flex-shrink: 0; }
 .buscador-gasolineras input { width: 100%; min-width: 0; padding: 12px 0; border: 0; outline: none; background: transparent; font-size: 12px; color: #222b38; }
 .cantidad-gasolineras { margin: 16px 2px 9px; font-size: 10px; font-weight: 650; color: #747d88; }
@@ -93,13 +93,13 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   color: #28313f; background: linear-gradient(120deg, #fff, #f1f3f6);
   box-shadow: 0 2px 3px #17223106; transition: border-color 160ms, background 160ms, transform 160ms;
 }
-.estacion-menu:hover { border-color: #e9989e; background: #fff5f5; transform: translateX(2px); }
-.estacion-menu[aria-pressed="true"] { border-color: #d71920; background: #fff0f1; box-shadow: inset 3px 0 #d71920; }
+.estacion-menu:hover { border-color: #98b1e9; background: #fff5f5; transform: translateX(2px); }
+.estacion-menu[aria-pressed="true"] { border-color: #1954d7; background: #fff0f1; box-shadow: inset 3px 0 #1954d7; }
 .estacion-menu img { width: 56px; height: 56px; object-fit: contain; flex-shrink: 0; }
 .estacion-menu span { flex: 1; min-width: 0; }
 .estacion-menu strong { display: block; font-size: 12px; line-height: 1.4; }
 .estacion-menu small { display: block; margin-top: 4px; font-size: 10px; color: #7a838f; }
-.estacion-menu .flecha-estacion { flex: 0; color: #bd1721; font-size: 22px; }
+.estacion-menu .flecha-estacion { flex: 0; color: #174abd; font-size: 22px; }
 .sin-resultados { padding: 20px 8px; color: #777f8b; font-size: 13px; line-height: 1.6; text-align: center; }
 @media (max-width: 1000px) and (min-width: 701px) {
   :root { --panel-ancho: 280px; }
@@ -122,7 +122,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .lista-gasolineras { top: auto; bottom: 30px; left: 10px; width: calc(100% - 20px); max-height: min(48dvh, 400px); padding: 12px; border: 1px solid #d4d8de; border-radius: 16px; box-shadow: 0 8px 30px #11182740; }
   .cabecera-lista h2 { font-size: 18px; }
   .etiqueta-seccion { font-size: 8px; margin-bottom: 3px; }
-  .plegar-lista { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border: 1px solid #e7c7ca; border-radius: 10px; background: #fff0f1; color: #b71924; font-size: 23px; }
+  .plegar-lista { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border: 1px solid #e7c7ca; border-radius: 10px; background: #fff0f1; color: #194ab7; font-size: 23px; }
   .contenido-lista { overflow: hidden; }
   .ayuda-lista { margin: 7px 0 10px; font-size: 11px; }
   .cantidad-gasolineras { margin: 10px 2px 7px; }
@@ -166,10 +166,10 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   min-height: 49px;
   margin-bottom: 9px;
   padding: 9px 7px 9px 12px;
-  border: 1px solid #b71924;
-  border-top: 4px solid #ff555d;
+  border: 1px solid #194ab7;
+  border-top: 4px solid #558aff;
   border-radius: 11px;
-  background: linear-gradient(120deg, #eb202c, #bd101b);
+  background: linear-gradient(120deg, #205feb, #1046bd);
 }
 .encabezado-tablero h2 {
   flex: 1;
@@ -218,17 +218,17 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   align-items: center;
   min-height: 34px;
   padding: 7px 10px;
-  border: 1px solid #bd1721;
+  border: 1px solid #174abd;
   border-radius: 7px;
   color: #fff;
-  background: #bd1721;
+  background: #174abd;
   font: inherit;
   font-size: 11px;
   font-weight: 750;
   text-decoration: none;
   cursor: pointer;
 }
-.boton-distancia { color: #bd1721; background: #fff; }
+.boton-distancia { color: #174abd; background: #fff; }
 .enlace-navegacion:hover, .boton-distancia:hover { filter: brightness(.93); }
 .enlace-navegacion:focus-visible, .boton-distancia:focus-visible { outline: 2px solid #28313f; outline-offset: 2px; }
 .boton-distancia:disabled { opacity: .65; cursor: wait; }
@@ -275,7 +275,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   min-width: 0;
   padding: 6px;
   color: #fff;
-  background: linear-gradient(100deg, #bd1520, #e2242e);
+  background: linear-gradient(100deg, #1549bd, #245fe2);
   font-size: 11px;
   font-weight: 750;
   line-height: 1.25;
@@ -295,13 +295,13 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   box-shadow: inset 1px 2px 5px #000c;
 }
 .simbolo-moneda {
-  color: #ff654d;
+  color: #4d84ff;
   font: 700 10px Arial, sans-serif;
-  text-shadow: 0 0 4px #ff321470;
+  text-shadow: 0 0 4px #145dff70;
 }
 .precio-digital {
   margin: 0;
-  color: #ff422a;
+  color: #2a6cff;
   font-family: "Jalapa LED", "Courier New", monospace;
   font-size: 26px;
   font-size: clamp(18px, 31cqw, 27px);
@@ -310,7 +310,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   font-variant-numeric: tabular-nums;
   line-height: 1;
   white-space: nowrap;
-  text-shadow: 0 0 2px #ff3b1e, 0 0 6px #ff220f80;
+  text-shadow: 0 0 2px #1e64ff, 0 0 6px #0f59ff80;
 }
 .pie-tablero {
   margin: 8px 3px 1px;

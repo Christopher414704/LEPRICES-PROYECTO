@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="es">
+<html data-liquid-glass lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#d71920" />
+    <meta name="theme-color" content="#315fbe" />
     <title>Administrar gasolineras | LEPRICES</title>
     <link rel="stylesheet" href="/src/precios-page.css" />
-  </head>
-  <body>
+  <link rel="stylesheet" href="/src/liquid-glass.css"><link rel="stylesheet" href="/src/identidad-leprices.css"><link rel="stylesheet" href="/src/visuales-grupo.css"></head>
+  <body data-vista="editar-gasolinera">
     <header class="barra">
-      <a class="marca" href="/mapa.html" aria-label="LEPRICES: volver al mapa"><img src="/images/leprices-logo.png" alt="" width="100" height="65" /><span>LEPRICES<small>Precios de combustible</small></span></a>
+      <a class="marca" href="/mapa.html" aria-label="LEPRICES: volver al mapa"><img src="/images/leprices-marca.png" alt="" width="100" height="65" /><span>LEPRICES<small>Precios de combustible</small></span></a>
       <nav aria-label="Apartados principales"><a class="opcion" href="/gasolineras.html">Registrar estación</a><a class="opcion" href="/mapa.html"><img src="/images/gasolinera.png" alt="" width="40" height="40" />Volver al mapa</a></nav>
     </header>
     <main id="app" hidden>
@@ -37,5 +37,5 @@
     </main>
     <section id="esperaEdicion" class="espera" role="status">Comprobando permisos…</section>
     <script type="module" src="/src/editar-gasolinera-page.js"></script>
-  </body>
+  <script type="module" src="/src/visuales-grupo.js"></script></body>
 </html>

@@ -1,0 +1,54 @@
+/* Identidad azul compartida. Los módulos conservan su estructura y lógica. */
+:root,html[data-liquid-glass]{--marca:#315fbe;--marca-profunda:#14284e;--marca-suave:#edf3ff;--rojo:var(--marca);--cristal-claro:linear-gradient(130deg,#ffffffed,#edf4ffda);--cristal-sombra:0 18px 46px #15294e12,inset 0 1px 0 #fff;color:#202e46}
+html[data-liquid-glass] body{background:radial-gradient(ellipse at 10% 0,#dce8ff8c,transparent 50%),radial-gradient(ellipse at 100% 60%,#d8e4ff66,transparent 50%),#f2f5fb}
+html[data-liquid-glass] :is(.barra,.barra-marca,.encabezado){border-top:0;border-bottom:1px solid #ffffffd9;background:linear-gradient(120deg,#ffffffed,#eef4ffe0);box-shadow:0 8px 34px #14284e0a}
+html[data-liquid-glass] :is(.marca img,.espacio-logotipo img){width:160px;height:48px;object-fit:contain;flex-shrink:0}
+html[data-liquid-glass] .marca{gap:16px;letter-spacing:-.035em}
+html[data-liquid-glass] .marca>span{font-size:0}
+html[data-liquid-glass] .marca small{font-size:12px;letter-spacing:.01em;color:#5d708e}
+html[data-liquid-glass] .espacio-logotipo{width:170px;height:52px}
+html[data-liquid-glass] :is(h1,h2,h3){letter-spacing:-.035em}
+html[data-liquid-glass] :is(.sobretitulo,.etiqueta-seccion,.bienvenida,.icono-favorito){color:var(--marca)}
+html[data-liquid-glass] :is(.boton-primario,.boton-ingresar,.primario){background:linear-gradient(115deg,#24478e,#3569d1);border-color:#315fbe;color:#fff;box-shadow:0 7px 18px #315fbe26}
+html[data-liquid-glass] :is(.boton-primario,.boton-ingresar,.primario):hover:not(:disabled){background:linear-gradient(115deg,#19396f,#2b58b6);color:#fff}
+html[data-liquid-glass] :is(.tarjeta,.vehiculo-guardado,.resultado-vehiculo){border-radius:22px;border-color:#e2e9f4;background:linear-gradient(135deg,#fffffffa,#f9fbffed);box-shadow:0 12px 40px #14284e0a}
+html[data-liquid-glass] :is(input:not([type=checkbox]):not([type=radio]),select,textarea){background:#ffffffeb;border-color:#d9e2f1;border-radius:12px;color:#202e46}
+html[data-liquid-glass] :is(input,select,textarea):focus{border-color:#6388d3;box-shadow:0 0 0 3px #315fbe14}
+html[data-liquid-glass] :is(button,a,input,select,summary):focus-visible{outline-color:#315fbe}
+html[data-liquid-glass] :is(.inventario-funciones,.ventana-gasolineras,.modal-departamentos,.dialogo-publico){background:linear-gradient(125deg,#ffffffef,#e6efffdf);border-color:#fff;box-shadow:0 30px 90px #101e3c36}
+html[data-liquid-glass] .inventario-funciones .opcion-menu:hover{background:linear-gradient(140deg,#fff,#eaf1ff);border-color:#acc3ee;box-shadow:0 12px 24px #315fbe12}
+html[data-liquid-glass] .inventario-funciones .opcion-menu[aria-current=page]{background:linear-gradient(140deg,#fff,#e1ebff);border-color:#315fbe66;color:#234d9f;box-shadow:0 6px 20px #315fbe14}
+html[data-liquid-glass] :is(.abrir-funciones,.opcion-menu,.opcion) img:not([src*="leprices"]){filter:grayscale(1) sepia(.6) saturate(3) hue-rotate(173deg)}
+html[data-liquid-glass] :is(.hero-rutas,.hero-garaje,.hero-visual){background:radial-gradient(ellipse at 80% 15%,#4678d466,transparent 65%),linear-gradient(140deg,#1d3155,#101c32);color:#f7faff;border-color:#b5ceff33}
+html[data-liquid-glass] :is(.hero-rutas,.hero-garaje) .sobretitulo{color:#bcd2ff}
+html[data-liquid-glass] .panel-visual{background:radial-gradient(ellipse at 50% 25%,#345eaa80,transparent 65%),linear-gradient(155deg,#172946,#0a1425);border-color:#17305b}
+html[data-liquid-glass] .panel-visual::before{background:radial-gradient(circle at 50% 39%,transparent 0 28%,#a4c2ff15 28.2% 28.4%,transparent 28.6% 39%,#a4c2ff0e 39.2% 39.4%,transparent 39.6%)}
+html[data-liquid-glass] .logotipo-principal{background:linear-gradient(130deg,#fff,#e7efff);padding:28px 24px;border:1px solid #fff;border-radius:22px;max-height:190px;filter:drop-shadow(0 22px 26px #0003)}
+html[data-liquid-glass] .linea-roja{background:#76a1ff}
+html[data-liquid-glass] .ventajas li::before{color:#9cbcff}
+html[data-liquid-glass] .login{margin-top:30px;box-shadow:0 28px 75px #14284e17}
+/* El mapa ocupa el lienzo; los controles de consulta flotan sobre él. */
+html[data-liquid-glass] #cesiumContainer{inset:0;background:#0d182c}
+html[data-liquid-glass] .encabezado{left:18px;right:18px;top:16px;height:80px;border:1px solid #ffffffb3;border-radius:22px;padding:10px 22px;box-shadow:0 12px 35px #07132626}
+html[data-liquid-glass] .encabezado .abrir-funciones{flex-shrink:0}
+html[data-liquid-glass] :is(.estado--error,.estado--informacion){top:112px}
+html[data-liquid-glass] .lista-gasolineras{top:112px;bottom:35px;left:18px;width:320px;border:1px solid #ffffffd9;border-radius:22px;background:linear-gradient(135deg,#ffffffed,#edf4ffe8);box-shadow:0 18px 45px #101e3c26}
+html[data-liquid-glass] .estacion-menu{border-radius:13px;background:#ffffffa8}
+html[data-liquid-glass] .estacion-menu:hover{background:#e7efff;border-color:#a6c0ef}
+html[data-liquid-glass] .barra-marca{border-bottom:1px solid #dce6f5}
+@media(max-width:700px){
+ html[data-liquid-glass] :is(.marca img,.espacio-logotipo img){width:118px;height:38px}
+ html[data-liquid-glass] .marca small{display:none}
+ html[data-liquid-glass] .encabezado{display:flex;left:10px;right:10px;top:10px;height:72px;padding:8px 12px;gap:10px;border-radius:18px}
+ html[data-liquid-glass] :is(.estado--error,.estado--informacion){top:94px}
+ html[data-liquid-glass] .espacio-logotipo{width:120px;height:40px}
+ html[data-liquid-glass] .encabezado .subtitulo{display:none}
+ html[data-liquid-glass] .encabezado h1{font-size:14px}
+ html[data-liquid-glass] .lista-gasolineras{top:auto;bottom:30px;left:10px;width:calc(100% - 20px);max-height:min(44dvh,400px);border-radius:18px}
+ html[data-liquid-glass] .login{margin-top:18px}
+ html[data-liquid-glass] :is(.tarjeta,.vehiculo-guardado){border-radius:18px}
+}
+@media(max-width:380px){html[data-liquid-glass] .encabezado .titulo-mapa{display:none}html[data-liquid-glass] .barra-marca .marca img{width:108px}}
+@media(prefers-reduced-transparency:reduce){html[data-liquid-glass] :is(.encabezado,.barra,.barra-marca,.lista-gasolineras,.inventario-funciones){background:#f7faff;backdrop-filter:none}}
+@media(forced-colors:active){html[data-liquid-glass] :is(.tarjeta,.encabezado,.lista-gasolineras,.primario,.boton-primario,.boton-ingresar){background:Canvas;color:CanvasText;border:1px solid CanvasText}}
+@media print{html[data-liquid-glass] body{background:#fff}}

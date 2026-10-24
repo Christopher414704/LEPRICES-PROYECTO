@@ -1,0 +1,21 @@
+.abrir-funciones {margin-left:auto;border:1px solid #dbe1e9;background:#fff;border-radius:12px;padding:12px 18px;color:#263448;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap;}
+.inventario-funciones {width:min(620px,88vw);max-height:80vh;overflow:auto;border:1px solid #d9e1eb;border-radius:22px;padding:24px;background:#f8fafc;color:#263448;box-shadow:0 24px 80px #10203040;}
+.inventario-funciones::backdrop {background:#17233788;backdrop-filter:blur(4px);}
+.inventario-cabecera {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;}
+.inventario-cabecera h2 {margin:0;font-size:22px;}
+.inventario-cabecera .cerrar-funciones {display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;box-sizing:border-box;border:0;background:#e9eef4;border-radius:10px;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;margin:0;line-height:1;cursor:pointer;}
+.cerrar-funciones svg {display:block;flex:none;pointer-events:none;}
+.inventario-funciones>input {width:100%;box-sizing:border-box;padding:13px;border:1px solid #d6dfe9;border-radius:12px;font:inherit;margin-bottom:18px;}
+.inventario-funciones .menu-superior {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;}
+.inventario-funciones .menu-superior[hidden] {display:none;}
+.inventario-funciones .opcion-menu {display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:120px;padding:14px 8px;background:#fff;border:1px solid #dbe1e9;border-radius:14px;font-size:14px;white-space:normal;text-align:center;}
+.inventario-funciones .opcion-menu[hidden] {display:none;}
+.inventario-funciones .opcion-menu:hover {border-color:#3b6bd7;background:#edf3ff;}
+.inventario-funciones .opcion-menu:focus-visible,.abrir-funciones:focus-visible {outline:3px solid #205ec8;outline-offset:3px;}
+@media(max-width:480px){.inventario-funciones .menu-superior{grid-template-columns:repeat(2,minmax(0,1fr))}.abrir-funciones{padding:10px;font-size:13px}}
+.abrir-funciones {display:flex;align-items:center;justify-content:center;gap:8px;}
+.abrir-funciones img {width:40px;height:40px;object-fit:contain;}
+.inventario-funciones .opcion-menu {text-decoration:none;color:#263448;font:inherit;font-weight:700;cursor:pointer;align-items:center;box-sizing:border-box;}
+.inventario-funciones .opcion-menu img {width:44px;height:44px;object-fit:contain;}
+.inventario-funciones .opcion-menu[aria-current="page"] {border-color:#3b6bd7;color:#315fc5;background:#edf3ff;}
+@media(max-width:480px){.abrir-funciones span{display:none}.abrir-funciones img{width:34px;height:34px}}
