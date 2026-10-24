@@ -1,5 +1,7 @@
+import { resolverTracciones } from '../../../shared/traccion.mjs';
+
 export const camposVehiculo = ['motorLitros','motorCc','cilindros','transmision','traccion','combustible','consumoCiudadL100','consumoCarreteraL100','consumoCombinadoL100'];
-export const revisionInvestigacion = 13;
+export const revisionInvestigacion = 14;
 export function faltantesFicha(ficha = {}, datos = []) {
   const presentes = new Set(datos.map(d => d.campo));
   if (/^(?:electricity|electricidad|el[eé]ctrico)$/i.test(String(ficha.combustible ?? '').trim())) {
@@ -47,6 +49,9 @@ function equivalente(a,b) {
   if (typeof a.valor==='number' && typeof b.valor==='number') return Math.abs(a.valor-b.valor)<=Math.max(.01,Math.abs(a.valor)*.01);
   const x=textoNormal(a.valor),y=textoNormal(b.valor);
   if(x===y) return true;
+  if(a.campo==='traccion') {
+    return resolverTracciones([a.valor,b.valor]).sistema!==null;
+  }
   if(a.campo==='transmision') {
     const corto=/^(\d+)\s*(?:velocidades|speeds?|spd)$/;
     const marchasX=corto.exec(x),marchasY=corto.exec(y);

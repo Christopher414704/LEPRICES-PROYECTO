@@ -42,3 +42,14 @@ test('renderiza fuentes y categorías como texto sin interpretar HTML de los dat
  assert.ok(nodos.some(n=>n.tag==='h4'));assert.ok(!nodos.some(n=>n.tag==='script'));
  }finally{delete globalThis.document;}
 });
+
+test('HU-35 la tabla y el esquema comparten estados sin conflictos entre sinónimos', () => {
+ const base={tipo:'auto',traccion:'FWD',proveedor:'fueleconomy',urlFuente:'https://catalogo.example/ficha',
+  complemento:{datos:[{campo:'traccion',valor:'Front-Wheel Drive',cita:'Front-Wheel Drive.',urlFuente:'https://fabricante.example/ficha'}]}};
+ assert.equal(filas(base).find(d=>d.campo==='traccion').estado,'Referencia general del modelo');
+ base.complemento.datos[0].valor='RWD';
+ assert.equal(filas(base).find(d=>d.campo==='traccion').estado,'En conflicto');
+ const negada={complemento:{datos:[{campo:'traccion',valor:'AWD',cita:'AWD opcional según versión.',
+  urlFuente:'https://fabricante.example/ficha',estado:'confirmado',alcance:'version'}]}};
+ assert.notEqual(filas(negada).find(d=>d.campo==='traccion').estado,'Confirmado para la versión');
+});

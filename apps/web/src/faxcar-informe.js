@@ -32,7 +32,7 @@ export function datosInformeFaxcar(vehiculo, generadoEn = new Date()) {
     identidad: [ficha.marca, ficha.modelo, ficha.anio ?? 'Año por confirmar'].join(' · '),
     version: ficha.version || 'Sin versión confirmada', mercado: ficha.mercado || 'Sin mercado confirmado',
     generadoEn: new Date(generadoEn).toISOString(), investigadoEn: ficha.complemento?.actualizadoEn || null,
-    categorias, fuentes, pendientes: categorias.flatMap(c => c.campos.filter(campo => campo.estado === 'Información incompleta').map(campo => campo.campo)),
+    categorias, fuentes, traccion: interpretarTraccion(ficha), pendientes: categorias.flatMap(c => c.campos.filter(campo => campo.estado === 'Información incompleta').map(campo => campo.campo)),
     contradicciones: ficha.complemento?.conflictos?.length ?? 0 };
 }
 
@@ -100,16 +100,21 @@ export async function crearPdfInformeFaxcar(vehiculo, generadoEn, comparacion = 
   parrafo('Documento de consulta técnica del modelo. Las referencias generales y los datos declarados requieren confirmación para la versión y unidad seleccionadas. Los campos incompletos y las contradicciones se conservan visibles.');
   parrafo('No acredita reparaciones, accidentes, inspecciones, estado mecánico ni historial individual. No se han realizado inspecciones físicas ni verificaciones por VIN para generar este documento.');
   seccion('3. Ficha técnica y evidencia disponible');
-  const traccion = interpretarTraccion(vehiculo.ficha);
+  const traccion = datos.traccion;
   seccion('Sistema de tracción');
   parrafo(`${traccion.titulo}. ${traccion.estado}. ${traccion.aviso}`);
+  parrafo(traccion.descripcion);
   if (y + 34 > limite) pagina(true);
   const xRuedas = traccion.tipo === 'moto' ? [103] : [91, 119];
   const dibujarRueda = (x, cy, motriz) => {
     pdf.setFillColor(...(motriz ? [181, 25, 40] : [222, 228, 235]));
     pdf.setDrawColor(83, 99, 115); pdf.roundedRect(x, cy, 8, 12, 2, 2, 'FD');
+    pdf.setTextColor(...(motriz ? [255, 255, 255] : [30, 44, 60]));
+    escribir(motriz ? 'M' : '-', x + 2, cy + 7, 9, true);
+    pdf.setTextColor(30, 44, 60);
   };
-  pdf.setDrawColor(137, 151, 168); pdf.roundedRect(84, y - 2, 51, 34, 5, 5, 'S');
+  pdf.setDrawColor(137, 151, 168);
+  pdf.roundedRect(traccion.tipo === 'moto' ? 99 : 84, y - 2, traccion.tipo === 'moto' ? 16 : 51, 34, 5, 5, 'S');
   escribir('Delante', margen, y + 6, 8); escribir('Atrás', margen, y + 26, 8);
   for (const x of xRuedas) {
     dibujarRueda(x, y, traccion.tipo === 'moto' ? traccion.ruedas.delantera : traccion.ruedas[x === xRuedas[0] ? 'delanteraIzquierda' : 'delanteraDerecha']);

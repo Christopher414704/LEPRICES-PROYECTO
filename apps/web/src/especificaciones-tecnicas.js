@@ -1,4 +1,4 @@
-import { crearDiagramaTraccion } from './traccion-vehiculo.js';
+import { crearDiagramaTraccion, interpretarTraccion } from './traccion-vehiculo.js';
 
 // Catálogo explícito: nunca inferir equipamiento por marca, gama o tipo de vehículo.
 const campos = [
@@ -45,9 +45,16 @@ export function categoriasTecnicas(ficha={}) {
   if(conflicto)candidatos.push(...(conflicto.opciones??[]));
   const validos=candidatos.filter(d=>presente(d.valor));
   const valores=new Set(validos.map(d=>JSON.stringify([d.valor,d.unidad??unidad])));
-  const estado=conflicto||valores.size>1?'En conflicto':!validos.length?'Información incompleta':ficha.proveedor==='manual'&&validos[0].base?'Declarado por el usuario':
+  let estado=conflicto||valores.size>1?'En conflicto':!validos.length?'Información incompleta':ficha.proveedor==='manual'&&validos[0].base?'Declarado por el usuario':
    validos[0].estado==='confirmado'&&fuenteSegura(validos[0].urlFuente)&&validos[0].cita&&validos[0].alcance==='version'?'Confirmado para la versión':
    fuenteSegura(validos[0].urlFuente)?'Referencia general del modelo':'Sin evidencia documentada';
+  if(campo==='traccion') {
+   const traccion=interpretarTraccion(ficha);
+   const estados={'Información contradictoria':'En conflicto','Información no disponible':'Información incompleta',
+    'Referencia del catálogo':'Referencia general del modelo','Referencia documental pendiente de revisión':'Referencia general del modelo'};
+   estado=traccion.estado==='Sin evidencia documentada'&&ficha.proveedor==='manual'&&validos[0]?.base?
+    'Declarado por el usuario':estados[traccion.estado]??traccion.estado;
+  }
   const opciones=validos.map(d=>({valor:typeof d.valor==='boolean'?(d.valor?'Sí':'No'):String(d.valor),unidad:d.unidad??unidad,
    fuente:fuenteSegura(d.urlFuente),origen:d.origen??(d.base?ficha.proveedor:null)??'Fuente no identificada',cita:d.cita??'',estado:d.estado??'',conversion:d.conversion??''}));
   // Las categorías de equipamiento solo aparecen si existe información; los campos básicos ausentes se señalan.

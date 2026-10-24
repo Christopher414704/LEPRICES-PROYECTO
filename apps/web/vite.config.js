@@ -60,6 +60,7 @@ export default defineConfig({
     fs: {
       allow: [
         directorioActual,
+        path.resolve(directorioActual, "../shared"),
         path.resolve(
           directorioActual,
           "node_modules",

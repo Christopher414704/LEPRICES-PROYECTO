@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
+import { combinarEvidencias } from '../src/services/evidencias-vehiculos.js';
 import { configurarInvestigacion, parametrosInferencia, validarConsultaInvestigacion, comprobarEvidencias, completarCamposLiterales, crearInvestigacionVehiculos, crearFuentesVehiculos } from '../src/services/investigacion-vehiculos.service.js';
 import { crearMiAutomovilRouter } from '../src/routes/mi-automovil.routes.js';
 
@@ -146,4 +147,21 @@ test('endpoints de investigación limitados a conductores y usan identidad de se
     const r = await fetch(`${base}/vehiculos/7/investigacion`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...entrada, usuarioId: 'otro' }) });
     assert.equal(r.status, 202); assert.equal(recibida.usuario.id, 'sesion'); assert.equal(recibida.id, '7');
   } finally { await new Promise(r => server.close(r)); }
+});
+
+test('HU-35 evidencia de tracción fusiona sinónimos, conserva AWD/4WD y no acepta negaciones', () => {
+  const dato = valor => ({ campo:'traccion', valor, cita:'Drive system: '+valor+'.', urlFuente:'https://fabricante.example/ficha' });
+  const iguales = combinarEvidencias([dato('FWD'), dato('Front-Wheel Drive'), dato('Tracción delantera')]);
+  assert.equal(iguales.conflictos.length, 0);
+  assert.equal(iguales.datos[0].evidencias.length, 3);
+  assert.equal(combinarEvidencias([dato('4x4'), dato('4WD')]).conflictos.length, 0);
+  assert.equal(combinarEvidencias([dato('AWD'), dato('4WD')]).conflictos.length, 1);
+  assert.equal(combinarEvidencias([dato('FWD'), dato('RWD')]).datos.length, 0);
+  for (const cita of ['No tiene tracción FWD.', 'Drive system: AWD optional.', 'Tracción RWD según versión.']) {
+    const f = { ...fuente, texto:cita };
+    const valor = cita.match(/FWD|AWD|RWD/)[0];
+    const resultado = comprobarEvidencias({datos:[{campo:'traccion',valor,unidad:'',fuente:f.id,cita,version:'unspecified'}]},[f]);
+    assert.equal(resultado.datos.length,0,cita);
+    assert.equal(resultado.descartados.length,1,cita);
+  }
 });

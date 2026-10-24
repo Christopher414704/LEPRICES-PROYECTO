@@ -1,6 +1,6 @@
 import { crearEspecificaciones } from "./especificaciones-tecnicas.js";
 const combustibles = { "Regular Gasoline": "Gasolina regular", "Premium Gasoline": "Gasolina premium", "Midgrade Gasoline": "Gasolina intermedia", Diesel: "Diésel", Electricity: "Electricidad", E85: "E85" };
-const tracciones = { "Front-Wheel Drive": "Delantera", "Rear-Wheel Drive": "Trasera", "All-Wheel Drive": "Integral (AWD)", "4-Wheel Drive": "4×4", "4-Wheel or All-Wheel Drive": "4×4 / integral", "2-Wheel Drive": "Dos ruedas", "Part-time 4-Wheel Drive": "4×4 conectable" };
+const tracciones = { "Front-Wheel Drive": "Delantera", "Rear-Wheel Drive": "Trasera", "All-Wheel Drive": "Integral (AWD)", "4-Wheel Drive": "4×4 (4WD)", "4-Wheel or All-Wheel Drive": "4WD / AWD · sistema por confirmar", "2-Wheel Drive": "Dos ruedas · eje por confirmar", "Part-time 4-Wheel Drive": "4×4 conectable (4WD)" };
 const formato = new Intl.NumberFormat("es-GT", { maximumFractionDigits: 2 });
 
 export function nombreCombustible(valor) {

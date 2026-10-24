@@ -97,3 +97,31 @@ test('descarga usa PDF y nombre seguro; el panel confirma solicitud al navegador
   await panel.hijos[0].onclick(); assert.match(panel.hijos[1].textContent, /Fallo de descarga/); assert.equal(panel.hijos[0].disabled, false);
   fallar = false; await panel.hijos[0].onclick(); assert.match(panel.hijos[1].textContent, /solicitada al navegador/);
 });
+
+test('HU-35 PDF conserva ruedas, denominaciones y estados de autos, motos y contradicciones', async () => {
+  for (const [tipo, traccion, complemento, esperado, motrices] of [
+    ['auto', 'FWD', {}, /Tracción delantera/, 2],
+    ['auto', 'RWD', {}, /Tracción trasera/, 2],
+    ['auto', 'AWD', {}, /Tracción integral AWD/, 4],
+    ['auto', '4WD', {}, /Tracción 4WD/, 4],
+    ['auto', '4x4', {}, /AWD\/4WD sin especificar/, 4],
+    ['moto', 'Rueda trasera', {}, /Rueda motriz: trasera/, 1],
+    ['moto', '2WD', {}, /Eje motriz sin confirmar/, 0],
+    ['auto', '4x2', {}, /Eje motriz sin confirmar/, 0],
+    ['auto', 'FWD', {datos:[{campo:'traccion',valor:'RWD'}]}, /Información contradictoria/, 0]
+  ]) {
+    const v={id:'35',ficha:{tipo,marca:'Prueba',modelo:'HU-35',traccion,complemento,
+      proveedor:'fueleconomy',urlFuente:'https://catalogo.example/ficha'}};
+    const datos=datosInformeFaxcar(v,ahora);
+    assert.equal(Object.values(datos.traccion.ruedas).filter(Boolean).length,motrices);
+    const doc=await abrir(await crearPdfInformeFaxcar(v,ahora));
+    try {
+      const items=[];
+      for(let i=1;i<=doc.numPages;i++) items.push(...(await (await doc.getPage(i)).getTextContent()).items);
+      const contenido=items.map(t=>t.str).join(' ');
+      assert.match(contenido,esperado,traccion);
+      assert.match(contenido,/M = rueda motriz/);
+      assert.equal(items.filter(t=>t.str==='M').length,motrices,traccion);
+    } finally {await doc.destroy();}
+  }
+});

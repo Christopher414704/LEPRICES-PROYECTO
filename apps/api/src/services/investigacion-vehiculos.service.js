@@ -1,4 +1,5 @@
 import { normalizarBusqueda, validarAnio } from './identidad-investigacion.js';
+import { citaTraccionDudosa } from '../../../shared/traccion.mjs';
 import { crearFuentesEspecializadas } from './fuentes-especializadas.service.js';
 import { crearBusquedaWebVehiculos } from './busqueda-web-vehiculos.service.js';
 import { camposVehiculo, normalizarNumero, combinarEvidencias, faltantesFicha, revisionInvestigacion } from './evidencias-vehiculos.js';
@@ -67,6 +68,7 @@ export function comprobarEvidencias(respuesta, fuentes) {
     const claveCampo=`${fuente.id}:${candidato.campo}:${versionLiteral}`;
     if (usados.has(claveCampo)) { rechazar('Datos repetidos o versiones distintas en un mismo documento; revisa las fuentes.'); continue; }
     if(candidato.campo==='combustible' && !/gasolina|gasoline|petrol|di[eé]sel|electric|el[eé]ctric|e85|biodiesel|cng|gnc|hydrogen|hidr[oó]geno/i.test(valor)){rechazar('El sistema de alimentación no identifica el combustible.');continue;}
+    if(candidato.campo==='traccion' && citaTraccionDudosa(cita)){rechazar('La cita no afirma una tracción única para el vehículo.');continue;}
     if(candidato.campo==='traccion' && !/\b(?:[24]\s*[x×]\s*[24]|[24]wd|awd|fwd|rwd)\b|delantera|trasera|integral|front.wheel|rear.wheel|all.wheel/i.test(valor)){rechazar('No identifica un tipo de tracción.');continue;}
     if(candidato.campo==='traccion' && /\b4\s*[x×]\s*2\b/i.test(fuente.texto) && /\b4\s*[x×]\s*4\b/i.test(fuente.texto) &&
       (!candidato.version || /^(unspecified|sin especificar)$/i.test(candidato.version) || !cita.toLowerCase().includes(candidato.version.toLowerCase()))) {
